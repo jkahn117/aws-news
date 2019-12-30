@@ -1,0 +1,11 @@
+{
+    "AppSyncApiName": "awsnews",
+    "DynamoDBBillingMode": "PAY_PER_REQUEST",
+    "DynamoDBEnableServerSideEncryption": "false",
+    "AuthCognitoUserPoolId": {
+        "Fn::GetAtt": [
+            "authawsnewsb9664fc2",
+            "Outputs.UserPoolId"
+        ]
+    }
+}

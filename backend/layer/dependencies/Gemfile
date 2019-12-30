@@ -1,0 +1,13 @@
+source 'https://rubygems.org'
+
+gem "feedjira", "~> 3.1"
+
+gem "httparty", "~> 0.17.3"
+
+gem "aws-record", "~> 2.4"
+
+gem "aws-sdk-s3", "~> 1.60"
+
+gem "upmark", "~> 1.0"
+
+gem "nokogiri", "~> 1.10"

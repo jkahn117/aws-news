@@ -42,3 +42,45 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+
+
+type Blog
+  @model
+  @auth(
+    rules: [
+      { allow: public, provider: iam, operations: [ read ] },
+      { allow: groups, groups: [ "editors" ]}
+    ]
+  )
+{
+  id: ID!
+  title: String!
+  url: AWSURL!
+  lastImportAt: AWSDateTime!
+  articles: [Article] @connection(keyName: "byBlog", fields: [ "id" ])
+}
+
+type Article
+  @model
+  @key(name: "byBlog" fields: [ "blogId", "publishedAt" ])
+  @auth(
+    rules: [
+      { allow: public, provider: iam, operations: [ read ] }, # public access for readers
+      { allow: groups, groups: [ "editors" ]}, # editor access
+      { allow: private, provider: iam } # private access for Lambda
+    ]
+  )
+{
+  id: ID!
+  blogId: ID!
+  title: String!
+  url: AWSURL!
+  published: Boolean!
+  publishedAt: AWSDateTime
+  author: String
+  contentUri: String
+  excerpt: String
+  tags: [String]
+  blog: Blog @connection(fields: [ "blogId" ])
+}

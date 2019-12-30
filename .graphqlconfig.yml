@@ -1,0 +1,18 @@
+projects:
+  awsnews:
+    schemaPath: amplify/backend/api/awsnews/build/schema.graphql
+    includes:
+      - web/src/graphql/**/*.ts
+    excludes:
+      - ./amplify/**
+    extensions:
+      amplify:
+        codeGenTarget: typescript
+        generatedFileName: web/src/API.ts
+        docsFilePath: web/src/graphql
+        region: us-east-2
+        apiId: null
+        maxDepth: 2
+extensions:
+  amplify:
+    version: 3
