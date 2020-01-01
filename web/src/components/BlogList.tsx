@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { DataStore } from '@aws-amplify/datastore';
 import { Blog } from '../models';
@@ -9,15 +10,15 @@ interface BlogItemProps {
 
 const BlogItem = ({ blog } : BlogItemProps) => {
   return (
-    <li>{ blog.title }</li>
+    <li><Link to={ `/blog/${blog.id}` }>{ blog.title }</Link></li>
   );
 };
 
-interface BlogProps {
+interface BlogListProps {
   limit?: number
 };
 
-const Blogs = ({ limit } : BlogProps) => {
+const BlogList = ({ limit } : BlogListProps) => {
   const [ blogs, setBlogs ] = useState<Blog[]>([]);
 
   useEffect(() => {
@@ -45,4 +46,4 @@ const Blogs = ({ limit } : BlogProps) => {
   )
 };
 
-export default Blogs;
+export default BlogList;
