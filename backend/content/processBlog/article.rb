@@ -53,7 +53,7 @@ class Article
         raise
       end
 
-      article.contentUri = "s3://#{content_bucket}/#{article.get_content_key}.md"
+      article.contentUri = "#{article.get_content_key}.md"
       article.published = true
       article.save!
 
