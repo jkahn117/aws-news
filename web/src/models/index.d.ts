@@ -18,7 +18,7 @@ export declare class Article {
   readonly url: string;
   readonly image?: string;
   readonly published: boolean;
-  readonly publishedAt?: string;
+  readonly publishedAt: string;
   readonly author?: string;
   readonly contentUri?: string;
   readonly excerpt?: string;

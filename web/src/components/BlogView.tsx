@@ -1,8 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import Moment from 'react-moment';
+
+import { Header, Image } from 'semantic-ui-react';
+import './BlogView.scss';
 
 import { DataStore } from '@aws-amplify/datastore';
 import { Article, Blog } from '../models';
+
+interface ArticleCardProps {
+  article: Article
+  index: Number
+}
+
+const ArticleCard = ({ article, index } : ArticleCardProps) => {
+
+  return (
+    <article>
+      <div className="img-wrapper">
+        <Image src={ article.image } />
+      </div>
+      <Header as={ index === 0 ? 'h2' : 'h3' }>
+        <Link to={ `/article/${article.id}` }>{ article.title }</Link>
+      </Header>
+      <Header sub>
+        <Moment format="MMM DD YYYY" date={ article.publishedAt } />
+      </Header>
+      <p>{ article.excerpt }</p>
+    </article>
+  );
+};
 
 const BlogView = () => {
   let { id } = useParams();
@@ -21,7 +48,7 @@ const BlogView = () => {
       setBlog(_blog);
 
       const _articles:Article[] = (await DataStore.query(Article)).filter(c => c.blog?.id === blogId);
-      setArticles(_articles);
+      setArticles(_articles.sort((a, b) => (a.publishedAt > b.publishedAt) ? -1 : 1));
     } catch (error) {
       console.error(error)
     }
@@ -31,14 +58,16 @@ const BlogView = () => {
     <div>
       { blog ? (
         <section>
-          <h2>{ blog.title }</h2>
-          <ul>
-            { articles.map((article) => 
-              <li key={ article.id }>
-                <Link to={ `/article/${article.id}` }>{ article.title }</Link>
-              </li>
-            )}
-          </ul>
+          <Header as="h1">{ blog.title }</Header>
+          <div className="frontpage-wrapper">
+            <div className="frontpage">
+              { articles.map((article, idx) =>
+                <div className={ `fp-cell fp-cell--${idx+1}` } key={ article.id }>
+                  <ArticleCard article={ article } index={ idx } />
+                </div>
+              )}
+            </div>
+          </div>
         </section>
       ) : (
         <p>Loading...</p>

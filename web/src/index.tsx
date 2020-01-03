@@ -4,6 +4,8 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
+import 'semantic-ui-css/semantic.min.css'
+
 import Amplify from '@aws-amplify/core';
 import awsconfig from './aws-exports';
 

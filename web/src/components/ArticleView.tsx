@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import Showdown from 'showdown';
+import Moment from 'react-moment';
+
+import { Breadcrumb, Container, Header } from 'semantic-ui-react';
 
 import { DataStore } from '@aws-amplify/datastore';
 import Storage from '@aws-amplify/storage';
@@ -58,11 +61,21 @@ const ArticleView = () => {
   return (
     <div>
       { article ? (
-        <section>
-          <h2>{ article.title }</h2>
-          <h3>by { article.author }</h3>
+        <Container text>
+          <Breadcrumb>
+            <Breadcrumb.Section link as={ Link } to={ `/blog/${article.blog?.id}` }>
+              { article.blog?.title }
+            </Breadcrumb.Section>
+          </Breadcrumb>
+          <Header as="h1">{ article.title }</Header>
+          <Header sub>
+            by { article.author } | <Moment format="MMM DD YYYY" date={ article.publishedAt } />
+          </Header>
+
           <ArticleContent contentUri={ article.contentUri } />
-        </section>
+
+          <em>Originally published at: </em> <Link to={ article.url }>{ article.url }</Link>
+        </Container>
       ) : (
         <p>Loading...</p>
       )}

@@ -8,7 +8,9 @@ export const schema = {
                 {
                     "type": "model",
                     "properties": {
-                        "subscriptions": null
+                        "subscriptions": {
+                            "level": "public"
+                        }
                     }
                 },
                 {
@@ -90,7 +92,11 @@ export const schema = {
             "attributes": [
                 {
                     "type": "model",
-                    "properties": {}
+                    "properties": {
+                        "subscriptions": {
+                            "level": "public"
+                        }
+                    }
                 },
                 {
                     "type": "key",
@@ -174,7 +180,7 @@ export const schema = {
                     "name": "publishedAt",
                     "isArray": false,
                     "type": "AWSDateTime",
-                    "isRequired": false,
+                    "isRequired": true,
                     "attributes": []
                 },
                 "author": {
