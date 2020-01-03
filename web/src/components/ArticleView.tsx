@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import Showdown from 'showdown';
 import Moment from 'react-moment';
 
-import { Breadcrumb, Container, Header } from 'semantic-ui-react';
+import { Breadcrumb, Container, Header, Label } from 'semantic-ui-react';
 
 import { DataStore } from '@aws-amplify/datastore';
 import Storage from '@aws-amplify/storage';
@@ -74,7 +74,16 @@ const ArticleView = () => {
 
           <ArticleContent contentUri={ article.contentUri } />
 
-          <em>Originally published at: </em> <Link to={ article.url }>{ article.url }</Link>
+          <div className="tags">
+          { article.tags?.map((t, idx) =>
+            <Label key={ idx }>{ t }</Label>
+          )}
+          </div>
+
+          <p>
+            <em>Originally published at: </em>
+            <a href={ article.url } target="_new">{ article.url }</a>
+          </p>
         </Container>
       ) : (
         <p>Loading...</p>

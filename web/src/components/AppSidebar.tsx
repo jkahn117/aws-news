@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-import { Menu } from 'semantic-ui-react';
+import { Image, Menu } from 'semantic-ui-react';
 
 import { DataStore } from '@aws-amplify/datastore';
 import { Blog } from '../models';
@@ -48,7 +48,16 @@ const AppSidebar = () => {
       vertical
       fixed="left"
     >
-      <Menu.Item as="h1">AWS News</Menu.Item>
+      <Menu.Item>
+        <div style={{ width: '100%' }}>
+          <Image
+            src="/aws.png"
+            size="tiny"
+            style={{ display: 'block', margin: '0 auto' }}
+            as={ Link }
+            to="/" />
+        </div>
+      </Menu.Item>
 
       <Menu.Item>
         <Menu.Header>Blogs</Menu.Header>
