@@ -34,7 +34,7 @@ type Article
   url: AWSURL!
   image: String
   published: Boolean!
-  publishedAt: AWSDateTime
+  publishedAt: AWSDateTime!
   author: String
   contentUri: String
   excerpt: String
