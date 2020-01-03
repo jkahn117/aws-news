@@ -1,5 +1,5 @@
 #
-#
+# Article Model
 #
 require 'aws-record'
 require 'aws-sdk-s3'
@@ -31,6 +31,9 @@ class Article
   list_attr     :tags
 
   class << self
+    #
+    # Find Article item by `id` or `url`.
+    #
     def find(id:nil, url:nil)
       unless (id || url)
         throw new Aws::Record::Errors::KeyMissing("Must provide a valid identifier")
@@ -49,10 +52,16 @@ class Article
       ).first
     end
 
+    #
+    # Determine if an Article exists by `id` or `url`.
+    #
     def exists?(id:nil, url:nil)
       !!Article.find(id: id, url: url)
     end
 
+    #
+    # Create a new Article from a Feedjira entry.
+    #
     def create_from(entry:, blog_id:, content_bucket:)
       if Article.exists?(url: entry.url)
         p 'Article already exists in database'
