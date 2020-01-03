@@ -31,7 +31,34 @@ class Article
   list_attr     :tags
 
   class << self
+    def find(id:nil, url:nil)
+      unless (id || url)
+        throw new Aws::Record::Errors::KeyMissing("Must provide a valid identifier")
+      end
+
+      if url
+        id = Digest::MD5.hexdigest(url)
+      end
+
+      query(
+        key_condition_expression: "id = :id",
+        expression_attribute_values: {
+          ':id' => id
+        },
+        limit: 1
+      ).first
+    end
+
+    def exists?(id:nil, url:nil)
+      !!Article.find(id: id, url: url)
+    end
+
     def create_from(entry:, blog_id:, content_bucket:)
+      if Article.exists?(url: entry.url)
+        p 'Article already exists in database'
+        return
+      end
+
       article = Article.new(
         blogId: blog_id,
         url: entry.url,
@@ -66,7 +93,7 @@ class Article
       $s3_client.put_object({
         body: Upmark.convert(content),
         bucket: bucket,
-        key: "#{key}.md"
+        key: "public/#{key}.md"
       })
     end
 

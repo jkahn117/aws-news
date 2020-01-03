@@ -28,12 +28,6 @@ def handler(event:, context:)
   entries = Feedjira.parse(data).entries
   entries.each do |entry|
     begin
-
-
-    ### TODO: add check for existence before creating new entry
-    ### check if the id already exists in the table
-
-
       Article.create_from(entry: entry, blog_id: blog_id, content_bucket: CONTENT_BUCKET)
     rescue Aws::Record::Errors::ConditionalWriteFailed => e
       p " -- Item already exists, ignoring"
