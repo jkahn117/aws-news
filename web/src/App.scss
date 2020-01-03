@@ -1,0 +1,30 @@
+.main {
+  margin-left: 210px;
+  
+  .content {
+    padding: 2rem;
+    padding-top: 3rem;
+  }
+}
+
+.container.text img {
+  max-width: 100%;
+}
+
+footer {
+  border-top: 1px solid #ccc;
+  box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.08) inset;
+  background-color: #fafafa;
+  padding: 1rem 0;
+  text-align: center;
+  width: 100%;
+}
+
+html.ios {
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+html.ios,
+html.ios body {
+  height: initial !important;
+}
