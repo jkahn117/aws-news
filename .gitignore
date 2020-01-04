@@ -25,7 +25,7 @@ yarn-error.log*
 datasources.json
 backend/layer/dependencies/.bundle
 backend/layer/dependencies/ruby
-backend/layer/dependencies/*.zip
+backend/layer/*.zip
 
 packaged.yaml
 
