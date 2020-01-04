@@ -14,6 +14,14 @@ Parameters:
     Description: The name of this project
     Default: 'aws-news'
 
+  AppSyncApiId:
+    Type: String
+    Description: AWS AppSync API ID -- created by Amplify
+  
+  AppSyncEndpoint:
+    Type: String
+    Description: AWS AppSync Endpoint -- created by Amplify
+
   BlogsTable:
     Type: String
     Description: Name of DyanmoDB Blogs table -- created by Amplify
@@ -158,11 +166,18 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref BlogsTable
+        - Version: '2012-10-17' # Policy Document
+          Statement: # per docs, EventBridge only supports * today (@see https://github.com/awslabs/serverless-application-model/issues/1187)
+            - Effect: Allow
+              Action:
+                - events:PutEvents
+              Resource: '*'
       Layers:
         - !Ref LayerArn
       Environment:
         Variables:
           BLOGS_TABLE: !Ref BlogsTable
+          EVENT_BUS: !Ref EventBus
   
   ProcessBlogFunction:
     Type: AWS::Serverless::Function
@@ -175,19 +190,60 @@ Resources:
             TableName: !Ref ArticlesTable
         - S3CrudPolicy:
             BucketName: !Ref ContentBucket
+        - Version: '2012-10-17' # Policy Document
+          Statement: # per docs, EventBridge only supports * today (@see https://github.com/awslabs/serverless-application-model/issues/1187)
+            - Effect: Allow
+              Action:
+                - events:PutEvents
+              Resource: '*'
       Layers:
         - !Ref LayerArn
       Environment:
         Variables:
           ARTICLES_TABLE: !Ref ArticlesTable
           CONTENT_BUCKET: !Ref ContentBucket
+          EVENT_BUS: !Ref EventBus
+
+  NewContentEventFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: newContentEvent
+      Handler: index.handler
+      Runtime: nodejs10.x
+      Policies:
+        - Version: '2012-10-17' # Policy Document
+          Statement:
+            - Effect: Allow
+              Action:
+                - appsync:GraphQL
+              Resource:
+                - !Sub "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/${AppSyncApiId}/types/Mutation/fields/updateBlog"
+                - !Sub "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/${AppSyncApiId}/types/Mutation/fields/updateArticle"
+      Environment:
+        Variables:
+          APPSYNC_ENDPOINT: !Ref AppSyncEndpoint
+      Events:
+        OnCreateEvent:
+          Type: CloudWatchEvent
+          Properties:
+            EventBusName: !Ref EventBus
+            Pattern:
+              detail-type:
+                - blog_created
+                - article_created
 
   ### SQS ###
   ProcessFailureQueue:
     Type: AWS::SQS::Queue
 
   ### EventBridge ###
+  EventBus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: !Sub "${ProjectName}-${Stage}-eventbus"
+
   ## TODO: add event bridge to trigger processing hourly?
+
 
   ### IAM ###
   ProcessAllBlogsStateMachineRole:

@@ -1,0 +1,16 @@
+{
+  "version": "0",
+  "id": "a4a137e6-4545-8740-3516-0e882cd075e7",
+  "detail-type": "article_created",
+  "source": "arn:aws:lambda:us-east-2:XXXXXXXXXXXX:function:ProcessBlogFunction",
+  "account": "XXXXXXXXXXXX",
+  "time": "2020-01-03T23:06:29Z",
+  "region": "us-east-2",
+  "resources": [],
+  "detail": {
+    "articleId": "9e7387e20fc36d72ccac725f4835ec16",
+    "title": "Building an AWS IoT Core device using AWS Serverless and an ESP32",
+    "blogId": "0011ecb2680decfd1de620336d1a1485",
+    "publishedAt": "2020-01-03T22:02:31+00:00"
+  }
+}

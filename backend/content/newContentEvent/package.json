@@ -1,0 +1,12 @@
+{
+  "name": "aws-news-content-new-content",
+  "version": "1.0.0",
+  "description": "Processes new blog and article content created for aws-news",
+  "main": "index.js",
+  "author": "jkahn@",
+  "license": "Apache2.0",
+  "dependencies": {
+    "aws4": "^1.9.0",
+    "axios": "^0.19.0"
+  }
+}

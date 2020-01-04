@@ -63,11 +63,6 @@ class Article
     # Create a new Article from a Feedjira entry.
     #
     def create_from(entry:, blog_id:, content_bucket:)
-      if Article.exists?(url: entry.url)
-        p 'Article already exists in database'
-        return
-      end
-
       article = Article.new(
         blogId: blog_id,
         url: entry.url,
