@@ -9,6 +9,7 @@ DEPLOYMENT_BUCKET_NAME := $(shell jq -r '.providers.awscloudformation.Deployment
 AWS_REGION := $(shell jq -r '.providers.awscloudformation.Region' ./amplify/\#current-cloud-backend/amplify-meta.json)
 # Amplify generated resources
 APPSYNC_API_ID := $(shell jq -r '.api[(.api | keys)[0]].output.GraphQLAPIIdOutput' ./amplify/\#current-cloud-backend/amplify-meta.json)
+APPSYNC_ENDPOINT := $(shell jq -r '.api[(.api | keys)[0]].output.GraphQLAPIEndpointOutput' ./amplify/\#current-cloud-backend/amplify-meta.json)
 BLOGS_TABLE_NAME := $(shell jq -r '.dataSources[] | select(.name == "BlogTable") | .dynamodbConfig.tableName' datasources.json)
 ARTICLES_TABLE_NAME := $(shell jq -r '.dataSources[] | select(.name == "ArticleTable") | .dynamodbConfig.tableName' datasources.json)
 CONTENT_BUCKET := $(shell jq -r '.storage[(.storage | keys)[0]].output.BucketName' ./amplify/\#current-cloud-backend/amplify-meta.json)
@@ -38,6 +39,8 @@ deploy.content: ##=> Deploy content loading services
 						--capabilities CAPABILITY_IAM \
 						--parameter-overrides \
 								Stage=${AMPLIFY_ENV} \
+								AppSyncApiId=${APPSYNC_API_ID} \
+								AppSyncEndpoint=${APPSYNC_ENDPOINT} \
 								BlogsTable=${BLOGS_TABLE_NAME} \
 								ArticlesTable=${ARTICLES_TABLE_NAME} \
 								ContentBucket=${CONTENT_BUCKET} \
