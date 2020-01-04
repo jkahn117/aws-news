@@ -13,6 +13,9 @@ GEM
     aws-sdk-dynamodb (1.41.0)
       aws-sdk-core (~> 3, >= 3.71.0)
       aws-sigv4 (~> 1.1)
+    aws-sdk-eventbridge (1.3.0)
+      aws-sdk-core (~> 3, >= 3.71.0)
+      aws-sigv4 (~> 1.1)
     aws-sdk-kms (1.27.0)
       aws-sdk-core (~> 3, >= 3.71.0)
       aws-sigv4 (~> 1.1)
@@ -50,6 +53,7 @@ PLATFORMS
 
 DEPENDENCIES
   aws-record (~> 2.4)
+  aws-sdk-eventbridge (~> 1.3)
   aws-sdk-s3 (~> 1.60)
   feedjira (~> 3.1)
   httparty (~> 0.17.3)
