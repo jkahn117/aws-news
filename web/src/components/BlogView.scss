@@ -40,6 +40,8 @@
 
     .img-wrapper {
       height: auto;
+      max-height: 20rem;
+      object-fit: cover;
     }
   }
 

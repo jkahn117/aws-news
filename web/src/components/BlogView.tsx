@@ -32,21 +32,53 @@ const ArticleCard = ({ article, index } : ArticleCardProps) => {
 };
 
 const BlogView = () => {
-  let { id } = useParams();
+  let { id: blogId } = useParams();
   const [ blog, setBlog ] = useState<Blog>();
   const [ articles, setArticles ] = useState<Article[]>([]);
 
   useEffect(() => {
-    if (id) {
-      getBlog(id)
+    if (blogId) {
+      getBlog(blogId)
     }
-  }, [ id ]);
+  }, [ blogId ]);
 
-  async function getBlog(blogId: string) {
+  useEffect(() => {
+    // Subscribe to updates to articles related to this blog...
+    const subscription = DataStore.observe(Article).subscribe(msg => {
+      
+      // TODO: msg.element.blogId is coming as null, so the update does not occur
+      //   unclear why as blogId is included in the response payload for mutation
+      console.log(msg.element);
+      // @ts-ignore
+      console.log(msg.element.blogId)
+      console.log(blogId)
+
+      // @ts-ignore
+      if (blogId && msg.element.blogId === blogId) {
+        console.log('**** ARTICLE SUBSCRIPTION ****');
+        console.log('  Operation type: ', msg.opType);
+        console.log('  Object: ', msg.element);
+        setArticlesForBlog(blogId);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [ blogId ]);
+
+  async function getBlog(id: string) {
     try {
-      const _blog:Blog = await DataStore.query(Blog, blogId);
+      const _blog:Blog = await DataStore.query(Blog, id);
       setBlog(_blog);
+      setArticlesForBlog(_blog.id);
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
+  async function setArticlesForBlog(id: string) {
+    try {
       const _articles:Article[] = (await DataStore.query(Article)).filter(c => c.blog?.id === blogId);
       setArticles(_articles.sort((a, b) => (a.publishedAt > b.publishedAt) ? -1 : 1));
     } catch (error) {

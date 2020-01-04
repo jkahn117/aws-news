@@ -25,6 +25,17 @@ const BlogList = ({ limit } : BlogListProps) => {
     listBlogs();
   }, []);
 
+  useEffect(() => {
+    const subscription = DataStore.observe(Blog).subscribe(msg => {
+      console.log('**** BLOG SUBSCRIPTION ****');
+      console.log(msg.model, msg.opType, msg.element);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   async function listBlogs() {
     try {
       const items:Blog[] = await DataStore.query(Blog);
