@@ -19,7 +19,7 @@ type Blog
 
 type Article
   @model(subscriptions: { level: public })
-  @key(name: "byBlog" fields: [ "blogId", "publishedAt" ])
+  @key(name: "byBlog", fields: [ "blogId", "publishedAt" ])
   @auth(
     rules: [
       { allow: public, provider: iam, operations: [ read ] }, # public access for readers
