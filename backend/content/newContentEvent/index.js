@@ -47,12 +47,18 @@ const updateArticleMutation = `
 mutation UpdateArticle($input: UpdateArticleInput!) {
   updateArticle(input: $input) {
     id
-    blogId
     title
     published
     publishedAt
     url
+    image
+    excerpt
+    author
+    contentUri
     tags
+    blog {
+      id
+    }
     _lastChangedAt
     _version
     _deleted
