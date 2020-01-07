@@ -1,0 +1,58 @@
+version: 0.1
+backend:
+  phases:
+    preBuild:
+      commands:
+        - npm install -g @aws-amplify/cli  # is this available already?
+        - make _install_dev_packages   # install dev tools, e.g. SAM CLI
+    build:
+      commands:
+        - "*** Amplify ***"
+        - amplifyPush --simple
+        # Environment Variables for Backend
+        - "... setup environment"
+        - export STACK_NAME=$(jq -r '.providers.awscloudformation.StackName' ./amplify/\#current-cloud-backend/amplify-meta.json)
+        - export DEPLOYMENT_BUCKET_NAME=$(jq -r '.providers.awscloudformation.DeploymentBucketName' ./amplify/\#current-cloud-backend/amplify-meta.json)
+        - export AWS_REGION=$(jq -r '.providers.awscloudformation.Region' ./amplify/\#current-cloud-backend/amplify-meta.json)
+        # Amplify generated resources
+        - export APPSYNC_API_ID=$(jq -r '.api[(.api | keys)[0]].output.GraphQLAPIIdOutput' ./amplify/\#current-cloud-backend/amplify-meta.json)
+        - export APPSYNC_ENDPOINT=$(jq -r '.api[(.api | keys)[0]].output.GraphQLAPIEndpointOutput' ./amplify/\#current-cloud-backend/amplify-meta.json)
+        - export BLOGS_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "BlogTable") | .dynamodbConfig.tableName' datasources.json)
+        - export ARTICLES_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "ArticleTable") | .dynamodbConfig.tableName' datasources.json)
+        - export CONTENT_BUCKET=$(jq -r '.storage[(.storage | keys)[0]].output.BucketName' ./amplify/\#current-cloud-backend/amplify-meta.json)
+        # Deploy backend, including content service and support layer
+        - "*** SAM ***"
+        - make deploy
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - yum install yarn
+        - cd web
+        - yarn install
+    build:
+      commands:
+        - yarn build
+  artifacts:
+    baseDirectory: web/dist
+    files:
+      - "**/*"
+  cache:
+    paths:
+      - node_modules/**/*
+  customHeaders:
+    - pattern: "**/*"
+      headers: # https://infosec.mozilla.org/guidelines/web_security
+        - key: "Strict-Transport-Security"
+          value: "max-age=31536000; includeSubDomains"
+        - key: "X-Content-Type-Options"
+          value: "nosniff"
+        - key: "X-XSS-Protection"
+          value: "1; mode=block"
+        - key: "X-Frame-Options"
+          value: "DENY"
+        - key: "Referrer-Policy"
+          value: "same-origin"
+        - key: "Feature-Policy"
+          value: "microphone 'none'; camera 'none'; notifications 'self'"
+        # CSP generated using Laboratory: https://github.com/april/laboratory

@@ -2,7 +2,7 @@
 # https://github.com/aws-samples/aws-serverless-airline-booking/blob/develop/amplify.yml
 # inspiration at: https://github.com/aws-samples/aws-serverless-airline-booking/blob/develop/Makefile
 
-#
+# STACK_NAME ?= "UNDEFINED"
 AMPLIFY_ENV ?= dev
 STACK_NAME := $(shell jq -r '.providers.awscloudformation.StackName' ./amplify/\#current-cloud-backend/amplify-meta.json)
 DEPLOYMENT_BUCKET_NAME := $(shell jq -r '.providers.awscloudformation.DeploymentBucketName' ./amplify/\#current-cloud-backend/amplify-meta.json)
@@ -24,6 +24,7 @@ init: ##=> Initialize environment
 
 deploy: ##=> Deploy all services
 		$(info [*] Deploying...)
+		$(MAKE) init
 		$(MAKE) deploy.layer
 		$(MAKE) deploy.content
 
@@ -45,7 +46,6 @@ deploy.content: ##=> Deploy content loading services
 								ArticlesTable=${ARTICLES_TABLE_NAME} \
 								ContentBucket=${CONTENT_BUCKET} \
 								LayerArn=/news/${AMPLIFY_ENV}/backend/loader/layer
-
 
 deploy.layer: ##=> Deploy support layer for loader service
 		$(info [*] Packaging, building, and deploying loader dependency layer, this can take a few minutes...)

@@ -1,86 +1,55 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# AWS News
 
-## Available Scripts
+A sample project leveraging AWS Amplify, AWS AppSync, AWS Lambda, Amazon DynamoDB, etc. This project (and a previous incarnation of it) was born out of a desire to test drive a number of new services released by AWS over the past months / year. These primarily include [Amplify DataStore](https://aws-amplify.github.io/docs/js/datastore), [Lambda Layers](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html), [Lambda support for Ruby](https://docs.aws.amazon.com/lambda/latest/dg//lambda-ruby.html), [AWS Step Functions Nested Workflows](https://aws.amazon.com/about-aws/whats-new/2019/08/aws-step-function-adds-support-for-nested-workflows/), and a few others. The project was also an opportunity to build and test a few ideas in a more realistic application.
 
-In the project directory, you can run:
+The resulting product is a news reader that aggregates the various AWS blogs, creating awareness of the content, and a single location to read it. In the future, the application will also attempt to recommend content across blogs.
 
-### `yarn start`
+Project is currently hosted at: https://news.iamjkahn.com.
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Getting Started
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+To get started with AWS News:
 
-### `yarn test`
+### Prerequisites
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+AWS News requires the following prerequisites:
 
-### `yarn build`
+* [AWS Account](https://aws.amazon.com/account/)
+* [Node 10+](https://nodejs.org/en/download/)
+* [Amplify CLI v4.10+](https://aws-amplify.github.io/docs/cli-toolchain/quickstart#quickstart)
+* [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
+* [Docker](https://docs.docker.com/install/)
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+> Note: AWS offers a [Free Tier](https://aws.amazon.com/free/) for many services, though not all used in this project are part of the Free Tier.
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+## Deployment
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+To deploy AWS News:
 
-### `yarn eject`
+1. 
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Cleaning Up
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+make delete
+amplify delete
 
 
+## Stack
 
-type Blog
-  @model
-  @auth(
-    rules: [
-      { allow: public, provider: iam, operations: [ read ] },
-      { allow: groups, groups: [ "editors" ]}
-    ]
-  )
-{
-  id: ID!
-  title: String!
-  url: AWSURL!
-  lastImportAt: AWSDateTime!
-  articles: [Article] @connection(keyName: "byBlog", fields: [ "id" ])
-}
 
-type Article
-  @model
-  @key(name: "byBlog" fields: [ "blogId", "publishedAt" ])
-  @auth(
-    rules: [
-      { allow: public, provider: iam, operations: [ read ] }, # public access for readers
-      { allow: groups, groups: [ "editors" ]}, # editor access
-      { allow: private, provider: iam } # private access for Lambda
-    ]
-  )
-{
-  id: ID!
-  blogId: ID!
-  title: String!
-  url: AWSURL!
-  published: Boolean!
-  publishedAt: AWSDateTime
-  author: String
-  contentUri: String
-  excerpt: String
-  tags: [String]
-  blog: Blog @connection(fields: [ "blogId" ])
-}
+## To Do
+
+* Add most read / latest reads
+* Add personalization and auth needed
+* Add analytics
+* QLDB??
+* Notifications?
+* iOS (SwiftUI)
+
+## Authors
+
+* **Josh Kahn** - *Initial work*
+
+## Acknowledgements
+
+Heitor Lessa's [AWS Serverless Airline Booking](https://github.com/aws-samples/aws-serverless-airline-booking) project helped identify several useful patterns for managing deployment.
