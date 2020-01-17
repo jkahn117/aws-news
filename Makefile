@@ -75,7 +75,7 @@ delete.layer: ##=> Delete support layer for loader service
 #### HELPERS ####
 _install_dev_packages:
 	$(info [*] Installing Ruby 2.5...)
-	rvm install 2.5.0 && rvm --default use 2.5.0
+	rvm install 2.5.0 && rvm use 2.5.0 --default
 	$(info [*] Installing jq...)
 	yum install jq -y
 	$(info [*] Upgrading Python SAM CLI and CloudFormation linter to latest...)
