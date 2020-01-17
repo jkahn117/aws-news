@@ -30,6 +30,7 @@ frontend:
   phases:
     preBuild:
       commands:
+        - test -f src/aws-exports.js && cp src/aws-exports.js web/src/ # temporary fix: https://github.com/aws-amplify/amplify-console/issues/342
         - cd web
         - npm install
     build:
