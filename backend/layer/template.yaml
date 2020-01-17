@@ -24,7 +24,7 @@ Resources:
       CompatibleRuntimes:
         - ruby2.5
       LicenseInfo: 'MIT'
-      RetentionPolicy: Retain
+      RetentionPolicy: Delete
 
   LayerParameter:
     Type: AWS::SSM::Parameter
