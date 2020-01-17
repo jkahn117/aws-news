@@ -34,7 +34,7 @@ deploy.content: ##=> Deploy content loading services
 						--output-template-file packaged.yaml && \
 				sam deploy \
 						--template-file packaged.yaml \
-						--stack-name ${STACK_NAME}-content-${AMPLIFY_ENV} \
+						--stack-name ${STACK_NAME}-content \
 						--capabilities CAPABILITY_IAM \
 						--parameter-overrides \
 								Stage=${AMPLIFY_ENV} \
@@ -56,8 +56,10 @@ deploy.layer: ##=> Deploy support layer for loader service
 						--output-template-file packaged.yaml && \
 				sam deploy \
 						--template-file packaged.yaml \
-						--stack-name ${STACK_NAME}-dependencies-${AMPLIFY_ENV} \
+						--stack-name ${STACK_NAME}-dependencies \
 						--capabilities CAPABILITY_IAM
+						--parameter-overrides \
+								Stage=${AMPLIFY_ENV}
 
 delete: ##=> Delete all
 		$(info [*] Deleting...)
