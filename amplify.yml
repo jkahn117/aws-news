@@ -1,9 +1,6 @@
 version: 0.1
 backend:
   phases:
-    install:
-      runtime-versions:
-        docker: 18
     preBuild:
       commands:
         - echo Installing required packages for build...
@@ -19,6 +16,7 @@ backend:
         - export DEPLOYMENT_BUCKET_NAME=$(jq -r '.providers.awscloudformation.DeploymentBucketName' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
         - export AWS_REGION=$(jq -r '.providers.awscloudformation.Region' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
         # Amplify generated resources
+        - make init
         - export APPSYNC_API_ID=$(jq -r '.api[(.api | keys)[0]].output.GraphQLAPIIdOutput' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
         - export APPSYNC_ENDPOINT=$(jq -r '.api[(.api | keys)[0]].output.GraphQLAPIEndpointOutput' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
         - export BLOGS_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "BlogTable") | .dynamodbConfig.tableName' datasources.json)
