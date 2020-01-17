@@ -3,8 +3,6 @@ blogs:
     url: https://aws.amazon.com/blogs/compute/feed/
   - title: AWS Database Blog
     url: https://aws.amazon.com/blogs/database/feed
-  - title: AWS IoT Blog
-   url: https://aws.amazon.com/blogs/iot/feed
   - title: AWS Architecture Blog
     url: https://aws.amazon.com/blogs/architecture/feed
   - title: AWS Security Blog
@@ -21,6 +19,8 @@ blogs:
     url: https://aws.amazon.com/blogs/developer/feed
   - title: AWS DevOps Blog
     url: https://aws.amazon.com/blogs/devops/feed
+  - title: AWS IoT Blog
+    url: https://aws.amazon.com/blogs/iot/feed
   - title: AWS Management Tools Blog
     url: https://aws.amazon.com/blogs/mt/feed
   - title: AWS Networking & Content Delivery Blog
