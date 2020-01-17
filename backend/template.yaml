@@ -15,10 +15,21 @@ Parameters:
     Default: 'aws-news'
 
 Resources:
-  Content:
+  Content: ## content processing
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: './content/template.yaml'
+      Parameters:
+        Stage: !Ref Stage
+        ProjectName: !Ref ProjectName
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+
+  Services: ## API backing services
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: './services/template.yaml'
       Parameters:
         Stage: !Ref Stage
         ProjectName: !Ref ProjectName

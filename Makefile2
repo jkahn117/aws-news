@@ -4,15 +4,15 @@
 
 # STACK_NAME ?= "UNDEFINED"
 AMPLIFY_ENV ?= dev
-STACK_NAME ?= "UNDEFINED"
-DEPLOYMENT_BUCKET_NAME ?= "UNDEFINED"
-AWS_REGION ?= "UNDEFINED"
+STACK_NAME := $(shell jq -r '.providers.awscloudformation.StackName' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
+DEPLOYMENT_BUCKET_NAME := $(shell jq -r '.providers.awscloudformation.DeploymentBucketName' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
+AWS_REGION := $(shell jq -r '.providers.awscloudformation.Region' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
 # Amplify generated resources
-APPSYNC_API_ID ?= "UNDEFINED"
-APPSYNC_ENDPOINT ?= "UNDEFINED"
-BLOGS_TABLE_NAME ?= "UNDEFINED"
-ARTICLES_TABLE_NAME ?= "UNDEFINED"
-CONTENT_BUCKET ?= "UNDEFINED"
+APPSYNC_API_ID := $(shell jq -r '.api[(.api | keys)[0]].output.GraphQLAPIIdOutput' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
+APPSYNC_ENDPOINT := $(shell jq -r '.api[(.api | keys)[0]].output.GraphQLAPIEndpointOutput' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
+BLOGS_TABLE_NAME := $(shell jq -r '.dataSources[] | select(.name == "BlogTable") | .dynamodbConfig.tableName' datasources.json)
+ARTICLES_TABLE_NAME := $(shell jq -r '.dataSources[] | select(.name == "ArticleTable") | .dynamodbConfig.tableName' datasources.json)
+CONTENT_BUCKET := $(shell jq -r '.storage[(.storage | keys)[0]].output.BucketName' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
 
 target:
 		$(info ${HELP_MESSAGE})
@@ -24,6 +24,7 @@ init: ##=> Initialize environment
 
 deploy: ##=> Deploy all services
 		$(info [*] Deploying...)
+		$(MAKE) init
 		$(MAKE) deploy.layer
 		$(MAKE) deploy.content
 
@@ -49,7 +50,12 @@ deploy.content: ##=> Deploy content loading services
 deploy.layer: ##=> Deploy support layer for loader service
 		$(info [*] Packaging, building, and deploying loader dependency layer, this can take a few minutes...)
 		cd backend/layer && \
-				./build.sh && \
+				rm dependencies.zip && \
+				docker run --rm \
+								-v `pwd`/dependencies:`pwd` \
+								-w `pwd` \
+								lambci/lambda:build-ruby2.5 \
+								./build.sh && \
 				mv dependencies/dependencies.zip . && \
 				sam package \
 						--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
@@ -72,8 +78,6 @@ delete.layer: ##=> Delete support layer for loader service
 
 #### HELPERS ####
 _install_dev_packages:
-	$(info [*] Installing docker...)
-	yum install docker -y
 	$(info [*] Installing jq...)
 	yum install jq -y
 	$(info [*] Upgrading Python SAM CLI and CloudFormation linter to latest...)

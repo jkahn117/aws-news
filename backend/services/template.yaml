@@ -1,0 +1,27 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Transform: 'AWS::Serverless-2016-10-31'
+
+Parameters:
+  Stage:
+    Type: String
+    Description: The stage where the application is running in, e.g., dev, prod.
+    Default: 'dev'
+
+  ProjectName:
+    Type: String
+    Description: The name of this project
+    Default: 'aws-news'
+
+Globals:
+  Function:
+    Runtime: ruby2.5
+    Handler: app.handler
+    Timeout: 25
+    Tags:
+      Project: !Ref ProjectName
+      Env: !Ref Stage
+
+Resources:
+  
