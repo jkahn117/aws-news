@@ -8,6 +8,7 @@ backend:
         - make _install_dev_packages   # install dev tools, e.g. SAM CLI
     build:
       commands:
+        - cd web
         - echo Amplify build...
         - amplifyPush --simple
         # Environment Variables for Backend
