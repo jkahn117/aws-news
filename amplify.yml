@@ -30,12 +30,11 @@ frontend:
   phases:
     preBuild:
       commands:
-        - yum install yarn
         - cd web
-        - yarn install
+        - npm install
     build:
       commands:
-        - yarn build
+        - npm run build
   artifacts:
     baseDirectory: web/dist
     files:

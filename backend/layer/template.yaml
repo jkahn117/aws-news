@@ -18,7 +18,7 @@ Resources:
   LoaderDependencyLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: aws-news-loader-dependencies
+      LayerName: !Sub "aws-news-${Stage}-loader-dependencies"
       Description: Dependencies for aws-news loader
       ContentUri: dependencies.zip
       CompatibleRuntimes:
