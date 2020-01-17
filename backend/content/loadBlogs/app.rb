@@ -60,7 +60,7 @@ def load_blog_list_from_local
       '__typename': 'Blog',
       '_version': 1,
       '_lastChangedAt': Time.now.to_i,
-      id: ,
+      id: blog_id,
       title: blog['title'],
       url: blog['url']
     }
