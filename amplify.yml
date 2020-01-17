@@ -7,10 +7,8 @@ backend:
         - make _install_dev_packages   # install dev tools, e.g. SAM CLI
     build:
       commands:
-        - "*** Amplify ***"
         - amplifyPush --simple
         # Environment Variables for Backend
-        - "... setup environment"
         - export STACK_NAME=$(jq -r '.providers.awscloudformation.StackName' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
         - export DEPLOYMENT_BUCKET_NAME=$(jq -r '.providers.awscloudformation.DeploymentBucketName' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
         - export AWS_REGION=$(jq -r '.providers.awscloudformation.Region' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
@@ -21,7 +19,6 @@ backend:
         - export ARTICLES_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "ArticleTable") | .dynamodbConfig.tableName' datasources.json)
         - export CONTENT_BUCKET=$(jq -r '.storage[(.storage | keys)[0]].output.BucketName' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
         # Deploy backend, including content service and support layer
-        - "*** SAM ***"
         - make deploy
 frontend:
   phases:
