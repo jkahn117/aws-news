@@ -77,7 +77,7 @@ _install_dev_packages:
 	$(info [*] Installing Ruby 2.5...)
 	yum install -y git gcc
 	git clone git://github.com/rbenv/rbenv.git ~/.rbenv
-	echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc
+	echo 'export PATH="$$HOME/.rbenv/bin:$$PATH"' >> ~/.bashrc
 	echo 'eval "$(rbenv init -)"' >> ~/.bashrc
 	source ~/.bashrc
 	rbenv install 2.5.0 && rbenv global 2.5.0
