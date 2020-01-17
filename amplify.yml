@@ -11,6 +11,7 @@ backend:
         - cd web
         - echo Amplify build...
         - amplifyPush --simple
+        - cd ..
         # Environment Variables for Backend
         - echo Exporting environment variables from Amplify...
         - export STACK_NAME=$(jq -r '.providers.awscloudformation.StackName' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
