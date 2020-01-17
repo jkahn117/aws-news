@@ -72,8 +72,6 @@ delete.layer: ##=> Delete support layer for loader service
 
 #### HELPERS ####
 _install_dev_packages:
-	$(info [*] Installing docker...)
-	yum install docker -y
 	$(info [*] Installing jq...)
 	yum install jq -y
 	$(info [*] Upgrading Python SAM CLI and CloudFormation linter to latest...)
