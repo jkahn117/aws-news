@@ -4,15 +4,15 @@
 
 # STACK_NAME ?= "UNDEFINED"
 AMPLIFY_ENV ?= dev
-STACK_NAME := $(shell jq -r '.providers.awscloudformation.StackName' ./amplify/\#current-cloud-backend/amplify-meta.json)
-DEPLOYMENT_BUCKET_NAME := $(shell jq -r '.providers.awscloudformation.DeploymentBucketName' ./amplify/\#current-cloud-backend/amplify-meta.json)
-AWS_REGION := $(shell jq -r '.providers.awscloudformation.Region' ./amplify/\#current-cloud-backend/amplify-meta.json)
+STACK_NAME ?= "UNDEFINED"
+DEPLOYMENT_BUCKET_NAME ?= "UNDEFINED"
+AWS_REGION ?= "UNDEFINED"
 # Amplify generated resources
-APPSYNC_API_ID := $(shell jq -r '.api[(.api | keys)[0]].output.GraphQLAPIIdOutput' ./amplify/\#current-cloud-backend/amplify-meta.json)
-APPSYNC_ENDPOINT := $(shell jq -r '.api[(.api | keys)[0]].output.GraphQLAPIEndpointOutput' ./amplify/\#current-cloud-backend/amplify-meta.json)
-BLOGS_TABLE_NAME := $(shell jq -r '.dataSources[] | select(.name == "BlogTable") | .dynamodbConfig.tableName' datasources.json)
-ARTICLES_TABLE_NAME := $(shell jq -r '.dataSources[] | select(.name == "ArticleTable") | .dynamodbConfig.tableName' datasources.json)
-CONTENT_BUCKET := $(shell jq -r '.storage[(.storage | keys)[0]].output.BucketName' ./amplify/\#current-cloud-backend/amplify-meta.json)
+APPSYNC_API_ID ?= "UNDEFINED"
+APPSYNC_ENDPOINT ?= "UNDEFINED"
+BLOGS_TABLE_NAME ?= "UNDEFINED"
+ARTICLES_TABLE_NAME ?= "UNDEFINED"
+CONTENT_BUCKET ?= "UNDEFINED"
 
 target:
 		$(info ${HELP_MESSAGE})
