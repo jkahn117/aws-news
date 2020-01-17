@@ -49,11 +49,7 @@ deploy.content: ##=> Deploy content loading services
 deploy.layer: ##=> Deploy support layer for loader service
 		$(info [*] Packaging, building, and deploying loader dependency layer, this can take a few minutes...)
 		cd backend/layer && \
-				docker run --rm \
-								-v `pwd`/dependencies:`pwd` \
-								-w `pwd` \
-								lambci/lambda:build-ruby2.5 \
-								./build.sh && \
+				./build.sh && \
 				mv dependencies/dependencies.zip . && \
 				sam package \
 						--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
