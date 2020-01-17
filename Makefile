@@ -50,7 +50,8 @@ deploy.layer: ##=> Deploy support layer for loader service
 		$(info [*] Packaging, building, and deploying loader dependency layer, this can take a few minutes...)
 		cd backend/layer/dependencies && \
 				./build.sh && \
-				mv dependencies/dependencies.zip . && \
+				mv dependencies.zip .. && \
+				cd .. && \
 				sam package \
 						--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
 						--output-template-file packaged.yaml && \
