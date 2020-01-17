@@ -48,7 +48,7 @@ deploy.content: ##=> Deploy content loading services
 
 deploy.layer: ##=> Deploy support layer for loader service
 		$(info [*] Packaging, building, and deploying loader dependency layer, this can take a few minutes...)
-		cd backend/layer && \
+		cd backend/layer/dependencies && \
 				./build.sh && \
 				mv dependencies/dependencies.zip . && \
 				sam package \
