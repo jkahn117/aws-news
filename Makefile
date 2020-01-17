@@ -57,7 +57,7 @@ deploy.layer: ##=> Deploy support layer for loader service
 				sam deploy \
 						--template-file packaged.yaml \
 						--stack-name ${STACK_NAME}-dependencies \
-						--capabilities CAPABILITY_IAM
+						--capabilities CAPABILITY_IAM \
 						--parameter-overrides \
 								Stage=${AMPLIFY_ENV}
 
