@@ -75,7 +75,8 @@ delete.layer: ##=> Delete support layer for loader service
 #### HELPERS ####
 _install_dev_packages:
 	$(info [*] Installing Ruby 2.5...)
-	echo "source $$HOME/.rvm/scripts/rvm" >> ~/.bashrc
+	echo "source ~/.rvm/scripts/rvm" >> ~/.bashrc
+	echo "export GEM_PATH=/usr/local/rvm/gems/ruby-2.5.0" >> ~/.bashrc
 	cat ~/.bashrc
 	source ~/.bashrc
 	rvm install 2.5.0 && rvm use 2.5.0 --default
