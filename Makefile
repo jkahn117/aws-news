@@ -24,12 +24,9 @@ init: ##=> Initialize environment
 deploy.build: ##=> Deploy the build environment
 		$(info [*] Deploy build environment...)
 		cd _build && \
-				aws cloudformation package \
-						--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
-						--output-template-file packaged.yaml && \
 				aws cloudformation deploy \
-						--template-file packaged.yaml \
-						--stack-name ${STACK_NAME}-build \
+						--template-file template.yaml \
+						--stack-name aws-news-build \
 						--capabilities CAPABILITY_IAM
 
 deploy: ##=> Deploy all services

@@ -96,7 +96,7 @@ RUN /bin/bash -c "pip3 install aws-sam-cli cfn-lint"
 
 ## Install AWS Amplify CLI for VERSION_NODE_DEFAULT
 RUN /bin/bash -c ". ~/.nvm/nvm.sh && nvm use ${VERSION_NODE_DEFAULT} && \
-	npm install -g @aws-amplify/cli@${VERSION_AMPLIFY}"
+	npm install -g @aws-amplify/cli"
 
 ## Environment Setup
 RUN echo export PATH="\

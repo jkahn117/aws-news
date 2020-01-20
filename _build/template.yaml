@@ -23,6 +23,16 @@ Resources:
     Type: AWS::ECR::Repository
     Properties:
       RepositoryName: !Sub "${ProjectName}-build-${Stage}"
+      RepositoryPolicyText:
+        # Amplify Console requires "public" access
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: "*" # allow any AWS account, but can we tie to Amplify Console?
+            Action:
+              - "ecr:GetDownloadUrlForLayer"
+              - "ecr:BatchGetImage"
+              - "ecr:BatchCheckLayerAvailability"
   
   ### CodeBuild ###
   BuildContainerProject:
@@ -34,8 +44,9 @@ Resources:
         Type: NO_ARTIFACTS
       Environment:
         Type: LINUX_CONTAINER
-        ComputeType: BUILD_GENERAL1_SMALL
+        ComputeType: BUILD_GENERAL1_MEDIUM
         Image: aws/codebuild/standard:2.0
+        PrivilegedMode: True
         EnvironmentVariables:
           - Name: AWS_DEFAULT_REGION
             Value: !Sub "${AWS::Region}"
