@@ -58,6 +58,7 @@ deploy.layer: ##=> Deploy support layer for loader service
 		cd backend/layer && \
 				docker run --rm \
 								-v `pwd`/dependencies:`pwd` \
+								-v /var/run/docker.sock:/var/run/docker.sock \
 								-w `pwd` \
 								lambci/lambda:build-ruby2.5 \
 								./build.sh && \
