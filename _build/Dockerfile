@@ -97,10 +97,13 @@ RUN /bin/bash -c "pip3 install aws-sam-cli cfn-lint"
 ## Install AWS Amplify CLI for VERSION_NODE_DEFAULT
 RUN /bin/bash -c ". ~/.nvm/nvm.sh && nvm use ${VERSION_NODE_DEFAULT} && \
 	npm install -g @aws-amplify/cli@${VERSION_AMPLIFY}"
+RUN /bin/bash -c ". ~/.nvm/nvm.sh && nvm use ${VERSION_NODE_10} && \
+	npm install -g @aws-amplify/cli@${VERSION_AMPLIFY}"
 
 ## Environment Setup
 RUN echo export PATH="\
 /usr/local/rvm/bin:\
+/root/.nvm/versions/node/${VERSION_NODE_DEFAULT}/bin:\
 $(python3 -m site --user-base)/bin:\
 $PATH" >> ~/.bashrc && \
     echo "rvm use ${VERSION_RUBY_DEFAULT} --default 1> /dev/null" >> ~/.bashrc \
