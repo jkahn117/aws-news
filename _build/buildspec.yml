@@ -4,12 +4,16 @@ phases:
   install:
     runtime-versions:
       docker: 18
+  pre_build:
+    commands:
+      - which aws
+      - which sam
   build:
     commands:
       - echo Build started on `date`
       - echo Building Lambda layer...
       - cd backend/layer
-      - docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v `pwd`/dependencies:`pwd` -w `pwd` lambci/lambda:build-ruby2.5 ./build.sh
+      - docker run --rm -v `pwd`/dependencies:`pwd` -w `pwd` lambci/lambda:build-ruby2.5 ./build.sh
       - mv dependencies/dependencies.zip .
   post_build:
     commands:
