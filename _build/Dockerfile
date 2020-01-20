@@ -73,7 +73,6 @@ RUN yum -y update && \
 
 ## Install Node 10 & 12
 RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.35.2/install.sh | bash
-RUN curl -o- -L https://yarnpkg.com/install.sh > /usr/local/bin/yarn-install.sh
 RUN /bin/bash -c ". ~/.nvm/nvm.sh && \
 	nvm install $VERSION_NODE_10 && nvm use $VERSION_NODE_10 && \
 	nvm install $VERSION_NODE_12 && nvm use $VERSION_NODE_12 && \
@@ -85,7 +84,7 @@ RUN gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 409B6B1796C275462A
 
 ENV PATH /usr/local/rvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 RUN /bin/bash --login -c "\
-	rvm install $VERSION_RUBY_2_5 && rvm use $VERSION_RUBY_2_5 --default && gem install bundler -v $VERSION_BUNDLER && gem install jekyll && \
+	rvm install $VERSION_RUBY_2_5 && rvm use $VERSION_RUBY_2_5 --default && gem install bundler -v $VERSION_BUNDLER && \
 	rvm cleanup all"
 
 ## Install awscli
@@ -97,17 +96,18 @@ RUN /bin/bash -c "pip3 install aws-sam-cli cfn-lint"
 ## Install AWS Amplify CLI for VERSION_NODE_DEFAULT
 RUN /bin/bash -c ". ~/.nvm/nvm.sh && nvm use ${VERSION_NODE_DEFAULT} && \
 	npm install -g @aws-amplify/cli@${VERSION_AMPLIFY}"
-RUN /bin/bash -c ". ~/.nvm/nvm.sh && nvm use ${VERSION_NODE_10} && \
-	npm install -g @aws-amplify/cli@${VERSION_AMPLIFY}"
 
 ## Environment Setup
 RUN echo export PATH="\
 /usr/local/rvm/bin:\
-/root/.nvm/versions/node/${VERSION_NODE_DEFAULT}/bin:\
+/root/.nvm/versions/node/v${VERSION_NODE_DEFAULT}/bin:\
 $(python3 -m site --user-base)/bin:\
 $PATH" >> ~/.bashrc && \
     echo "rvm use ${VERSION_RUBY_DEFAULT} --default 1> /dev/null" >> ~/.bashrc \
-    echo "nvm use ${VERSION_NODE_DEFAULT} 1> /dev/null" >> ~/.bashrc \
-    echo "nvm alias default ${VERSION_NODE_DEFAULT}" >> ~/.bashrc
+    echo "nvm use ${VERSION_NODE_DEFAULT} 1> /dev/null" >> ~/.bashrc
+
+RUN node -v
+RUN npm -v
+RUN ruby -v
 
 ENTRYPOINT [ "bash", "-c" ]
