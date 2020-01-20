@@ -1,6 +1,8 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
 
+Transform: 'AWS::Serverless-2016-10-31'
+
 Parameters:
   Stage:
     Type: String
@@ -11,34 +13,21 @@ Parameters:
     Type: String
     Description: The name of this project
     Default: 'aws-news'
-  
+
   ProjectRepo:
     Type: String
     Description: GitHub repository for the project
     Default: 'https://github.com/jkahn117/aws-news.git'
 
 Resources:
-  ### ECR ###
-  BuildContainerRepository:
-    Type: AWS::ECR::Repository
-    Properties:
-      RepositoryName: !Sub "${ProjectName}-build-${Stage}"
-      RepositoryPolicyText:
-        # Amplify Console requires "public" access
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal: "*" # allow any AWS account, but can we tie to Amplify Console?
-            Action:
-              - "ecr:GetDownloadUrlForLayer"
-              - "ecr:BatchGetImage"
-              - "ecr:BatchCheckLayerAvailability"
-  
+  DeploymentBucket:
+    Type: AWS::S3::Bucket
+
   ### CodeBuild ###
-  BuildContainerProject:
+  BuildLayerProject:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: !Sub "${ProjectName}-build-${Stage}"
+      Name: !Sub "${ProjectName}-build-${Stage}-layer"
       ServiceRole: !GetAtt CodeBuildServiceRole.Arn
       Artifacts:
         Type: NO_ARTIFACTS
@@ -48,20 +37,26 @@ Resources:
         Image: aws/codebuild/standard:2.0
         PrivilegedMode: True
         EnvironmentVariables:
-          - Name: AWS_DEFAULT_REGION
-            Value: !Sub "${AWS::Region}"
-          - Name: AWS_ACCOUNT_ID
-            Value: !Sub "${AWS::AccountId}"
-          - Name: IMAGE_REPO_NAME
-            Value: !Sub "${ProjectName}-build-${Stage}"
-          - Name: IMAGE_TAG
-            Value: latest
+          - Name: DEPLOYMENT_BUCKET_NAME
+            Value: !Ref DeploymentBucket
+          - Name: STACK_NAME
+            Value: !Sub "${AWS::StackName}-dependencies"
+          - Name: AMPLIFY_ENV
+            Value: !Ref Stage
       Source:
         Auth: 
           Type: OAUTH
         BuildSpec: _build/buildspec.yml
         Type: GITHUB
         Location: !Ref ProjectRepo
+      Triggers:
+        Webhook: true
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: FILE_PATH
+              Pattern: backend/layer/dependencies/Gemfile
+              
 
   ### IAM ###
   CodeBuildServiceRole:
@@ -79,23 +74,24 @@ Resources:
       Policies:
         - PolicyName: !Sub "${ProjectName}-build-${Stage}-codebuild"
           PolicyDocument:
-            Version: 2012-10-17
+            Version: "2012-10-17"
             Statement:
-              - Effect: Allow
-                Action:
-                  - "ecr:BatchCheckLayerAvailability"
-                  - "ecr:CompleteLayerUpload"
-                  - "ecr:InitiateLayerUpload"
-                  - "ecr:PutImage"
-                  - "ecr:UploadLayerPart"
-                Resource: !GetAtt BuildContainerRepository.Arn
-              - Effect: Allow
-                Action:
-                  - "ecr:GetAuthorizationToken"
-                Resource: "*"
               - Effect: Allow
                 Action:
                   - "logs:CreateLogGroup"
                   - "logs:CreateLogStream"
                   - "logs:PutLogEvents"
                 Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+              - Effect: Allow
+                Action:
+                  - "lambda:PublishLayerVersion"
+                Resource: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer/*
+              - Effect: Allow
+                Action:
+                  - "ssm:PutParameter"
+                Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*
+
+Outputs:
+  CodeBuildProject:
+    Description: Name of the CodeBuild project
+    Value: !Ref BuildLayerProject
