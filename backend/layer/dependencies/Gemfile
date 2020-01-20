@@ -1,7 +1,5 @@
 source 'https://rubygems.org'
 
-ruby "2.5.0"
-
 gem "feedjira", "~> 3.1"
 
 gem "httparty", "~> 0.17.3"
