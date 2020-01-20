@@ -55,8 +55,7 @@ deploy.content: ##=> Deploy content loading services
 
 deploy.layer: ##=> Deploy support layer for loader service
 		$(info [*] Packaging, building, and deploying loader dependency layer, this can take a few minutes...)
-		cd backend/layer && \
-				cd backend/layer/dependencies && \
+		cd backend/layer/dependencies && \
 				rvm use 2.5.0 && \
 				./build.sh && \
 				mv dependencies.zip .. && \
