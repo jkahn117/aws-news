@@ -74,9 +74,17 @@ Resources:
                 Action:
                   - "ecr:BatchCheckLayerAvailability"
                   - "ecr:CompleteLayerUpload"
-                  - "ecr:GetAuthorizationToken"
                   - "ecr:InitiateLayerUpload"
                   - "ecr:PutImage"
                   - "ecr:UploadLayerPart"
                 Resource: !GetAtt BuildContainerRepository.Arn
-                
+              - Effect: Allow
+                Action:
+                  - "ecr:GetAuthorizationToken"
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
