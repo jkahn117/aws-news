@@ -81,6 +81,7 @@ RUN /bin/bash -c ". ~/.nvm/nvm.sh && \
 ## Install Ruby 2.5.0 - this is the version used by Lambda
 RUN gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB && \
 	curl -sL https://get.rvm.io | bash -s -- --with-gems="bundler"
+#RUN curl -sL https://get.rvm.io | bash -s -- --with-gems="bundler"
 
 ENV PATH /usr/local/rvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 RUN /bin/bash --login -c "\
@@ -88,26 +89,19 @@ RUN /bin/bash --login -c "\
 	rvm cleanup all"
 
 ## Install awscli
-RUN /bin/bash -c "pip3 install awscli && rm -rf /var/cache/apk/*"
+RUN /bin/bash -c "pip3 install --upgrade --user awscli && rm -rf /var/cache/apk/*"
 
 ## Install SAM CLI
-RUN /bin/bash -c "pip3 install aws-sam-cli cfn-lint"
+RUN /bin/bash -c "pip3 install --upgrade --user aws-sam-cli cfn-lint"
 
 ## Install AWS Amplify CLI for VERSION_NODE_DEFAULT
 RUN /bin/bash -c ". ~/.nvm/nvm.sh && nvm use ${VERSION_NODE_DEFAULT} && \
 	npm install -g @aws-amplify/cli@${VERSION_AMPLIFY}"
 
 ## Environment Setup
-RUN echo export PATH="\
-/usr/local/rvm/bin:\
-/root/.nvm/versions/node/v${VERSION_NODE_DEFAULT}/bin:\
-$(python3 -m site --user-base)/bin:\
-$PATH" >> ~/.bashrc && \
-    echo "rvm use ${VERSION_RUBY_DEFAULT} --default 1> /dev/null" >> ~/.bashrc \
-    echo "nvm use ${VERSION_NODE_DEFAULT} 1> /dev/null" >> ~/.bashrc
+ENV NODE_PATH /root/.nvm/v${VERSION_NODE_DEFAULT}/lib/node_modules
+ENV PATH /root/.nvm/versions/node/v${VERSION_NODE_DEFAULT}/bin:/usr/local/rvm/bin:/root/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 
-RUN node -v
-RUN npm -v
-RUN ruby -v
+RUN echo "rvm use ${VERSION_RUBY_DEFAULT} --default 1> /dev/null" >> ~/.bashrc
 
-ENTRYPOINT [ "bash", "-c" ]
+ENTRYPOINT [ "bash", "-l", "-c" ]
