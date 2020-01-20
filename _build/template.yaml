@@ -1,0 +1,82 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+  Stage:
+    Type: String
+    Description: The stage where the application is running in, e.g., dev, prod.
+    Default: 'dev'
+
+  ProjectName:
+    Type: String
+    Description: The name of this project
+    Default: 'aws-news'
+  
+  ProjectRepo:
+    Type: String
+    Description: GitHub repository for the project
+    Default: 'https://github.com/jkahn117/aws-news.git'
+
+Resources:
+  ### ECR ###
+  BuildContainerRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub "${ProjectName}-build-${Stage}"
+  
+  ### CodeBuild ###
+  BuildContainerProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub "${ProjectName}-build-${Stage}"
+      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:2.0
+        EnvironmentVariables:
+          - Name: AWS_DEFAULT_REGION
+            Value: !Sub "${AWS::Region}"
+          - Name: AWS_ACCOUNT_ID
+            Value: !Sub "${AWS::AccountId}"
+          - Name: IMAGE_REPO_NAME
+            Value: !Sub "${ProjectName}-build-${Stage}"
+          - Name: IMAGE_TAG
+            Value: latest
+      Source:
+        Auth: 
+          Type: OAUTH
+        BuildSpec: _build/buildspec.yml
+        Type: GITHUB
+        Location: !Ref ProjectRepo
+
+  ### IAM ###
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: !Sub "${ProjectName}-build-${Stage}-codebuild"
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "ecr:BatchCheckLayerAvailability"
+                  - "ecr:CompleteLayerUpload"
+                  - "ecr:GetAuthorizationToken"
+                  - "ecr:InitiateLayerUpload"
+                  - "ecr:PutImage"
+                  - "ecr:UploadLayerPart"
+                Resource: !GetAtt BuildContainerRepository.Arn
+                

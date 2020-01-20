@@ -21,6 +21,17 @@ init: ##=> Initialize environment
 		$(info [*] Initialize environment...)
 		aws appsync list-data-sources --api-id ${APPSYNC_API_ID} > datasources.json
 
+deploy.build: ##=> Deploy the build environment
+		$(info [*] Deploy build environment...)
+		cd _build && \
+				aws cloudformation package \
+						--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
+						--output-template-file packaged.yaml && \
+				aws cloudformation deploy \
+						--template-file packaged.yaml \
+						--stack-name ${STACK_NAME}-build \
+						--capabilities CAPABILITY_IAM
+
 deploy: ##=> Deploy all services
 		$(info [*] Deploying...)
 		$(MAKE) deploy.layer
@@ -74,12 +85,6 @@ delete.layer: ##=> Delete support layer for loader service
 
 #### HELPERS ####
 _install_dev_packages:
-	$(info [*] Installing Ruby 2.5...)
-	echo "source ~/.rvm/scripts/rvm" >> ~/.bashrc
-	echo "export GEM_PATH=/usr/local/rvm/gems/ruby-2.5.0" >> ~/.bashrc
-	cat ~/.bashrc
-	source ~/.bashrc
-	rvm install 2.5.0 && rvm use 2.5.0 --default
 	$(info [*] Installing jq...)
 	yum install jq -y
 	$(info [*] Upgrading Python SAM CLI and CloudFormation linter to latest...)

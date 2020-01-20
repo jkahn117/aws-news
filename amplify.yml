@@ -1,11 +1,11 @@
 version: 0.1
 backend:
   phases:
-    preBuild:
-      commands:
-        - echo Installing required packages for build...
-        - npm install -g @aws-amplify/cli  # is this available already?
-        - make _install_dev_packages   # install dev tools, e.g. SAM CLI
+    # preBuild:
+    #   commands:
+    #     - echo Installing required packages for build...
+    #     - npm install -g @aws-amplify/cli  # is this available already?
+    #     - make _install_dev_packages   # install dev tools, e.g. SAM CLI
     build:
       commands:
         - ruby -v
@@ -35,11 +35,6 @@ frontend:
   phases:
     preBuild:
       commands:
-        # - echo "################################ Listing current files after backend build"
-        # - ls -l .
-        # - ls -l web/
-        # - ls -l web/src
-        # - test -f src/aws-exports.js && cp src/aws-exports.js web/src/ # temporary fix: https://github.com/aws-amplify/amplify-console/issues/342
         - cd web
         - npm install
     build:
