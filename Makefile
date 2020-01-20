@@ -56,7 +56,7 @@ deploy.content: ##=> Deploy content loading services
 deploy.layer: ##=> Deploy support layer for loader service
 		$(info [*] Packaging, building, and deploying loader dependency layer, this can take a few minutes...)
 		cd backend/layer && \
-				docker run --rm \
+				docker run --rm -it \
 								-v /var/run/docker.sock:/var/run/docker.sock \
 								-v `pwd`/dependencies:`pwd` \
 								-w `pwd` \
