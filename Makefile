@@ -55,17 +55,20 @@ deploy.content: ##=> Deploy content loading services
 
 deploy.layer: ##=> Deploy support layer for loader service
 		$(info [*] Packaging, building, and deploying loader dependency layer, this can take a few minutes...)
-		cd backend/layer/dependencies && \
-				./build.sh && \
-				mv dependencies.zip .. && \
-				cd .. && \
+		cd backend/layer && \
+				docker run --rm \
+								-v `pwd`/dependencies:`pwd` \
+								-w `pwd` \
+								lambci/lambda:build-ruby2.5 \
+								./build.sh && \
+				mv dependencies/dependencies.zip . && \
 				sam package \
 						--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
 						--output-template-file packaged.yaml && \
 				sam deploy \
 						--template-file packaged.yaml \
-						--stack-name ${STACK_NAME}-dependencies \
-						--capabilities CAPABILITY_IAM \
+						--stack-name ${STACK_NAME}-dependencies-${AMPLIFY_ENV} \
+						--capabilities CAPABILITY_IAM
 						--parameter-overrides \
 								Stage=${AMPLIFY_ENV}
 

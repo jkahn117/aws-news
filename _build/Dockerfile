@@ -7,9 +7,9 @@ LABEL maintainer="jkahn"
 ENV VERSION_NODE_10=10.16.0
 ENV VERSION_NODE_12=12
 ENV VERSION_NODE_DEFAULT=$VERSION_NODE_10
-ENV VERSION_RUBY_2_5=2.5.0
+ENV VERSION_RUBY_2_6=2.6.5
 ENV VERSION_BUNDLER=2.1.2
-ENV VERSION_RUBY_DEFAULT=$VERSION_RUBY_2_5
+ENV VERSION_RUBY_DEFAULT=$VERSION_RUBY_2_6
 ENV VERSION_AMPLIFY=4.12.0
 
 # UTF-8 Environment
@@ -28,6 +28,7 @@ RUN yum -y update && \
         bison \
         bzr \
         cmake \
+        docker \
         expect \
         fontconfig \
         git \
@@ -85,7 +86,7 @@ RUN gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 409B6B1796C275462A
 
 ENV PATH /usr/local/rvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 RUN /bin/bash --login -c "\
-	rvm install $VERSION_RUBY_2_5 && rvm use $VERSION_RUBY_2_5 --default && gem install bundler -v $VERSION_BUNDLER && \
+	rvm install $VERSION_RUBY_2_6 && rvm use $VERSION_RUBY_2_6 --default && gem install bundler -v $VERSION_BUNDLER && \
 	rvm cleanup all"
 
 ## Install awscli
