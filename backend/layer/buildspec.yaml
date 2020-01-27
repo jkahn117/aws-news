@@ -19,4 +19,4 @@ phases:
 artifacts:
   type: zip
   files:
-    - packaged.yaml
+    - backend/layer/packaged.yaml
