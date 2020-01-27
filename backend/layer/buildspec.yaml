@@ -17,6 +17,6 @@ phases:
       - echo Publishing layer via AWS SAM CLI...
       - aws cloudformation package --template-file template.yaml --s3-bucket ${PACKAGE_BUCKET} --output-template-file packaged-template.yaml
 artifacts:
-  type: zip
+  discard-paths: yes
   files:
     - backend/layer/packaged-template.yaml
