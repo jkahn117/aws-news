@@ -24,6 +24,24 @@ AWS News requires the following prerequisites:
 
 ## Deployment
 
+1. [Create a personal access token for GitHub](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) with scopes `repo` and `admin:repo_hook`. Name the token "aws-news-build".
+2. Copy the token value (it will not be visible again).
+3. Create a new secret in AWS Secrets Manager:
+
+  ``` bash
+  aws secretsmanager create-secret --name GitHubOAuthToken --secret-string ACCESS_TOKEN
+  ```
+
+4. Deploy the build stack
+
+  ``` bash
+  make setup.build
+  ```
+
+
+
+
+
 To deploy AWS News:
 
 1. 

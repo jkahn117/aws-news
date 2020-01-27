@@ -40,7 +40,3 @@ Outputs:
   LoaderDependencyLayerArn:
     Description: Loader Dependency Layer ARN
     Value: !Ref LoaderDependencyLayer
-
-  LoaderDependencyLayerParameter:
-    Description: Name of parameter in Parameter Store with Layer ARN
-    Value: !Ref LayerParameter

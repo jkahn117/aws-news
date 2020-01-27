@@ -17,22 +17,24 @@ target:
 		$(info ${HELP_MESSAGE})
 		@exit 0
 
-init: ##=> Initialize environment
-		$(info [*] Initialize environment...)
-		aws appsync list-data-sources --api-id ${APPSYNC_API_ID} > datasources.json
-
-deploy.build: ##=> Deploy the build environment
-		$(info [*] Deploy build environment...)
-		cd _build && \
-				aws cloudformation deploy \
-						--template-file template.yaml \
-						--stack-name aws-news-build \
-						--capabilities CAPABILITY_IAM
+setup.build: ##=> Setup the layer build environment
+		$(info [*] Setup build environment...)
+		cd backend/layer && \
+				sam deploy \
+						--template-file build.template.yaml \
+						--stack-name aws-news-build-${AMPLIFY_ENV} \
+						--capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+						--parameter-overrides \
+								Stage=${AMPLIFY_ENV}
 
 deploy: ##=> Deploy all services
 		$(info [*] Deploying...)
 		$(MAKE) deploy.layer
 		$(MAKE) deploy.content
+
+init: ##=> Initialize environment
+		$(info [*] Initialize environment...)
+		aws appsync list-data-sources --api-id ${APPSYNC_API_ID} > datasources.json
 
 deploy.content: ##=> Deploy content loading services
 		$(info [*] Deploying content services...)
@@ -54,21 +56,11 @@ deploy.content: ##=> Deploy content loading services
 								LayerArn=/news/${AMPLIFY_ENV}/backend/loader/layer
 
 deploy.layer: ##=> Deploy support layer for loader service
-		$(info [*] Packaging, building, and deploying loader dependency layer, this can take a few minutes...)
-		cd backend/layer/dependencies && \
-				rvm use 2.5.0 && \
-				./build.sh && \
-				mv dependencies.zip .. && \
-				cd .. && \
-				sam package \
-						--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
-						--output-template-file packaged.yaml && \
-				sam deploy \
-						--template-file packaged.yaml \
-						--stack-name ${STACK_NAME}-dependencies-${AMPLIFY_ENV} \
-						--capabilities CAPABILITY_IAM
-						--parameter-overrides \
-								Stage=${AMPLIFY_ENV}
+		$(info [*] Deploying loader dependency layer, this can take a few minutes...)
+		PROJ_NAME := $(shell jq -r '.Stacks[0].Outputs | select(.OutputKey == "CodeBuildProject") | .OutputValue' | aws cloudformation describe-stacks --stack-name aws-news-dependencies-${AMPLIFY_ENV})
+		echo $${PROJ_NAME}
+		#aws codebuild start-build \
+		#		--project-name $$PROJ_NAME
 
 delete: ##=> Delete all
 		$(info [*] Deleting...)
