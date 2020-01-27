@@ -15,8 +15,8 @@ phases:
     commands:
       - echo Build completed on `date`
       - echo Publishing layer via AWS SAM CLI...
-      - aws cloudformation package --template-file template.yaml --s3-bucket ${PACKAGE_BUCKET} --output-template-file packaged.yaml
+      - aws cloudformation package --template-file template.yaml --s3-bucket ${PACKAGE_BUCKET} --output-template-file packaged-template.yaml
 artifacts:
   type: zip
   files:
-    - backend/layer/packaged.yaml
+    - backend/layer/packaged-template.yaml
