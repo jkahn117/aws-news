@@ -46,7 +46,7 @@ Resources:
         GitHubOwner: !Ref GitHubOwner
         GitHubRepo: !Ref GitHubRepo
         GitHubBranch: !Ref GitHubBranch
-        DeployStackName: !Sub "${ProjectName}-bulid-layer-${Stage}"
+        DeployStackName: !Sub "${ProjectName}-build-layer-${Stage}"
         DeployRoleName: !Ref DeployRole
         DeployParameterOverrides: !Sub '{ "Stage" : "${Stage}" }'
         BuildSpecFilePath: 'backend/layer/buildspec.yaml'
@@ -82,8 +82,9 @@ Resources:
               - Effect: "Allow"
                 Action:
                   - "lambda:PublishLayerVersion"
+                  - "lambda:DeleteLayerVersion"
                 Resource:
-                  - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer/*"
+                  - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:*"
         - PolicyName: "put-parameter"
           PolicyDocument:
             Version: "2012-10-17"
@@ -91,6 +92,8 @@ Resources:
               - Effect: "Allow"
                 Action:
                   - "ssm:PutParameter"
+                  - "ssm:DeleteParameter"
+                  - "ssm:AddTagsToResource"
                 Resource:
                   - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*"
 
