@@ -32,15 +32,11 @@ AWS News requires the following prerequisites:
   aws secretsmanager create-secret --name GitHubOAuthToken --secret-string ACCESS_TOKEN
   ```
 
-4. Deploy the build stack
+4. Deploy the build stack. In addition, we will modify the CodeBuild project created as part of this stack to use privileged mode -- this allows CodeBuild to use the Docker daemon.
 
   ``` bash
-  make setup.build
+  make deploy.build
   ```
-
-
-
-
 
 To deploy AWS News:
 
