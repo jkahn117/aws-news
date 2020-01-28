@@ -31,8 +31,15 @@ deploy.build: ##=> Setup the layer build environment
 		@echo Pipeline stack: ${PIPELINE_STACK}
 		$(eval BUILD_PROJECT := $(shell aws cloudformation list-stack-resources --stack-name ${PIPELINE_STACK} | jq -r '.StackResourceSummaries[] | select(.LogicalResourceId == "BuildProject").PhysicalResourceId'))
 		@echo Build project: ${BUILD_PROJECT}
+		$(eval PACKAGE_BUCKET := $(shell aws cloudformation describe-stacks --stack-name ${PIPELINE_STACK} | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "ArtifactsBucketName").OutputValue'))
+		@echo Artifact bucket: ${PACKAGE_BUCKET}
 		aws codebuild update-project --name ${BUILD_PROJECT} \
-						--environment type=LINUX_CONTAINER,image=aws/codebuild/standard:2.0,computeType=BUILD_GENERAL1_SMALL,privilegedMode=true
+						--environment "{ \"type\": \"LINUX_CONTAINER\", \
+							\"image\": \"aws/codebuild/standard:2.0\", \
+							\"computeType\": \"BUILD_GENERAL1_SMALL\", \
+							\"privilegedMode\": true, \
+							\"environmentVariables\": [ { \"name\": \"PACKAGE_BUCKET\", \"value\": \"${PACKAGE_BUCKET}\", \"type\": \"PLAINTEXT\" } ] \
+						}"
 
 deploy: ##=> Deploy all services
 		$(info [*] Deploying...)
