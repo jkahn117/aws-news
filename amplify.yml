@@ -1,14 +1,12 @@
 version: 0.1
 backend:
   phases:
-    # preBuild:
-    #   commands:
-    #     - echo Installing required packages for build...
-    #     - npm install -g @aws-amplify/cli  # is this available already?
-    #     - make _install_dev_packages   # install dev tools, e.g. SAM CLI
+    preBuild:
+      commands:
+        - echo Installing required packages for build...
+        - make _install_dev_packages   # install dev tools, e.g. SAM CLI
     build:
       commands:
-        - ruby -v
         - cd web
         - echo Amplify build...
         - amplifyPush --simple
