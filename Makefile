@@ -17,7 +17,7 @@ target:
 		$(info ${HELP_MESSAGE})
 		@exit 0
 
-setup.build: ##=> Setup the layer build environment
+deploy.build: ##=> Setup the layer build environment
 		$(info [*] Setup build environment...)
 		cd backend/layer && \
 				sam deploy \
@@ -26,10 +26,16 @@ setup.build: ##=> Setup the layer build environment
 						--capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
 						--parameter-overrides \
 								Stage=${AMPLIFY_ENV}
+		$(info [*] Setting privileged mode on CodeBuild project...)
+		$(eval PIPELINE_STACK := $(shell aws cloudformation list-stack-resources --stack-name aws-news-build-${AMPLIFY_ENV} | jq -r '.StackResourceSummaries[] | select(.LogicalResourceId == "PipelineApp").PhysicalResourceId' | grep -Eo '\/(.*)\/' | grep -Eo '[^\/]+'))
+		@echo Pipeline stack: ${PIPELINE_STACK}
+		$(eval BUILD_PROJECT := $(shell aws cloudformation list-stack-resources --stack-name ${PIPELINE_STACK} | jq -r '.StackResourceSummaries[] | select(.LogicalResourceId == "BuildProject").PhysicalResourceId'))
+		@echo Build project: ${BUILD_PROJECT}
+		aws codebuild update-project --name ${BUILD_PROJECT} \
+						--environment type=LINUX_CONTAINER,image=aws/codebuild/standard:2.0,computeType=BUILD_GENERAL1_SMALL,privilegedMode=true
 
 deploy: ##=> Deploy all services
 		$(info [*] Deploying...)
-		$(MAKE) deploy.layer
 		$(MAKE) deploy.content
 
 init: ##=> Initialize environment
@@ -55,23 +61,12 @@ deploy.content: ##=> Deploy content loading services
 								ContentBucket=${CONTENT_BUCKET} \
 								LayerArn=/news/${AMPLIFY_ENV}/backend/loader/layer
 
-deploy.layer: ##=> Deploy support layer for loader service
-		$(info [*] Deploying loader dependency layer, this can take a few minutes...)
-		PROJ_NAME := $(shell jq -r '.Stacks[0].Outputs | select(.OutputKey == "CodeBuildProject") | .OutputValue' | aws cloudformation describe-stacks --stack-name aws-news-dependencies-${AMPLIFY_ENV})
-		echo $${PROJ_NAME}
-		#aws codebuild start-build \
-		#		--project-name $$PROJ_NAME
-
 delete: ##=> Delete all
 		$(info [*] Deleting...)
 		$(MAKE) delete.content
-		$(MAKE) delete.layer
 
 delete.content: ##=> Delete content loading services
 		aws cloudformation delete-stack --stack-name $${STACK_NAME}-content-$${AWS_BRANCH}
-
-delete.layer: ##=> Delete support layer for loader service
-		aws cloudformation delete-stack --stack-name $${STACK_NAME}-dependencies-$${AWS_BRANCH}
 
 #### HELPERS ####
 _install_dev_packages:
