@@ -2,6 +2,8 @@
 
 bundle install --path=. --without test
 
+gem pristine nokogiri
+
 rm -rf ruby/2.5.0/cache && ruby -rf ruby/2.5.0/bin
 
 mkdir ruby/gems
