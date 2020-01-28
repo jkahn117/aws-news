@@ -24,12 +24,35 @@
 		"S3DeploymentRootKey": {
 			"Type": "String",
 			"Description": "An S3 key relative to the S3DeploymentBucket that points to the root\nof the deployment directory."
+		},
+		"UnauthRoleName": {
+			"Type": "String",
+			"Description": "Unauthenticated role name"
 		}
 	},
 	"Resources": {
-		"EmptyResource": {
-			"Type": "Custom::EmptyResource",
-			"Condition": "AlwaysFalse"
+		"UnuathSubscriptionPolicy": {
+			"Type": "AWS::IAM::Policy",
+			"Properties": {
+				"PolicyName": { "Fn::Sub": "${AppSyncApiName}-${AppSyncApiId}-unauth-sub-policy" },
+				"PolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Effect": "Allow",
+							"Action": [
+								"appsync:GraphQL"
+							],
+							"Resource": [
+								{ "Fn::Sub": "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/${AppSyncApiId}/types/Subscription/*" }
+							]
+						}
+					]
+				},
+				"Roles": [
+					{ "Ref": "UnauthRoleName" }
+				]
+			}
 		}
 	},
 	"Conditions": {
