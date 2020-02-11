@@ -40,7 +40,7 @@ AWS News requires the following prerequisites:
 
 To deploy AWS News:
 
-1. 
+1. H
 
 ## Cleaning Up
 
