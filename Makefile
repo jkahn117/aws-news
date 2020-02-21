@@ -2,7 +2,7 @@
 # https://github.com/aws-samples/aws-serverless-airline-booking/blob/develop/amplify.yml
 # inspiration at: https://github.com/aws-samples/aws-serverless-airline-booking/blob/develop/Makefile
 
-AMPLIFY_ENV ?= prod
+AMPLIFY_ENV ?= dev
 STACK_NAME ?= "UNDEFINED"
 DEPLOYMENT_BUCKET_NAME ?= "UNDEFINED"
 AWS_REGION ?= "UNDEFINED"
