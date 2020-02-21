@@ -6,7 +6,7 @@ export declare class Blog {
   readonly id: string;
   readonly title: string;
   readonly url: string;
-  readonly lastImportAt: string;
+  readonly lastImportAt?: string;
   readonly articles?: Article[];
   constructor(init: ModelInit<Blog>);
   static copyOf(source: Blog, mutator: (draft: MutableModel<Blog>) => MutableModel<Blog> | void): Blog;

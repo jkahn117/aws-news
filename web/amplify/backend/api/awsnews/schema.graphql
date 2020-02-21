@@ -13,7 +13,7 @@ type Blog
   id: ID!
   title: String!
   url: AWSURL!
-  lastImportAt: AWSDateTime!
+  lastImportAt: AWSDateTime
   articles: [Article] @connection(keyName: "byBlog", fields: [ "id" ])
 }
 

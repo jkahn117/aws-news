@@ -67,7 +67,7 @@ export const schema = {
                     "name": "lastImportAt",
                     "isArray": false,
                     "type": "AWSDateTime",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": []
                 },
                 "articles": {
