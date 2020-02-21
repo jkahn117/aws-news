@@ -26,6 +26,10 @@ deploy.build: ##=> Setup the layer build environment
 						--capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
 						--parameter-overrides \
 								Stage=${AMPLIFY_ENV}
+		aws cloudformation wait stack-create-complete --stack-name aws-news-build-${AMPLIFY_ENV}
+		$(MAKE) _deploy.set_codebuild_privileged_mode
+
+_deploy.set_codebuild_privileged_mode: ##=>
 		$(info [*] Setting privileged mode on CodeBuild project...)
 		$(eval PIPELINE_STACK := $(shell aws cloudformation list-stack-resources --stack-name aws-news-build-${AMPLIFY_ENV} | jq -r '.StackResourceSummaries[] | select(.LogicalResourceId == "PipelineApp").PhysicalResourceId' | grep -Eo '\/(.*)\/' | grep -Eo '[^\/]+'))
 		@echo Pipeline stack: ${PIPELINE_STACK}
@@ -40,6 +44,13 @@ deploy.build: ##=> Setup the layer build environment
 							\"privilegedMode\": true, \
 							\"environmentVariables\": [ { \"name\": \"PACKAGE_BUCKET\", \"value\": \"${PACKAGE_BUCKET}\", \"type\": \"PLAINTEXT\" } ] \
 						}"
+
+build.run: ##=> Initiate pipeline
+	$(info [*] Starting CodePipeline build of dependency layer...)
+	$(eval PIPELINE_STACK := $(shell aws cloudformation list-stack-resources --stack-name aws-news-build-${AMPLIFY_ENV} | jq -r '.StackResourceSummaries[] | select(.LogicalResourceId == "PipelineApp").PhysicalResourceId' | grep -Eo '\/(.*)\/' | grep -Eo '[^\/]+'))
+	$(eval PIPELINE_NAME := $(shell aws cloudformation list-stack-resources --stack-name ${PIPELINE_STACK} | jq -r '.StackResourceSummaries[] | select(.LogicalResourceId == "Pipeline").PhysicalResourceId'))
+	@echo Build project: ${PIPELINE_NAME}
+	aws codepipeline start-pipeline-execution --name ${PIPELINE_NAME}
 
 deploy: ##=> Deploy all services
 		$(info [*] Deploying...)

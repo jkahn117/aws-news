@@ -40,7 +40,7 @@ Parameters:
 
 Globals:
   Function:
-    Runtime: ruby2.5
+    Runtime: ruby2.7
     Handler: app.handler
     Timeout: 25
     Tags:

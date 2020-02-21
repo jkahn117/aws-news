@@ -27,7 +27,7 @@ Parameters:
   GitHubBranch:
     Type: String
     Description: GitHub repository branch name (default='master')
-    Default: master
+    Default: development
   
   GitHubOAuthTokenSecretId:
     Type: String
