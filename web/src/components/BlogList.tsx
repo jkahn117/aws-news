@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { DataStore } from '@aws-amplify/datastore';
@@ -21,30 +21,44 @@ interface BlogListProps {
 const BlogList = ({ limit } : BlogListProps) => {
   const [ blogs, setBlogs ] = useState<Blog[]>([]);
 
-  useEffect(() => {
-    listBlogs();
+  const listBlogs = useCallback(() => {
+    async function loadBlogs() {
+      try {
+        const _blogs:Blog[] = await DataStore.query(Blog);
+        setBlogs(_blogs.sort((a, b) => (a.title < b.title) ? -1 : 1));
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    loadBlogs();
   }, []);
 
   useEffect(() => {
+    listBlogs();
+  }, [ listBlogs ]);
+
+  useEffect(() => {
     const subscription = DataStore.observe(Blog).subscribe(msg => {
-      console.log('**** BLOG SUBSCRIPTION ****');
-      console.log(msg.model, msg.opType, msg.element);
+      // console.log('**** BLOG SUBSCRIPTION ****');
+      // console.log(msg.model, msg.opType, msg.element);
+      listBlogs();
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [ listBlogs ]);
 
-  async function listBlogs() {
-    try {
-      const items:Blog[] = await DataStore.query(Blog);
-      console.log(items)
-      setBlogs(items);
-    } catch (error) {
-      console.error(error)
-    }
-  }
+  // async function listBlogs() {
+  //   try {
+  //     const items:Blog[] = await DataStore.query(Blog);
+  //     console.log(items)
+  //     setBlogs(items);
+  //   } catch (error) {
+  //     console.error(error)
+  //   }
+  // }
 
   return (
     <div>

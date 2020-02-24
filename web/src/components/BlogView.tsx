@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Moment from 'react-moment';
 
-import { Header, Image } from 'semantic-ui-react';
+import { Header, Image, Placeholder } from 'semantic-ui-react';
 import './BlogView.scss';
 
 import { DataStore } from '@aws-amplify/datastore';
@@ -14,7 +14,6 @@ interface ArticleCardProps {
 }
 
 const ArticleCard = ({ article, index } : ArticleCardProps) => {
-
   return (
     <article>
       <div className="img-wrapper">
@@ -31,10 +30,29 @@ const ArticleCard = ({ article, index } : ArticleCardProps) => {
   );
 };
 
+const LoadingArticleCard = () => {
+  return (
+    <Placeholder fluid>
+      <Placeholder.Header>
+        <Placeholder.Image />
+        <Placeholder.Line length="full" />
+      </Placeholder.Header>
+      <Placeholder.Paragraph>
+        <Placeholder.Line length="long" />
+        <Placeholder.Line length="medium" />
+        <Placeholder.Line length="long" />
+      </Placeholder.Paragraph>
+    </Placeholder>
+  );
+};
+
 const BlogView = () => {
   let { id: blogId } = useParams();
+
   const [ blog, setBlog ] = useState<Blog>();
-  const [ articles, setArticles ] = useState<Article[]>([]);
+  // a little funky? using another type to test if articles are loaded...using null was less pleasant
+  // but still want to have something in the array to iterate over in order to create loading screen
+  const [ articles, setArticles ] = useState<(Article|number)[]>([ 0, 1, 2, 3, 4, 5 ]);
 
   // using useCallback here per pattern at https://reactjs.org/docs/hooks-faq.html#is-it-safe-to-omit-functions-from-the-list-of-dependencies
   const setArticlesForBlog = useCallback(() => {
@@ -43,14 +61,14 @@ const BlogView = () => {
         const _articles:Article[] = (await DataStore.query(Article)).filter(c => c.blog?.id === blogId);
         setArticles(_articles.sort((a, b) => (a.publishedAt > b.publishedAt) ? -1 : 1));
       } catch (error) {
-        console.error(error)
+        console.error(error);
       }
     }
 
     if (blogId) {
-      loadArticles(blogId)
+      loadArticles(blogId);
     }
-  }, [ blogId ])
+  }, [ blogId ]);
 
   useEffect(() => {
     // define getBlog in useEffect, @see https://reactjs.org/docs/hooks-faq.html#is-it-safe-to-omit-functions-from-the-list-of-dependencies
@@ -58,7 +76,6 @@ const BlogView = () => {
       try {
         const _blog:Blog = await DataStore.query(Blog, id);
         setBlog(_blog);
-        // setArticlesForBlog(_blog.id);
       } catch (error) {
         console.error(error)
       }
@@ -77,36 +94,47 @@ const BlogView = () => {
       // as `.blogId` though.
       // @ts-ignore
       if (blogId && msg.element.blogId === blogId) {
-        console.log('**** ARTICLE SUBSCRIPTION ****');
-        console.log('  Operation type: ', msg.opType);
-        console.log('  Object: ', msg.element);
+        // console.log('**** ARTICLE SUBSCRIPTION ****');
+        // console.log('  Operation type: ', msg.opType);
+        // console.log('  Object: ', msg.element);
         setArticlesForBlog();
       }
     });
 
     return () => {
       subscription.unsubscribe();
+      resetState();
     };
   }, [ blogId, setArticlesForBlog ]);
 
+  function resetState() {
+    setArticles([ 0, 1, 2, 3, 4, 5 ]);
+    setBlog(undefined);
+  }
+
   return (
     <div>
-      { blog ? (
-        <section>
+      <section>
+        { blog ? (
           <Header as="h1">{ blog.title }</Header>
-          <div className="frontpage-wrapper">
-            <div className="frontpage">
-              { articles.map((article, idx) =>
-                <div className={ `fp-cell fp-cell--${idx+1}` } key={ article.id }>
+        ) : (
+          <Placeholder.Line length="long" />
+        ) }
+        <div className="frontpage-wrapper">
+          <div className="frontpage">
+            { articles.map((article, idx) =>
+              <div className={ `fp-cell fp-cell--${idx+1}` } key={ idx }>
+                { blog && typeof article === 'object' ? (
                   <ArticleCard article={ article } index={ idx } />
-                </div>
-              )}
-            </div>
+                ) : (
+                  <LoadingArticleCard/>                  
+                ) }
+                
+              </div>
+            )}
           </div>
-        </section>
-      ) : (
-        <p>Loading...</p>
-      )}
+        </div>
+      </section>
     </div>
   )
 };

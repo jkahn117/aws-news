@@ -27,7 +27,7 @@
       height: 10rem;
       overflow-y: hidden;
 
-      img {
+      div.image, img {
         object-fit: cover;
         object-position: center;
       }
