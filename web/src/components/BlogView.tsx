@@ -124,7 +124,7 @@ const BlogView = () => {
           <div className="frontpage">
             { articles.map((article, idx) =>
               <div className={ `fp-cell fp-cell--${idx+1}` } key={ idx }>
-                { blog && typeof article === 'object' ? (
+                { blog && typeof article === "object" ? (
                   <ArticleCard article={ article } index={ idx } />
                 ) : (
                   <LoadingArticleCard/>                  
