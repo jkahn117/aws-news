@@ -14,7 +14,7 @@ interface ArticleContentProps {
 };
 
 const ArticleContent = ({ contentUri } : ArticleContentProps) => {
-  const [ content, setContent ] = useState();
+  const [ content, setContent ] = useState("");
   const converter = new Showdown.Converter();
 
   useEffect(() => {
@@ -31,6 +31,9 @@ const ArticleContent = ({ contentUri } : ArticleContentProps) => {
   }
 
   function makeHtmlFromContent() {
+    if (!content || 0 === content.length) {
+      return { __html: "" }
+    }
     return { __html: converter.makeHtml(content) };
   }
 
