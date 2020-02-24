@@ -9,8 +9,8 @@ import AppSidebar from './components/AppSidebar';
 import Footer from './components/Footer';
 
 import ArticleView from './components/ArticleView';
-import BlogList from './components/BlogList';
 import BlogView from './components/BlogView';
+import LatestArticles from './components/LatestArticles';
 
 const App: React.FC = () => {
   return (
@@ -24,7 +24,7 @@ const App: React.FC = () => {
                 <Switch>
                   <Route path="/article/:id"><ArticleView /></Route>
                   <Route path="/blog/:id"><BlogView /></Route>
-                  <Route exact path="/"><BlogList /></Route>
+                  <Route exact path="/"><LatestArticles /></Route>
                 </Switch>
               </div>
               <Footer />
