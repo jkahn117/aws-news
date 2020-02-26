@@ -4,13 +4,11 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { Sidebar } from 'semantic-ui-react';
 
 import './App.scss';
-
 import AppSidebar from './components/AppSidebar';
 import Footer from './components/Footer';
-
-import ArticleView from './components/ArticleView';
-import BlogView from './components/BlogView';
-import LatestArticles from './components/LatestArticles';
+import ArticleView from './pages/ArticleView';
+import BlogView from './pages/BlogView';
+import LatestArticles from './pages/LatestArticles';
 
 const App: React.FC = () => {
   return (

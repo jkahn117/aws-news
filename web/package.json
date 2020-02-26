@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@aws-amplify/analytics": "^2.2.5",
     "@aws-amplify/auth": "^2.1.5",
     "@aws-amplify/core": "^2.2.4",
     "@aws-amplify/datastore": "^1.0.7",
