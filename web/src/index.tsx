@@ -7,9 +7,16 @@ import * as serviceWorker from './serviceWorker';
 import 'semantic-ui-css/semantic.min.css'
 
 import Amplify from '@aws-amplify/core';
+import Analytics from '@aws-amplify/analytics';
 import awsconfig from './aws-exports';
 
 Amplify.configure(awsconfig);
+
+// enable session analytics. we will track page views independently
+Analytics.autoTrack("session", {
+  enable: true,
+  type: "SPA"
+});
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

@@ -6,6 +6,7 @@ import { Header, Item, List } from 'semantic-ui-react';
 
 import { DataStore, Predicates } from '@aws-amplify/datastore';
 import { Article } from '../models';
+import useAnalytics from '../hooks/useAnalytics';
 
 interface ArticleItemProps {
   article: Article
@@ -26,7 +27,8 @@ const ArticleItem = ({ article } : ArticleItemProps) => {
               { article.blog ?
                 <Link to={ `/blog/${article.blog.id}` }>{ article.blog.title }</Link>
                 :
-                "AWS Blog" }
+                "AWS Blog"
+              }
             </List.Item>
             <List.Item>
               <Moment format="MMM DD YYYY" date={ article.publishedAt } />
@@ -46,6 +48,12 @@ const ArticleItem = ({ article } : ArticleItemProps) => {
 
 const LatestArticles = () => {
   const [ articles, setArticles ] = useState<(Article)[]>([]);
+
+  useAnalytics(() => {
+    return {
+        title: '[Latest Articles]'
+      }
+  });
 
   const latestArticles = useCallback(() => {
     async function loadArticles() {

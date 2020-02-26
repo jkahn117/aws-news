@@ -7,6 +7,7 @@ import './BlogView.scss';
 
 import { DataStore } from '@aws-amplify/datastore';
 import { Article, Blog } from '../models';
+import useAnalytics from '../hooks/useAnalytics';
 
 interface ArticleCardProps {
   article: Article
@@ -53,6 +54,14 @@ const BlogView = () => {
   // a little funky? using another type to test if articles are loaded...using null was less pleasant
   // but still want to have something in the array to iterate over in order to create loading screen
   const [ articles, setArticles ] = useState<(Article|number)[]>([ 0, 1, 2, 3, 4, 5 ]);
+
+  useAnalytics(() => {
+    return blog ?
+      {
+        title: `[Blog] ${blog.title}`,
+        id: blog.id
+      } : {}
+  }, [ blog ]);
 
   // using useCallback here per pattern at https://reactjs.org/docs/hooks-faq.html#is-it-safe-to-omit-functions-from-the-list-of-dependencies
   const setArticlesForBlog = useCallback(() => {
