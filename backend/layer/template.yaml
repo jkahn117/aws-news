@@ -22,7 +22,7 @@ Resources:
       Description: Dependencies for aws-news loader
       ContentUri: dependencies.zip
       CompatibleRuntimes:
-        - ruby2.5
+        - ruby2.7
       LicenseInfo: 'MIT'
       RetentionPolicy: Delete
 

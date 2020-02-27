@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 import { Image, Menu } from 'semantic-ui-react';
@@ -13,7 +13,6 @@ interface BlogMenuItemProps {
 const BlogMenuItem = ({ blog } : BlogMenuItemProps) => {
   let { pathname } = useLocation();
 
-  // TODO: add LABEL to include count?
   return (
     <Menu.Item
       as={ Link }
@@ -28,18 +27,32 @@ const BlogMenuItem = ({ blog } : BlogMenuItemProps) => {
 const AppSidebar = () => {
   const [ blogs, setBlogs ] = useState<Blog[]>([]);
 
-  useEffect(() => {
-    listBlogs();
+  const listBlogs = useCallback(() => {
+    async function loadBlogs() {
+      try {
+        const _blogs:Blog[] = await DataStore.query(Blog);
+        setBlogs(_blogs.sort((a, b) => (a.title < b.title) ? -1 : 1));
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    loadBlogs();
   }, []);
 
-  async function listBlogs() {
-    try {
-      const items:Blog[] = await DataStore.query(Blog);
-      setBlogs(items);
-    } catch (error) {
-      console.error(error)
-    }
-  }
+  useEffect(() => {
+    listBlogs();
+  }, [ listBlogs ]);
+
+  useEffect(() => {
+    const subscription = DataStore.observe(Blog).subscribe(msg => {
+      listBlogs();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [ listBlogs ]);
 
   return (
     <Menu

@@ -13,8 +13,8 @@ backend:
         - cd ..
         # Environment Variables for Backend
         - echo Exporting environment variables from Amplify...
-        # - if [ "${AWS_BRANCH}" = "master" ]; then export AMPLIFY_ENV=prod; fi
-        # - if [ "${AWS_BRANCH}" = "development" ]; then export AMPLIFY_ENV=dev; fi
+        - if [ "${AWS_BRANCH}" = "master" ]; then export AMPLIFY_ENV=prod; fi
+        - if [ "${AWS_BRANCH}" = "development" ]; then export AMPLIFY_ENV=dev; fi
         - export STACK_NAME=$(jq -r '.providers.awscloudformation.StackName' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
         - export DEPLOYMENT_BUCKET_NAME=$(jq -r '.providers.awscloudformation.DeploymentBucketName' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
         - export AWS_REGION=$(jq -r '.providers.awscloudformation.Region' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
@@ -34,10 +34,10 @@ frontend:
     preBuild:
       commands:
         - cd web
-        - npm install
+        - yarn install
     build:
       commands:
-        - npm run build
+        - yarn run build
   artifacts:
     baseDirectory: web/build
     files:

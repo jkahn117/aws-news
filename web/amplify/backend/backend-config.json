@@ -32,5 +32,11 @@
 				}
 			}
 		}
+	},
+	"analytics": {
+		"awsnews": {
+			"service": "Pinpoint",
+			"providerPlugin": "awscloudformation"
+		}
 	}
 }

@@ -9,7 +9,7 @@ phases:
       - echo Build started on `date`
       - echo Building Lambda layer...
       - cd backend/layer
-      - docker run --rm -v `pwd`/dependencies:`pwd` -w `pwd` lambci/lambda:build-ruby2.5 ./build.sh
+      - docker run --rm -v `pwd`/dependencies:`pwd` -w `pwd` lambci/lambda:build-ruby2.7 ./build.sh
       - mv dependencies/dependencies.zip .
   post_build:
     commands:

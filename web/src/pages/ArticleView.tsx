@@ -8,13 +8,14 @@ import { Breadcrumb, Container, Header, Label } from 'semantic-ui-react';
 import { DataStore } from '@aws-amplify/datastore';
 import Storage from '@aws-amplify/storage';
 import { Article } from '../models';
+import useAnalytics from '../hooks/useAnalytics';
 
 interface ArticleContentProps {
   contentUri: string | undefined;
 };
 
 const ArticleContent = ({ contentUri } : ArticleContentProps) => {
-  const [ content, setContent ] = useState();
+  const [ content, setContent ] = useState("");
   const converter = new Showdown.Converter();
 
   useEffect(() => {
@@ -31,6 +32,9 @@ const ArticleContent = ({ contentUri } : ArticleContentProps) => {
   }
 
   function makeHtmlFromContent() {
+    if (!content || 0 === content.length) {
+      return { __html: "" }
+    }
     return { __html: converter.makeHtml(content) };
   }
 
@@ -42,6 +46,14 @@ const ArticleContent = ({ contentUri } : ArticleContentProps) => {
 const ArticleView = () => {
   let { id } = useParams();
   const [ article, setArticle ] = useState<Article>();
+
+  useAnalytics(() => {
+    return article ?
+      {
+        title: `[Article] ${article.title}`,
+        id: article.id
+      } : {}
+  }, [ article ]);
 
   useEffect(() => {
     if (id) {
