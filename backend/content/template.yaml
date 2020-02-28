@@ -8,6 +8,10 @@ Parameters:
     Type: String
     Description: The stage where the application is running in, e.g., dev, prod.
     Default: 'dev'
+    AllowedValues:
+      - 'dev'
+      - 'test'
+      - 'prod'
 
   ProjectName:
     Type: String
@@ -37,6 +41,11 @@ Parameters:
   LayerArn:
     Type: AWS::SSM::Parameter::Value<String>
     Description: ARN for Lambda Layer
+
+Conditions:
+  IsProduction: !Equals 
+    - !Ref Stage
+    - 'prod'
 
 Globals:
   Function:
@@ -242,10 +251,42 @@ Resources:
     Properties:
       Name: !Sub "${ProjectName}-${Stage}-eventbus"
 
-  ## TODO: add event bridge to trigger processing hourly?
-
+  # Rule to run step function each weekday at 8am and 4pm US Central Standard
+  ScheduleRule:
+    Condition: IsProduction
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Start Step Functions execution
+      ScheduleExpression: cron(0 14,22 ? * MON-FRI *)
+      RoleArn: !GetAtt EventBridgeRole.Arn
+      State: ENABLED
+      Targets:
+        - Arn: !Ref ProcessAllBlogsStateMachine
+          Id: ProcessAllBlogsStateMachine
 
   ### IAM ###
+  EventBridgeRole:
+    Condition: IsProduction
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: !Sub events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: EventBridgeStartStateMachine
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - states:StartExecution
+                Resource:
+                  - !Ref ProcessAllBlogsStateMachine
+
   ProcessAllBlogsStateMachineRole:
     Type: AWS::IAM::Role
     Properties:
