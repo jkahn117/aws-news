@@ -258,11 +258,11 @@ Resources:
     Properties:
       Description: Start Step Functions execution
       ScheduleExpression: cron(0 14,22 ? * MON-FRI *)
-      RoleArn: !GetAtt EventBridgeRole.Arn
       State: ENABLED
       Targets:
         - Arn: !Ref ProcessAllBlogsStateMachine
           Id: ProcessAllBlogsStateMachine
+          RoleArn: !GetAtt EventBridgeRole.Arn
 
   ### IAM ###
   EventBridgeRole:
