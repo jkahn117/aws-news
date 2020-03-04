@@ -110,7 +110,7 @@ Resources:
   RedisSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      VpcId: !Ref VPC
+      VpcId: !GetAtt Network.Outputs.VPC
       GroupDescription: Enable Redis access
       SecurityGroupIngress:
         - IpProtocol: tcp
