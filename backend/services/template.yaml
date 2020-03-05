@@ -32,6 +32,10 @@ Parameters:
     Type: String
     Description: AWS AppSync API ID -- created by Amplify
 
+  ArticlesTable:
+    Type: String
+    Description: Name of DyanmoDB Articles table -- created by Amplify
+
 Globals:
   Function:
     Runtime: nodejs12.x
@@ -108,6 +112,88 @@ Resources:
       ServiceRoleArn: !GetAtt AppSyncServiceRole.Arn
       LambdaConfig:
         LambdaFunctionArn: !GetAtt ElastiCacheIntegrationFunction.Arn
+
+  # Query.latestArticles resolver
+  LatestArticlesQueryResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !Ref AppSyncApiId
+      TypeName: Query
+      FieldName: latestArticles
+      Kind: PIPELINE
+      PipelineConfig:
+        Functions:
+          - !GetAtt GetLatestArticlesFunction.FunctionId
+          - !GetAtt BatchGetArticlesFunctions.FunctionId
+      RequestMappingTemplate: |
+        {}
+      ResponseMappingTemplate: |
+        $util.toJson($result)
+
+  # Get latest articles via elasticache integration data source
+  GetLatestArticlesFunction:
+    Type: AWS::AppSync::FunctionConfiguration
+    Properties:
+      ApiId: !Ref AppSyncApiId
+      DataSourceName: !GetAtt ElastiCacheIntegrationDataSource.Name
+      FunctionVersion: "2018-05-29"
+      Name: GetLatestArticles
+      Description: >
+        Queries ElastiCache via Lambda data source to retrieve list of
+        latest article ids.
+      RequestMappingTemplate: |
+        {
+          "version": "2017-02-28",
+          "operation": "Invoke",
+          "payload": {
+            "action": "latestArticles",
+            "args":  {
+              "limit": $util.defaultIfNull($ctx.args.limit, 10),
+              "nextToken": $util.defaultIfNullOrEmpty($ctx.args.nextToken, "")
+            }
+          }
+        }
+      ResponseMappingTemplate: |
+        #if($ctx.result && $ctx.result.error)
+          $util.error($ctx.result.error)
+        #end
+        $util.toJson($ctx.result)
+
+  # Loads details on batch of Articles from DynamoDB
+  BatchGetArticlesFunctions:
+    Type: AWS::AppSync::FunctionConfiguration
+    Properties:
+      ApiId: !Ref AppSyncApiId
+      DataSourceName: ArticleTable # this seems to be consistent across environments
+      FunctionVersion: "2018-05-29"
+      Name: BatchGetArticles
+      Description: >
+        Retrieves batch of articles from DynamoDB data source.
+      RequestMappingTemplate: !Sub |
+        #set($ids = [])
+        #foreach($result in $ctx.prev.result.ids)
+          #set($map = {})
+          $util.qr($map.put("id", $util.dynamodb.toString($result)))
+          $util.qr($ids.add($map))
+        #end
+        {
+          "version" : "2018-05-29",
+          "operation" : "BatchGetItem",
+          "tables" : {
+            "${ArticlesTable}": {
+              "keys": $util.toJson($ids),
+              "consistentRead": true
+            }
+          }
+        }
+      ResponseMappingTemplate: |
+        #if($ctx.result && $ctx.result.error)
+          $util.error($ctx.result.error)
+        #end
+        {
+          items: $util.toJson($ctx.result.data.${ArticlesTable}),
+          nextToken: $ctx.prev.result.nextToken
+        }
 
   AppSyncServiceRole:
     Type: AWS::IAM::Role

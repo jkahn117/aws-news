@@ -22,20 +22,38 @@ let redis = new Redis.Cluster([
   }
 ]);
 
-async function getLatestArticles(start=0, count=10) {
+async function getLatestArticles(start, limit) {
   try {
-    let end = start + count - 1;
-    let result = await redis.lrange(LATEST_CONTENT_KEY, start, end);
+    const pipeline = redis.pipeline();
 
-    if (!result) { return [] }
+    // get listing of article ids from list in desired range
+    const end = start + limit - 1;
+    pipeline.lrange(LATEST_CONTENT_KEY, start, end);
 
-    return result.map( (r) => {
-      return { id: r };
-    })
+    // get the total length of the list to determine if we need to paginate
+    pipeline.llen(LATEST_CONTENT_KEY);
+
+    const [ articleIds, length ] = await pipeline.exec();
+
+    const nextId = length > end ? end + 1 : null;
+
+    return {
+      ids: articleIds,
+      nextToken: nextId ? _encodeNextToken("Article", nextId) : ""
+    };
   } catch(error) {
     console.error(JSON.stringify(error));
     return { error: error.message };
   }
+}
+
+function _decodeNextToken(nextToken) {
+  let str = new Buffer(nextToken, "base64").toString("ascii");
+  return str.split(":")[1];
+}
+
+function _encodeNextToken(type, nextIndex) {
+  return new Buffer(`${type}:${nextIndex}`).toString("base64");
 }
 
 /**
@@ -46,12 +64,14 @@ async function getLatestArticles(start=0, count=10) {
 exports.handler = async(event) => {
   console.log(JSON.stringify(event));
 
-  switch(event.action) {
-    case "latest":
-      let { start, count } = { payload: { start, count }}
-      console.log(start)
-      console.log(count)
-      return await getLatestArticles(start, count);
+  const { action, args: { limit=10, nextToken }} = event;
+  const start = nextToken !== "" ? _decodeNextToken(nextToken) : 0;
+
+  switch(action) {
+    case "latestArticles":
+      return await getLatestArticles(start, limit);
+    case "popularArticles":
+      return [];
     default:
       throw("No such method");
   }

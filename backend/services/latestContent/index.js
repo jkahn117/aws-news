@@ -49,17 +49,15 @@ exports.handler = async(event) => {
 
   let { detail: { blogId, articleId } } = event;
 
-  let pipeline = redis.pipeline();
-  
-  // add blog to list of latest
-  pipeline.lpush(LATEST_CONTENT_KEY, articleId);
-  pipeline.ltrim(LATEST_CONTENT_KEY, 0, 99);
-  
-  // increment count of articles on this blog
-  pipeline.incr(BLOG_COUNT_KEY + blogId);
-  
   try {
-    await pipeline.exec;
+    // add blog to list of latest
+    const pipeline = redis.pipeline();
+    pipeline.lpush(LATEST_CONTENT_KEY, articleId);
+    pipeline.ltrim(LATEST_CONTENT_KEY, 0, 99);  
+    await pipeline.exec();
+
+    // increment count of articles on this blog
+    await pipeline.incr(BLOG_COUNT_KEY + blogId);
   } catch(error) {
     console.error(`[ERROR] ${error}`)
   }

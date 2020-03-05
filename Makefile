@@ -93,7 +93,8 @@ deploy.services: ##=> Deploy services used by API
 					--capabilities CAPABILITY_NAMED_IAM \
 					--parameter-overrides \
 							Stage=${AMPLIFY_ENV} \
-							AppSyncApiId=${APPSYNC_API_ID}
+							AppSyncApiId=${APPSYNC_API_ID} \
+							ArticlesTable=${ARTICLES_TABLE_NAME}
 
 delete: ##=> Delete all
 		$(info [*] Deleting...)
