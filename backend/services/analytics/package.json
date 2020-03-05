@@ -1,0 +1,11 @@
+{
+  "name": "aws-news-services-analytics",
+  "version": "1.0.0",
+  "description": "Analytics processor",
+  "main": "index.js",
+  "author": "jkahn@",
+  "license": "Apache2.0",
+  "dependencies": {
+    "ioredis": "^4.16.0"
+  }
+}

@@ -26,6 +26,7 @@ backend:
         - export BLOGS_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "BlogTable") | .dynamodbConfig.tableName' datasources.json)
         - export ARTICLES_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "ArticleTable") | .dynamodbConfig.tableName' datasources.json)
         - export CONTENT_BUCKET=$(jq -r '.storage[(.storage | keys)[0]].output.BucketName' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
+        - export PINPOINT_APP_ID=$(jq -r '.analytics[(.analytics | keys)[0]].output.Id' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
         # Deploy backend, including content service and support layer
         - echo Deploy backend components...
         - make deploy

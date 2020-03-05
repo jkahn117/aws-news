@@ -1,0 +1,116 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Transform: 'AWS::Serverless-2016-10-31'
+
+Parameters:
+  Stage:
+    Type: String
+    Description: The stage where the application is running in, e.g., dev, prod.
+    Default: 'dev'
+    AllowedValues:
+      - 'dev'
+      - 'test'
+      - 'prod'
+
+  ProjectName:
+    Type: String
+    Description: The name of this project
+    Default: 'aws-news'
+
+  PinpointApplicationId:
+    Type: String
+    Description: Application ID for Pinpoint app
+
+  ElastiCacheEndpoint:
+    Type: String
+    Description: DNS endpoint for ElastiCache Redis
+
+  ElastiCachePort:
+    Type: Number
+    Description: Port for ElastiCache Redis
+
+  LambdaSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet::Id
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet::Id
+
+Globals:
+  Function:
+    Runtime: nodejs12.x
+    Handler: index.handler
+    Timeout: 10
+    Tags:
+      Project: !Ref ProjectName
+      Env: !Ref Stage
+
+Resources:
+  LatestContentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: analytics/
+      Policies:
+        - VPCAccessPolicy: {}
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroupId
+        SubnetIds:
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
+      Environment:
+        Variables:
+          ELASTICACHE_ENDPOINT: !Ref ElastiCacheEndpoint
+          ELASTICACHE_PORT: !Ref ElastiCachePort
+          POPULAR_CONTENT_KEY: "articles:popular"
+      Events:
+        Stream:
+          Type: Kinesis
+          Properties:
+            Stream: !GetAtt EventStream.Arn
+            BatchSize: 10
+            StartingPosition: LATEST
+
+  PinpointEventStream:
+    Type: AWS::Pinpoint::EventStream
+    Properties:
+      ApplicationId: !Ref PinpointApplicationId
+      DestinationStreamArn: !GetAtt EventStream.Arn
+      RoleArn: !Ref PinpointServiceRole
+
+  EventStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      ShardCount: 1
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Stage
+          Value: !Ref Stage
+
+  PinpointServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service:
+                - pinpoint.amazonaws.com
+      Policies:
+        - PolicyName: !Sub ${ProjectName}-${Stage}-pinpoint-service-role
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kinesis:PutRecords
+                  - kinesis:DescribeStream
+                Resource:
+                  - !GetAtt EventStream.Arn

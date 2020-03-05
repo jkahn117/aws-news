@@ -12,6 +12,7 @@ APPSYNC_ENDPOINT ?= "UNDEFINED"
 BLOGS_TABLE_NAME ?= "UNDEFINED"
 ARTICLES_TABLE_NAME ?= "UNDEFINED"
 CONTENT_BUCKET ?= "UNDEFINED"
+PINPOINT_APP_ID ?= "UNDEFINED"
 
 target:
 		$(info ${HELP_MESSAGE})
@@ -94,7 +95,8 @@ deploy.services: ##=> Deploy services used by API
 					--parameter-overrides \
 							Stage=${AMPLIFY_ENV} \
 							AppSyncApiId=${APPSYNC_API_ID} \
-							ArticlesTable=${ARTICLES_TABLE_NAME}
+							ArticlesTable=${ARTICLES_TABLE_NAME} \
+							PinpointApplicationId=${PINPOINT_APP_ID}
 
 delete: ##=> Delete all
 		$(info [*] Deleting...)

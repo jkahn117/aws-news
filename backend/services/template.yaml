@@ -36,6 +36,10 @@ Parameters:
     Type: String
     Description: Name of DyanmoDB Articles table -- created by Amplify
 
+  PinpointApplicationId:
+    Type: String
+    Description: Application ID for Pinpoint app -- created by Amplify
+
 Globals:
   Function:
     Runtime: nodejs12.x
@@ -217,6 +221,12 @@ Resources:
       Description: >
         Retrieves batch of articles from DynamoDB data source.
       RequestMappingTemplate: !Sub |
+        #if($ctx.prev.result.ids.size() == 0)
+          #set($result = {})
+          $util.qr($result.put("items", []))
+          $util.qr($result.put("nextToken", $ctx.prev.result.nextToken))
+          #return($result)
+        #end
         #set($ids = [])
         #foreach($result in $ctx.prev.result.ids)
           #set($map = {})
@@ -311,10 +321,29 @@ Resources:
         - Key: Project
           Value: !Ref ProjectName
 
+  ### Analytics ###
+  Analytics:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "./analytics.yaml"
+      Parameters:
+        Stage: !Ref Stage
+        ProjectName: !Ref ProjectName
+        PinpointApplicationId: !Ref PinpointApplicationId
+        LambdaSecurityGroupId: !Ref LambdaSecurityGroup
+        PrivateSubnet1: !GetAtt Network.Outputs.PrivateSubnet1
+        PrivateSubnet2: !GetAtt Network.Outputs.PrivateSubnet2
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Stage
+          Value: !Ref Stage
+
+  ### Network ###
   Network:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: './network.yaml'
+      TemplateURL: "./network.yaml"
       Parameters:
         Stage: !Ref Stage
         ProjectName: !Ref ProjectName
@@ -323,5 +352,3 @@ Resources:
           Value: !Ref ProjectName
         - Key: Stage
           Value: !Ref Stage
-
-## update lambda permission (AWS::Lambda::Permission) for EventBridge
