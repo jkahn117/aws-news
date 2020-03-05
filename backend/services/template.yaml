@@ -99,6 +99,7 @@ Resources:
           ELASTICACHE_ENDPOINT: !GetAtt RedisCluster.ConfigurationEndPoint.Address
           ELASTICACHE_PORT: !GetAtt RedisCluster.ConfigurationEndPoint.Port
           LATEST_CONTENT_KEY: "articles:latest"
+          POPULAR_CONTENT_KEY: "articles:popular"
           BLOG_COUNT_KEY: "blog:count:"
 
   ## AppSync Integration ##
@@ -128,7 +129,24 @@ Resources:
       RequestMappingTemplate: |
         {}
       ResponseMappingTemplate: |
-        $util.toJson($result)
+        $util.toJson($ctx.prev.result)
+
+  # Query.popularArticles resolver
+  PopularArticlesQueryResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !Ref AppSyncApiId
+      TypeName: Query
+      FieldName: popularArticles
+      Kind: PIPELINE
+      PipelineConfig:
+        Functions:
+          - !GetAtt GetPopularArticlesFunction.FunctionId
+          - !GetAtt BatchGetArticlesFunctions.FunctionId
+      RequestMappingTemplate: |
+        {}
+      ResponseMappingTemplate: |
+        $util.toJson($ctx.prev.result)
 
   # Get latest articles via elasticache integration data source
   GetLatestArticlesFunction:
@@ -149,7 +167,36 @@ Resources:
             "action": "latestArticles",
             "args":  {
               "limit": $util.defaultIfNull($ctx.args.limit, 10),
-              "nextToken": $util.defaultIfNullOrEmpty($ctx.args.nextToken, "")
+              "nextToken": "$util.defaultIfNullOrEmpty($ctx.args.nextToken, '')"
+            }
+          }
+        }
+      ResponseMappingTemplate: |
+        #if($ctx.result && $ctx.result.error)
+          $util.error($ctx.result.error)
+        #end
+        $util.toJson($ctx.result)
+
+  # Get popular articles via elasticache integration data source
+  GetPopularArticlesFunction:
+    Type: AWS::AppSync::FunctionConfiguration
+    Properties:
+      ApiId: !Ref AppSyncApiId
+      DataSourceName: !GetAtt ElastiCacheIntegrationDataSource.Name
+      FunctionVersion: "2018-05-29"
+      Name: GetPopularArticles
+      Description: >
+        Queries ElastiCache via Lambda data source to retrieve list of
+        popular article ids.
+      RequestMappingTemplate: |
+        {
+          "version": "2017-02-28",
+          "operation": "Invoke",
+          "payload": {
+            "action": "popularArticles",
+            "args":  {
+              "limit": $util.defaultIfNull($ctx.args.limit, 10),
+              "nextToken": "$util.defaultIfNullOrEmpty($ctx.args.nextToken, '')"
             }
           }
         }
@@ -186,13 +233,13 @@ Resources:
             }
           }
         }
-      ResponseMappingTemplate: |
+      ResponseMappingTemplate: !Sub |
         #if($ctx.result && $ctx.result.error)
           $util.error($ctx.result.error)
         #end
         {
-          items: $util.toJson($ctx.result.data.${ArticlesTable}),
-          nextToken: $ctx.prev.result.nextToken
+          "items": $util.toJson($ctx.result.data.${ArticlesTable}),
+          "nextToken": "$util.defaultIfNullOrEmpty($ctx.args.nextToken, '')"
         }
 
   AppSyncServiceRole:
