@@ -83,7 +83,7 @@ deploy.content: ##=> Deploy content loading services
 deploy.services: ##=> Deploy services used by API
 	$(info [*] Deploying API services...)
 	cd backend/services && \
-			sam build \
+			sam build && \
 			sam package \
 					--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
 					--output-template-file packaged.yaml && \
