@@ -91,7 +91,7 @@ deploy.services: ##=> Deploy services used by API
 			sam deploy \
 					--template-file packaged.yaml \
 					--stack-name ${STACK_NAME}-services \
-					--capabilities CAPABILITY_NAMED_IAM \
+					--capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
 					--parameter-overrides \
 							Stage=${AMPLIFY_ENV} \
 							AppSyncApiId=${APPSYNC_API_ID} \
