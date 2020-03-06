@@ -36,10 +36,6 @@ Parameters:
     Type: String
     Description: Name of DyanmoDB Articles table -- created by Amplify
 
-  PinpointApplicationId:
-    Type: String
-    Description: Application ID for Pinpoint app -- created by Amplify
-
 Globals:
   Function:
     Runtime: nodejs12.x
@@ -53,7 +49,7 @@ Resources:
   LatestContentFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: latestContent/
+      CodeUri: latest-content/
       Policies:
         - VPCAccessPolicy: {}
       VpcConfig:
@@ -89,7 +85,7 @@ Resources:
   ElastiCacheIntegrationFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: elasticache/
+      CodeUri: elasticache-integration/
       Policies:
         - VPCAccessPolicy: {}
       VpcConfig:
@@ -320,26 +316,6 @@ Resources:
       Tags:
         - Key: Project
           Value: !Ref ProjectName
-
-  ### Analytics ###
-  Analytics:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: "./analytics.yaml"
-      Parameters:
-        Stage: !Ref Stage
-        ProjectName: !Ref ProjectName
-        PinpointApplicationId: !Ref PinpointApplicationId
-        ElastiCacheEndpoint: !GetAtt RedisCluster.ConfigurationEndPoint.Address
-        ElastiCachePort: !GetAtt RedisCluster.ConfigurationEndPoint.Port
-        LambdaSecurityGroupId: !Ref LambdaSecurityGroup
-        PrivateSubnet1: !GetAtt Network.Outputs.PrivateSubnet1
-        PrivateSubnet2: !GetAtt Network.Outputs.PrivateSubnet2
-      Tags:
-        - Key: Project
-          Value: !Ref ProjectName
-        - Key: Stage
-          Value: !Ref Stage
 
   ### Network ###
   Network:

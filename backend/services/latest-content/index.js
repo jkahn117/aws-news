@@ -10,7 +10,7 @@
  * 
  */
 
-const Redis = require("ioredis");
+const Redis = require("./node_modules/ioredis/built");
 
 const LATEST_CONTENT_KEY = process.env.LATEST_CONTENT_KEY;
 const BLOG_COUNT_KEY = process.env.BLOG_COUNT_KEY;

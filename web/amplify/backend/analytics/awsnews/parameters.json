@@ -1,10 +1,10 @@
 {
     "appName": "awsnews",
-    "roleName": "pinpointLambdaRolebc389e87",
-    "cloudWatchPolicyName": "cloudWatchPolicybc389e87",
-    "pinpointPolicyName": "pinpointPolicybc389e87",
-    "authPolicyName": "pinpoint_amplify_bc389e87",
-    "unauthPolicyName": "pinpoint_amplify_bc389e87",
+    "roleName": "pinpointLambdaRole0e3d0a9d",
+    "cloudWatchPolicyName": "cloudWatchPolicy0e3d0a9d",
+    "pinpointPolicyName": "pinpointPolicy0e3d0a9d",
+    "authPolicyName": "pinpoint_amplify_0e3d0a9d",
+    "unauthPolicyName": "pinpoint_amplify_0e3d0a9d",
     "authRoleName": {
         "Ref": "AuthRoleName"
     },
