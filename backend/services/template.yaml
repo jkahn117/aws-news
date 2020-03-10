@@ -85,7 +85,7 @@ Resources:
         - VPCAccessPolicy: {}
       VpcConfig:
         SecurityGroupIds:
-          - !Ref LambdaSecurityGroupId
+          - !Ref LambdaSecurityGroup
         SubnetIds:
           - !GetAtt Network.Outputs.PrivateSubnet1
           - !GetAtt Network.Outputs.PrivateSubnet2
