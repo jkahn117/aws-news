@@ -54,7 +54,7 @@ Resources:
               Action:
                 - mobiletargeting:PutEventStream
                 - mobiletargeting:DeleteEventStream
-              Resource: !Sub "arn:aws:mobiletargeting:${AWS::Region}:${AWS::AccountId}:apps*"
+              Resource: !Sub "arn:aws:mobiletargeting:*:${AWS::AccountId}:apps*"
           
   PinpointEventStream:
     Type: Custom::PinpointEventStream
