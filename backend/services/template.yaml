@@ -87,12 +87,12 @@ Resources:
         SecurityGroupIds:
           - !Ref LambdaSecurityGroupId
         SubnetIds:
-          - !Ref PrivateSubnet1
-          - !Ref PrivateSubnet2
+          - !GetAtt Network.Outputs.PrivateSubnet1
+          - !GetAtt Network.Outputs.PrivateSubnet2
       Environment:
         Variables:
-          ELASTICACHE_ENDPOINT: !Ref ElastiCacheEndpoint
-          ELASTICACHE_PORT: !Ref ElastiCachePort
+          ELASTICACHE_ENDPOINT: !GetAtt RedisCluster.ConfigurationEndPoint.Address
+          ELASTICACHE_PORT: !GetAtt RedisCluster.ConfigurationEndPoint.Port
           POPULAR_CONTENT_KEY: "articles:popular"
       Events:
         Stream:
