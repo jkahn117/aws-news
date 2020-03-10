@@ -23,6 +23,11 @@ Parameters:
     Description: Application ID for Pinpoint app
 
 Resources:
+  #
+  # Custom resource to create and enable a Pinpoint event stream. Custom resource is required
+  # as Pinpoint is not deployed in all AWS Regions, so we need flexibility to pick the "right"
+  # Region based on where Amplify has deployed Pinpoint.
+  #
   EventStreamCustomResourceFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -54,6 +59,7 @@ Resources:
               Action:
                 - mobiletargeting:PutEventStream
                 - mobiletargeting:DeleteEventStream
+              # allow in any region as the resource may need to be deployed elsewhere....
               Resource: !Sub "arn:aws:mobiletargeting:*:${AWS::AccountId}:apps*"
           
   PinpointEventStream:
