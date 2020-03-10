@@ -22,95 +22,53 @@ Parameters:
     Type: String
     Description: Application ID for Pinpoint app
 
-  ElastiCacheEndpoint:
-    Type: String
-    Description: DNS endpoint for ElastiCache Redis
-
-  ElastiCachePort:
-    Type: Number
-    Description: Port for ElastiCache Redis
-
-  LambdaSecurityGroupId:
-    Type: AWS::EC2::SecurityGroup::Id
-
-  PrivateSubnet1:
-    Type: AWS::EC2::Subnet::Id
-
-  PrivateSubnet2:
-    Type: AWS::EC2::Subnet::Id
-
-Globals:
-  Function:
-    Runtime: nodejs12.x
-    Handler: index.handler
-    Timeout: 10
-    Tags:
-      Project: !Ref ProjectName
-      Env: !Ref Stage
-
 Resources:
-  LatestContentFunction:
+  EventStreamCustomResourceFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: analytics/
+      CodeUri: ./event-stream-resource
+      Handler: custom_resource.handler
+      Runtime: python3.7
+      Timeout: 300
       Policies:
-        - VPCAccessPolicy: {}
-      VpcConfig:
-        SecurityGroupIds:
-          - !Ref LambdaSecurityGroupId
-        SubnetIds:
-          - !Ref PrivateSubnet1
-          - !Ref PrivateSubnet2
-      Environment:
-        Variables:
-          ELASTICACHE_ENDPOINT: !Ref ElastiCacheEndpoint
-          ELASTICACHE_PORT: !Ref ElastiCachePort
-          POPULAR_CONTENT_KEY: "articles:popular"
-      Events:
-        Stream:
-          Type: Kinesis
-          Properties:
-            Stream: !GetAtt EventStream.Arn
-            BatchSize: 10
-            StartingPosition: LATEST
-
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - kinesis:CreateStream
+                - kinesis:DeleteStream
+                - kinesis:DescribeStream
+              Resource: "*"
+            - Effect: Allow
+              Action:
+                - iam:AttachRolePolicy
+                - iam:CreateRole
+                - iam:CreatePolicy
+                - iam:PassRole
+                - iam:DeletePolicy
+                - iam:DeleteRole
+                - iam:GetPolicy
+                - iam:GetRole
+              Resource: "*"
+            - Effect: Allow
+              Action:
+                - mobiletargeting:PutEventStream
+                - mobiletargeting:DeleteEventStream
+              Resource: !Sub "arn:aws:mobiletargeting:${AWS::Region}:${AWS::AccountId}:apps*"
+          
   PinpointEventStream:
-    Type: AWS::Pinpoint::EventStream
+    Type: Custom::PinpointEventStream
     Properties:
       ApplicationId: !Ref PinpointApplicationId
-      DestinationStreamArn: !GetAtt EventStream.Arn
-      RoleArn: !Ref PinpointServiceRole
+      ServiceToken: !GetAtt EventStreamCustomResourceFunction.Arn
 
-  EventStream:
-    Type: AWS::Kinesis::Stream
+  EventStreamArnParameter:
+    Type: AWS::SSM::Parameter
     Properties:
-      ShardCount: 1
+      Name: !Sub "/news/${Stage}/analytics/stream/arn"
+      Type: String
+      Value: !GetAtt PinpointEventStream.StreamArn
+      Description: Analytics Event Stream ARN
       Tags:
-        - Key: Project
-          Value: !Ref ProjectName
-        - Key: Stage
-          Value: !Ref Stage
-
-  PinpointServiceRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action:
-              - sts:AssumeRole
-            Principal:
-              Service:
-                - pinpoint.amazonaws.com
-      Policies:
-        - PolicyName: !Sub ${ProjectName}-${Stage}-pinpoint-service-role
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - kinesis:PutRecords
-                  - kinesis:DescribeStream
-                Resource:
-                  - !GetAtt EventStream.Arn
+        Environment: !Ref Stage
+        Project: !Ref ProjectName

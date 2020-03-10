@@ -36,6 +36,10 @@ Parameters:
     Type: String
     Description: Name of DyanmoDB Articles table -- created by Amplify
 
+  EventStreamArn:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: ARN for Pinpoint Analytics Event Stream
+
 Globals:
   Function:
     Runtime: nodejs12.x
@@ -72,6 +76,31 @@ Resources:
             Pattern:
               detail-type:
                 - article_created
+
+  AnalyticsStreamProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: analytics-event-processor/
+      Policies:
+        - VPCAccessPolicy: {}
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroupId
+        SubnetIds:
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
+      Environment:
+        Variables:
+          ELASTICACHE_ENDPOINT: !Ref ElastiCacheEndpoint
+          ELASTICACHE_PORT: !Ref ElastiCachePort
+          POPULAR_CONTENT_KEY: "articles:popular"
+      Events:
+        Stream:
+          Type: Kinesis
+          Properties:
+            Stream: !Ref EventStreamArn
+            BatchSize: 10
+            StartingPosition: LATEST
 
   LambdaSecurityGroup:
     Type: AWS::EC2::SecurityGroup
