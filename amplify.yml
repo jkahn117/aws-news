@@ -15,18 +15,18 @@ backend:
         - echo Exporting environment variables from Amplify...
         - if [ "${AWS_BRANCH}" = "master" ]; then export AMPLIFY_ENV=prod; fi
         - if [ "${AWS_BRANCH}" = "development" ]; then export AMPLIFY_ENV=dev; fi
-        - export STACK_NAME=$(jq -r '.providers.awscloudformation.StackName' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
-        - export DEPLOYMENT_BUCKET_NAME=$(jq -r '.providers.awscloudformation.DeploymentBucketName' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
-        - export AWS_REGION=$(jq -r '.providers.awscloudformation.Region' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
+        - export STACK_NAME=$(jq -r '.providers.awscloudformation.StackName' ./amplify/\#current-cloud-backend/amplify-meta.json)
+        - export DEPLOYMENT_BUCKET_NAME=$(jq -r '.providers.awscloudformation.DeploymentBucketName' ./amplify/\#current-cloud-backend/amplify-meta.json)
+        - export AWS_REGION=$(jq -r '.providers.awscloudformation.Region' ./amplify/\#current-cloud-backend/amplify-meta.json)
         # Amplify generated resources
-        - export APPSYNC_API_ID=$(jq -r '.api[(.api | keys)[0]].output.GraphQLAPIIdOutput' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
-        - export APPSYNC_ENDPOINT=$(jq -r '.api[(.api | keys)[0]].output.GraphQLAPIEndpointOutput' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
+        - export APPSYNC_API_ID=$(jq -r '.api[(.api | keys)[0]].output.GraphQLAPIIdOutput' ./amplify/\#current-cloud-backend/amplify-meta.json)
+        - export APPSYNC_ENDPOINT=$(jq -r '.api[(.api | keys)[0]].output.GraphQLAPIEndpointOutput' ./amplify/\#current-cloud-backend/amplify-meta.json)
         - echo Generating datasources.json ....
         - make init
         - export BLOGS_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "BlogTable") | .dynamodbConfig.tableName' datasources.json)
         - export ARTICLES_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "ArticleTable") | .dynamodbConfig.tableName' datasources.json)
-        - export CONTENT_BUCKET=$(jq -r '.storage[(.storage | keys)[0]].output.BucketName' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
-        - export PINPOINT_APP_ID=$(jq -r '.analytics[(.analytics | keys)[0]].output.Id' ./web/amplify/\#current-cloud-backend/amplify-meta.json)
+        - export CONTENT_BUCKET=$(jq -r '.storage[(.storage | keys)[0]].output.BucketName' ./amplify/\#current-cloud-backend/amplify-meta.json)
+        - export PINPOINT_APP_ID=$(jq -r '.analytics[(.analytics | keys)[0]].output.Id' ./amplify/\#current-cloud-backend/amplify-meta.json)
         # Deploy backend, including content service and support layer
         - echo Deploy backend components...
         - make deploy
