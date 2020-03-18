@@ -56,7 +56,7 @@ build.run: ##=> Initiate pipeline
 deploy: ##=> Deploy all services
 		$(info [*] Deploying...)
 		$(MAKE) deploy.content
-		$(MAKE) deploy.analytics
+		# $(MAKE) deploy.analytics
 		$(MAKE) deploy.services
 
 init: ##=> Initialize environment
