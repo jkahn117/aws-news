@@ -281,7 +281,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       Path: /
-      RoleName: aws-news-appsync-elasticache-data-source
+      RoleName: !Sub "${ProjectName}-appsync-elasticache-data-source-${Stage}"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -292,7 +292,7 @@ Resources:
               Service:
                 - appsync.amazonaws.com
       Policies:
-        - PolicyName: aws-news-appsync-elasticache-data-source-policy
+        - PolicyName: !Sub "${ProjectName}-appsync-elasticache-data-source-policy-${Stage}"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
