@@ -111,8 +111,8 @@ deploy.services: ##=> Deploy services used by API
 					--parameter-overrides \
 							Stage=${AMPLIFY_ENV} \
 							AppSyncApiId=${APPSYNC_API_ID} \
-							ArticlesTable=${ARTICLES_TABLE_NAME} \
-							EventStreamArn=/news/${AMPLIFY_ENV}/analytics/stream/arn
+							ArticlesTable=${ARTICLES_TABLE_NAME}
+#							EventStreamArn=/news/${AMPLIFY_ENV}/analytics/stream/arn
 
 delete: ##=> Delete all
 		$(info [*] Deleting...)
