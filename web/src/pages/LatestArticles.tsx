@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Moment from 'react-moment';
 
-import { Header, Item, List } from 'semantic-ui-react';
+import { Header, Item, List, Loader, Visibility } from 'semantic-ui-react';
 
-import { DataStore, Predicates } from '@aws-amplify/datastore';
+import API, { graphqlOperation } from '@aws-amplify/api';
 import { Article } from '../models';
 import useAnalytics from '../hooks/useAnalytics';
 
@@ -46,54 +46,94 @@ const ArticleItem = ({ article } : ArticleItemProps) => {
   );
 };
 
+const LatestArticlesQuery = `query LatestArticles($limit:Int, $nextToken:String) {
+  latestArticles(limit:$limit, nextToken:$nextToken) {
+    items {
+      id
+      title
+      blog {
+        id
+        title
+      }
+      image
+      excerpt
+      publishedAt
+    }
+    nextToken
+  }
+}`;
+
 const LatestArticles = () => {
+  const [ isLoading, setIsLoading ] = useState(false);
   const [ articles, setArticles ] = useState<(Article)[]>([]);
+  
+  let nextToken = useRef<(string|null)>(null);
+  let limit = 10;
 
   useAnalytics(() => {
     return {
         title: '[Latest Articles]'
       }
   });
-
-  const latestArticles = useCallback(() => {
-    async function loadArticles() {
+  
+  const loadMoreArticles = useCallback(() => {
+    async function loadMore() {
+      setIsLoading(true);
       try {
+        const { data: { latestArticles: { items:_articles, nextToken:_token } } } =
+          await API.graphql(graphqlOperation(LatestArticlesQuery, { limit, nextToken: nextToken.current }));
         // @ts-ignore
-        const _articles:Article[] = await DataStore.query(Article, Predicates.ALL, {
-          limit: 20
-        });
-        setArticles(_articles.sort((a, b) => (a.publishedAt > b.publishedAt) ? -1 : 1));
+        const newArticles = _articles.sort((a, b) => (a.publishedAt > b.publishedAt) ? -1 : 1);
+        setArticles(prevState => ([ ...prevState, ...newArticles ]));
+        nextToken.current = _token
       } catch (error) {
         console.error(error);
+      } finally {
+        setIsLoading(false);
       }
     }
-
-    loadArticles();
-  }, []);
-
-  useEffect(() => {
-    latestArticles();
-  }, [ latestArticles ]);
+  
+    loadMore();
+  }, [ limit ]);
 
   useEffect(() => {
-    const subscription = DataStore.observe(Article).subscribe(msg => {
-      latestArticles();
-    });
+    loadMoreArticles();
+  }, [ loadMoreArticles ])
+  
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [ latestArticles ]);
+  function onBottomVisible() {
+    console.log("-- onBottomVisible --")
+    if (isLoading) { return; }
+    loadMoreArticles();
+  }
+
+  // useEffect(() => {
+  //   const subscription = DataStore.observe(Article).subscribe(msg => {
+  //     latestArticles();
+  //   });
+
+  //   return () => {
+  //     subscription.unsubscribe();
+  //   };
+  // }, [ latestArticles ]);
 
   return (
     <div>
       <section>
         <Header as="h1">Latest Articles</Header>
-        <Item.Group>
-          { articles.map((article, idx) => 
-            <ArticleItem article={ article } key={ idx } />
-          )}
-        </Item.Group>
+        <Visibility
+          onBottomVisible={ onBottomVisible }
+          once={ false }
+        >
+          <Item.Group>
+            { articles.map((article, idx) => 
+              <ArticleItem article={ article } key={ idx } />
+            )}
+          </Item.Group>
+          { isLoading &&
+            <Loader active inline='centered'></Loader>
+          }
+        </Visibility>
       </section>
     </div>
   );
