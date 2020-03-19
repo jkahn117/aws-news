@@ -31,9 +31,9 @@ let redis = new Redis.Cluster([
 async function getLatestArticles(start, limit) {
   try {
     const pipeline = redis.pipeline();
-
+  
     // get listing of article ids from list in desired range
-    const end = start + limit - 1;
+    const end = (start + limit) - 1;
     pipeline.lrange(LATEST_CONTENT_KEY, start, end);
 
     // get the total length of the list to determine if we need to paginate
@@ -109,8 +109,8 @@ async function getPopularArticles(start, limit) {
  * @param {String} nextToken 
  */
 function _decodeNextToken(nextToken) {
-  let str = new Buffer(nextToken, "base64").toString("ascii");
-  return str.split(":")[1];
+  let str = Buffer.from(nextToken, "base64").toString("ascii");
+  return parseInt(str.split(":")[1]);
 }
 
 /**
@@ -119,7 +119,7 @@ function _decodeNextToken(nextToken) {
  * @param {Int} nextIndex 
  */
 function _encodeNextToken(type, nextIndex) {
-  return new Buffer(`${type}:${nextIndex}`).toString("base64");
+  return Buffer.from(`${type}:${nextIndex}`).toString("base64");
 }
 
 /**
@@ -128,8 +128,7 @@ function _encodeNextToken(type, nextIndex) {
  * 
  */
 exports.handler = async(event) => {
-  console.log(JSON.stringify(event));
-
+  // console.log(JSON.stringify(event));
   const { action, args: { limit=10, nextToken }} = event;
   const start = nextToken !== "" ? _decodeNextToken(nextToken) : 0;
 

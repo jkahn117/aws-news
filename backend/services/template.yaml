@@ -274,7 +274,7 @@ Resources:
         #end
         {
           "items": $util.toJson($ctx.result.data.${ArticlesTable}),
-          "nextToken": "$util.defaultIfNullOrEmpty($ctx.args.nextToken, '')"
+          "nextToken": "$util.defaultIfNullOrEmpty($ctx.prev.result.nextToken, '')"
         }
 
   AppSyncServiceRole:
