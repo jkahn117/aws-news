@@ -31,7 +31,7 @@
 		}
 	},
 	"Resources": {
-		"UnuathSubscriptionPolicy": {
+		"UnuathPolicy": {
 			"Type": "AWS::IAM::Policy",
 			"Properties": {
 				"PolicyName": { "Fn::Sub": "${AppSyncApiName}-${AppSyncApiId}-unauth-sub-policy" },
@@ -44,7 +44,9 @@
 								"appsync:GraphQL"
 							],
 							"Resource": [
-								{ "Fn::Sub": "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/${AppSyncApiId}/types/Subscription/*" }
+								{ "Fn::Sub": "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/${AppSyncApiId}/types/Subscription/*" },
+								{ "Fn::Sub": "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/${AppSyncApiId}/types/Query/fields/latestArticles" },
+								{ "Fn::Sub": "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/${AppSyncApiId}/types/Query/fields/popularArticles" }
 							]
 						}
 					]
