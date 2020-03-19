@@ -73,7 +73,7 @@ deploy.analytics: ##=> Deploy analytics stack to enable Pinpoint event stream
 			sam deploy \
 					--template-file packaged.yaml \
 					--stack-name ${STACK_NAME}-analytics \
-					--capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+					--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
 					--parameter-overrides \
 							Stage=${AMPLIFY_ENV} \
 							PinpointApplicationId=${PINPOINT_APP_ID}
@@ -107,7 +107,7 @@ deploy.services: ##=> Deploy services used by API
 			sam deploy \
 					--template-file packaged.yaml \
 					--stack-name ${STACK_NAME}-services \
-					--capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+					--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
 					--parameter-overrides \
 							Stage=${AMPLIFY_ENV} \
 							AppSyncApiId=${APPSYNC_API_ID} \
