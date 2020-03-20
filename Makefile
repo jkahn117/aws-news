@@ -56,27 +56,11 @@ build.run: ##=> Initiate pipeline
 deploy: ##=> Deploy all services
 		$(info [*] Deploying...)
 		$(MAKE) deploy.content
-		# $(MAKE) deploy.analytics
 		$(MAKE) deploy.services
 
 init: ##=> Initialize environment
 		$(info [*] Initialize environment...)
 		aws appsync list-data-sources --api-id ${APPSYNC_API_ID} > datasources.json
-
-deploy.analytics: ##=> Deploy analytics stack to enable Pinpoint event stream
-	$(info [*] Deploying analytics...)
-	cd backend/analytics && \
-			sam build && \
-			sam package \
-					--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
-					--output-template-file packaged.yaml && \
-			sam deploy \
-					--template-file packaged.yaml \
-					--stack-name ${STACK_NAME}-analytics \
-					--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
-					--parameter-overrides \
-							Stage=${AMPLIFY_ENV} \
-							PinpointApplicationId=${PINPOINT_APP_ID}
 
 deploy.content: ##=> Deploy content loading services
 		$(info [*] Deploying content services...)
@@ -111,17 +95,13 @@ deploy.services: ##=> Deploy services used by API
 					--parameter-overrides \
 							Stage=${AMPLIFY_ENV} \
 							AppSyncApiId=${APPSYNC_API_ID} \
-							ArticlesTable=${ARTICLES_TABLE_NAME}
-#							EventStreamArn=/news/${AMPLIFY_ENV}/analytics/stream/arn
+							ArticlesTable=${ARTICLES_TABLE_NAME} \
+							PinpointApplicationId=${PINPOINT_APP_ID}
 
 delete: ##=> Delete all
 		$(info [*] Deleting...)
 		$(MAKE) delete.services
-		$(MAKE) delete.analytics
 		$(MAKE) delete.content
-
-delete.analytics: ##=> Delete analytics stack
-		aws cloudformation delete-stack --stack-name $${STACK_NAME}-analytics
 
 delete.content: ##=> Delete content loading services
 		aws cloudformation delete-stack --stack-name $${STACK_NAME}-content

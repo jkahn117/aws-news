@@ -36,9 +36,9 @@ Parameters:
     Type: String
     Description: Name of DyanmoDB Articles table -- created by Amplify
 
-  # EventStreamArn:
-  #   Type: AWS::SSM::Parameter::Value<String>
-  #   Description: ARN for Pinpoint Analytics Event Stream
+  PinpointApplicationId:
+    Type: String
+    Description: Application ID for Pinpoint -- created by Amplify
 
 Globals:
   Function:
@@ -76,31 +76,6 @@ Resources:
             Pattern:
               detail-type:
                 - article_created
-
-  AnalyticsStreamProcessorFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: analytics-event-processor/
-      Policies:
-        - VPCAccessPolicy: {}
-      VpcConfig:
-        SecurityGroupIds:
-          - !Ref LambdaSecurityGroup
-        SubnetIds:
-          - !GetAtt Network.Outputs.PrivateSubnet1
-          - !GetAtt Network.Outputs.PrivateSubnet2
-      Environment:
-        Variables:
-          ELASTICACHE_ENDPOINT: !GetAtt RedisCluster.ConfigurationEndPoint.Address
-          ELASTICACHE_PORT: !GetAtt RedisCluster.ConfigurationEndPoint.Port
-          POPULAR_CONTENT_KEY: "articles:popular"
-      # Events:
-      #   Stream:
-      #     Type: Kinesis
-      #     Properties:
-      #       Stream: !Ref EventStreamArn
-      #       BatchSize: 10
-      #       StartingPosition: LATEST
 
   LambdaSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -344,6 +319,23 @@ Resources:
       Tags:
         - Key: Project
           Value: !Ref ProjectName
+
+  ### Analytics ###
+  Analytics:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "./analytics.yaml"
+      Parameters:
+        Stage: !Ref Stage
+        ProjectName: !Ref ProjectName
+        PinpointApplicationId: !Ref PinpointApplicationId
+        ElastiCacheEndpoint: !GetAtt RedisCluster.ConfigurationEndPoint.Address
+        ElastiCachePort: !GetAtt RedisCluster.ConfigurationEndPoint.Port
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Stage
+          Value: !Ref Stage
 
   ### Network ###
   Network:
