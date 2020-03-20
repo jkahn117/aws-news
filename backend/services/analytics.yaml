@@ -135,6 +135,11 @@ Resources:
                 Resource:
                   - !Sub "${EventStorageBucket.Arn}"
                   - !Sub "${EventStorageBucket.Arn}/*"
+              - Effect: Allow
+                Action:
+                  - "lambda:InvokeFunction"
+                Resource:
+                  - !GetAtt AnalyticsStreamProcessorFunction.Arn
 
   EventStorageBucket:
     Type: AWS::S3::Bucket
@@ -142,6 +147,7 @@ Resources:
   AnalyticsStreamProcessorFunction:
     Type: AWS::Serverless::Function
     Properties:
+      Timeout: 120
       CodeUri: analytics-event-processor/
       Policies:
         - VPCAccessPolicy: {}
