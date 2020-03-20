@@ -10,6 +10,11 @@
             "StackName": "amplify-aws-news-developmen-142857",
             "StackId": "arn:aws:cloudformation:us-east-1:487757292854:stack/amplify-aws-news-developmen-142857/f8af8700-69ed-11ea-a58b-0e65f7e0e97d",
             "AmplifyAppId": "d13oc3jl2y9kuu"
+        },
+        "categories": {
+            "auth": {
+                "awsnewsb9664fc2": {}
+            }
         }
     }
 }

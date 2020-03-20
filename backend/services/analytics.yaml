@@ -31,6 +31,15 @@ Parameters:
     Description: ElastiCache port
     Default: 6379
 
+Globals:
+  Function:
+    Runtime: nodejs12.x
+    Handler: index.handler
+    Timeout: 25
+    Tags:
+      Project: !Ref ProjectName
+      Env: !Ref Stage
+
 Resources:
   EventStream:
     Type: AWS::Pinpoint::EventStream
