@@ -31,6 +31,18 @@ Parameters:
     Description: ElastiCache port
     Default: 6379
 
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet::Id
+    Description: Private subnet id
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet::Id
+    Description: Private subnet id
+
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: Security id
+
 Globals:
   Function:
     Runtime: nodejs12.x
@@ -142,8 +154,8 @@ Resources:
         SecurityGroupIds:
           - !Ref LambdaSecurityGroup
         SubnetIds:
-          - !GetAtt Network.Outputs.PrivateSubnet1
-          - !GetAtt Network.Outputs.PrivateSubnet2
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
       Environment:
         Variables:
           ELASTICACHE_ENDPOINT: !Ref ElastiCacheEndpoint

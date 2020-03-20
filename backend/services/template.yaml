@@ -331,6 +331,9 @@ Resources:
         PinpointApplicationId: !Ref PinpointApplicationId
         ElastiCacheEndpoint: !GetAtt RedisCluster.ConfigurationEndPoint.Address
         ElastiCachePort: !GetAtt RedisCluster.ConfigurationEndPoint.Port
+        PrivateSubnet1: !GetAtt Network.Outputs.PrivateSubnet1
+        PrivateSubnet2: !GetAtt Network.Outputs.PrivateSubnet2
+        LambdaSecurityGroup: !Ref LambdaSecurityGroup
       Tags:
         - Key: Project
           Value: !Ref ProjectName
