@@ -81,15 +81,10 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - "kinesis:DescribeStream"
-                  - "kinesis:PutRecords"
+                  - "firehose:PutRecordBatch"
+                  - "firehose:DescribeDeliveryStream"
                 Resource:
                   - !Sub "${EventDeliveryStream.Arn}"
-              - Effect: Allow
-                Action:
-                  - "kinesis:PutRecord"
-                Resource:
-                  - !Sub "${EventDeliveryStream.Arn}/*"
 
   EventDeliveryStream:
     Type: AWS::KinesisFirehose::DeliveryStream
