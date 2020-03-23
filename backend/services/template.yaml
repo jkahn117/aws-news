@@ -321,6 +321,25 @@ Resources:
           Value: !Ref ProjectName
 
   ### Analytics ###
+  AnalyticsStreamProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Timeout: 120
+      CodeUri: analytics-event-processor/
+      Policies:
+        - VPCAccessPolicy: {}
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+        SubnetIds:
+          - !GetAtt Network.Outputs.PrivateSubnet1
+          - !GetAtt Network.Outputs.PrivateSubnet2
+      Environment:
+        Variables:
+          ELASTICACHE_ENDPOINT: !GetAtt RedisCluster.ConfigurationEndPoint.Address
+          ELASTICACHE_PORT: !GetAtt RedisCluster.ConfigurationEndPoint.Port
+          POPULAR_CONTENT_KEY: "articles:popular"
+
   Analytics:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -329,11 +348,7 @@ Resources:
         Stage: !Ref Stage
         ProjectName: !Ref ProjectName
         PinpointApplicationId: !Ref PinpointApplicationId
-        ElastiCacheEndpoint: !GetAtt RedisCluster.ConfigurationEndPoint.Address
-        ElastiCachePort: !GetAtt RedisCluster.ConfigurationEndPoint.Port
-        PrivateSubnet1: !GetAtt Network.Outputs.PrivateSubnet1
-        PrivateSubnet2: !GetAtt Network.Outputs.PrivateSubnet2
-        LambdaSecurityGroup: !Ref LambdaSecurityGroup
+        StreamProcessorFunctionArn: !GetAtt AnalyticsStreamProcessorFunction.Arn
       Tags:
         - Key: Project
           Value: !Ref ProjectName
