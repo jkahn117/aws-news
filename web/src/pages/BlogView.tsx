@@ -59,7 +59,7 @@ const BlogView = () => {
     return blog ?
       {
         title: `[Blog] ${blog.title}`,
-        id: blog.id
+        blogId: blog.id
       } : {}
   }, [ blog ]);
 
