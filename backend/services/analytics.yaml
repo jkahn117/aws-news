@@ -53,9 +53,6 @@ Resources:
             Principal:
               Service: pinpoint.amazonaws.com
             Action: "sts:AssumeRole"
-            Condition:
-              StringEquals:
-                "sts:ExternalId": !Ref "AWS::AccountId"
       Path: "/"
       Policies:
         - PolicyName: "pinpoint-event-stream-policy"
@@ -125,8 +122,9 @@ Resources:
               - Effect: Allow
                 Action:
                   - "lambda:InvokeFunction"
+                  - "lambda:GetFunctionConfiguration"
                 Resource:
-                  - !Ref StreamProcessorFunctionArn
+                  - !Sub "${StreamProcessorFunctionArn}:*"
         - PolicyName: "cloudwatch-logs-policy"
           PolicyDocument:
             Version: "2012-10-17"

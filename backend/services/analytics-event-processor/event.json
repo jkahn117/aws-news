@@ -1,0 +1,56 @@
+{
+    "event_type": "pageView",
+    "event_timestamp": 1585001271160,
+    "arrival_timestamp": 1585001249309,
+    "event_version": "3.1",
+    "application": {
+        "app_id": "459c1e1e07e94352a1eb04cb8b22ff5b",
+        "cognito_identity_pool_id": "us-east-1:66b7e518-e94c-4e43-8e2e-14ca0f335003",
+        "sdk": {},
+        "version_name": "Firefox/72.0"
+    },
+    "client": {
+        "client_id": "a52c3310-6d50-11ea-915f-e5b00e616d8d",
+        "cognito_id": "us-east-1:08ee12c3-58a7-4006-a55a-287f65d867d7"
+    },
+    "device": {
+        "make": "Gecko",
+        "model": "Firefox",
+        "platform": {
+            "name": "macintel"
+        }
+    },
+    "session": {
+        "session_id": "bb889de1-6d52-11ea-a1e8-cd9a1d2f9244",
+        "start_timestamp": 1585001268926
+    },
+    "attributes": {
+        "path": "/article/3d7f2c7aa1d4615569b0fc975db9e6f3",
+        "id": "3d7f2c7aa1d4615569b0fc975db9e6f3",
+        "title": "[Article] Halodoc: Building the Future of Tele-Health One Microservice at a Time"
+    },
+    "endpoint": {
+        "EndpointStatus": "ACTIVE",
+        "OptOut": "ALL",
+        "RequestId": "2d7c6cfe-b37a-41fe-8b21-4ef3ca9988b0",
+        "Location": {},
+        "Demographic": {
+            "Make": "Gecko",
+            "Model": "Firefox",
+            "ModelVersion": "72.0",
+            "AppVersion": "Firefox/72.0",
+            "Platform": "macintel"
+        },
+        "EffectiveDate": "2020-03-23T22:07:29.303Z",
+        "Attributes": {},
+        "Metrics": {},
+        "User": {
+            "UserId": "us-east-1:08ee12c3-58a7-4006-a55a-287f65d867d7"
+        },
+        "ApplicationId": "459c1e1e07e94352a1eb04cb8b22ff5b",
+        "Id": "a52c3310-6d50-11ea-915f-e5b00e616d8d",
+        "CohortId": "13",
+        "CreationDate": "2020-03-23T21:52:52.776Z"
+    },
+    "awsAccountId": "487757292854"
+}

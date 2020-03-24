@@ -17,17 +17,17 @@ let redis = new Redis.Cluster([
   }
 ]);
 
-async function countArticleRead(record) {
-  let { event_type, attributes: { articleId } } = record;
-
+async function incrementArticleReadCount(articleId, blogId) {
   try {
-    if (event_type === 'pageView') {
-      const pipeline = redis.pipeline();
-      pipeline.lpush(POPULAR_CONTENT_KEY, articleId);
-      pipeline.ltrim(POPULAR_CONTENT_KEY, 0, 99);  
-      await pipeline.exec();
+    const pipeline = redis.pipeline();
+    pipeline.zincrby(POPULAR_CONTENT_KEY, 1, articleId);
+    
+    if (blogId) {
+      pipeline.zincrby(`${POPULAR_CONTENT_KEY}:${blogId}`, 1, articleId);
     }
 
+    await pipeline.exec();
+    
   } catch(error) {
     console.error(`[ERROR] ${error}`)
   }
@@ -39,12 +39,16 @@ async function countArticleRead(record) {
  * 
  */
 exports.handler = async(event) => {
-  console.log(JSON.stringify(event));
+  // console.log(JSON.stringify(event));
 
   const output = event.records.map((record) => {
-    let payload = Buffer.from(record.kinesis.data, "base64").toString("ascii");
+    let payload = Buffer.from(record.data, "base64").toString("ascii");
     console.log(payload);
-    // write to elasticache
+
+    const { event_type, attributes: { path, id, blogId }} = payload;
+    if (event_type === "pageView" && path.startsWith("/article")) {
+      incrementArticleReadCount(id, blogId);
+    }
 
     return {
       recordId: record.recordId,

@@ -324,7 +324,7 @@ Resources:
   AnalyticsStreamProcessorFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Timeout: 120
+      Timeout: 240
       CodeUri: analytics-event-processor/
       Policies:
         - VPCAccessPolicy: {}
