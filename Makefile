@@ -12,6 +12,7 @@ APPSYNC_ENDPOINT ?= "UNDEFINED"
 BLOGS_TABLE_NAME ?= "UNDEFINED"
 ARTICLES_TABLE_NAME ?= "UNDEFINED"
 CONTENT_BUCKET ?= "UNDEFINED"
+PINPOINT_APP_ID ?= "UNDEFINED"
 
 target:
 		$(info ${HELP_MESSAGE})
@@ -55,6 +56,7 @@ build.run: ##=> Initiate pipeline
 deploy: ##=> Deploy all services
 		$(info [*] Deploying...)
 		$(MAKE) deploy.content
+		$(MAKE) deploy.services
 
 init: ##=> Initialize environment
 		$(info [*] Initialize environment...)
@@ -79,12 +81,33 @@ deploy.content: ##=> Deploy content loading services
 								ContentBucket=${CONTENT_BUCKET} \
 								LayerArn=/news/${AMPLIFY_ENV}/backend/loader/layer
 
+deploy.services: ##=> Deploy services used by API
+	$(info [*] Deploying API services...)
+	cd backend/services && \
+			sam build && \
+			sam package \
+					--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
+					--output-template-file packaged.yaml && \
+			sam deploy \
+					--template-file packaged.yaml \
+					--stack-name ${STACK_NAME}-services \
+					--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
+					--parameter-overrides \
+							Stage=${AMPLIFY_ENV} \
+							AppSyncApiId=${APPSYNC_API_ID} \
+							ArticlesTable=${ARTICLES_TABLE_NAME} \
+							PinpointApplicationId=${PINPOINT_APP_ID}
+
 delete: ##=> Delete all
 		$(info [*] Deleting...)
+		$(MAKE) delete.services
 		$(MAKE) delete.content
 
 delete.content: ##=> Delete content loading services
-		aws cloudformation delete-stack --stack-name $${STACK_NAME}-content-$${AWS_BRANCH}
+		aws cloudformation delete-stack --stack-name $${STACK_NAME}-content
+
+delete.services: ##=> Delete API services
+		aws cloudformation delete-stack --stack-name $${STACK_NAME}-services
 
 #### HELPERS ####
 _install_dev_packages:

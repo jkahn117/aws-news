@@ -1,0 +1,20 @@
+{
+    "appName": "awsnews",
+    "roleName": "pinpointLambdaRolea0f1a820",
+    "cloudWatchPolicyName": "cloudWatchPolicya0f1a820",
+    "pinpointPolicyName": "pinpointPolicya0f1a820",
+    "authPolicyName": "pinpoint_amplify_a0f1a820",
+    "unauthPolicyName": "pinpoint_amplify_a0f1a820",
+    "authRoleName": {
+        "Ref": "AuthRoleName"
+    },
+    "unauthRoleName": {
+        "Ref": "UnauthRoleName"
+    },
+    "authRoleArn": {
+        "Fn::GetAtt": [
+            "AuthRole",
+            "Arn"
+        ]
+    }
+}

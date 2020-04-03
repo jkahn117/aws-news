@@ -257,7 +257,6 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       Description: Start Step Functions execution
-      EventBusName: !GetAtt EventBus.Name
       ScheduleExpression: cron(0 14,22 ? * MON-FRI *)
       State: ENABLED
       Targets:

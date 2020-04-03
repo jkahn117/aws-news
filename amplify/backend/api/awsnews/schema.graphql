@@ -41,3 +41,15 @@ type Article
   tags: [String]
   blog: Blog @connection(fields: [ "blogId" ])
 }
+
+type ArticleConnection {
+  items: [Article]
+  nextToken: String
+}
+
+type Query {
+  latestArticles(limit: Int, nextToken: String): ArticleConnection
+    @aws_cognito_user_pools @aws_iam
+  popularArticles(limit: Int, nextToken: String): ArticleConnection
+    @aws_cognito_user_pools @aws_iam
+}

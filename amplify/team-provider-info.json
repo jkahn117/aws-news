@@ -1,0 +1,20 @@
+{
+    "developmen": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-aws-news-developmen-142857-authRole",
+            "UnauthRoleArn": "arn:aws:iam::487757292854:role/amplify-aws-news-developmen-142857-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::487757292854:role/amplify-aws-news-developmen-142857-authRole",
+            "Region": "us-east-1",
+            "DeploymentBucketName": "amplify-aws-news-developmen-142857-deployment",
+            "UnauthRoleName": "amplify-aws-news-developmen-142857-unauthRole",
+            "StackName": "amplify-aws-news-developmen-142857",
+            "StackId": "arn:aws:cloudformation:us-east-1:487757292854:stack/amplify-aws-news-developmen-142857/f8af8700-69ed-11ea-a58b-0e65f7e0e97d",
+            "AmplifyAppId": "d13oc3jl2y9kuu"
+        },
+        "categories": {
+            "auth": {
+                "awsnewsb9664fc2": {}
+            }
+        }
+    }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "aws-news-services-elasticache-integration",
+  "version": "1.0.0",
+  "description": "Integrated AppSync and ElastiCache",
+  "main": "index.js",
+  "author": "jkahn@",
+  "license": "Apache2.0",
+  "dependencies": {
+    "ioredis": "^4.16.0"
+  }
+}

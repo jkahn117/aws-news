@@ -51,7 +51,8 @@ const ArticleView = () => {
     return article ?
       {
         title: `[Article] ${article.title}`,
-        id: article.id
+        articleId: article.id,
+        blogId: article.blog ? article.blog.id : null
       } : {}
   }, [ article ]);
 

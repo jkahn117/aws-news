@@ -1,0 +1,370 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Transform: 'AWS::Serverless-2016-10-31'
+
+Parameters:
+  Stage:
+    Type: String
+    Description: The stage where the application is running in, e.g., dev, prod.
+    Default: 'dev'
+    AllowedValues:
+      - 'dev'
+      - 'test'
+      - 'prod'
+
+  ProjectName:
+    Type: String
+    Description: The name of this project
+    Default: 'aws-news'
+
+  ElasticacheInstanceClass:
+    Type: String
+    Description: ElastiCache node instance type
+    Default: cache.t2.micro
+
+  RedisEngineVersion:
+    Type: String
+    Description: ElastiCache for Redis engine version
+    Default: 5.0.6
+
+  AppSyncApiId:
+    Type: String
+    Description: AWS AppSync API ID -- created by Amplify
+
+  ArticlesTable:
+    Type: String
+    Description: Name of DyanmoDB Articles table -- created by Amplify
+
+  PinpointApplicationId:
+    Type: String
+    Description: Application ID for Pinpoint -- created by Amplify
+
+Globals:
+  Function:
+    Runtime: nodejs12.x
+    Handler: index.handler
+    Timeout: 25
+    Tags:
+      Project: !Ref ProjectName
+      Env: !Ref Stage
+
+Resources:
+  LatestContentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: latest-content/
+      Policies:
+        - VPCAccessPolicy: {}
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+        SubnetIds:
+          - !GetAtt Network.Outputs.PrivateSubnet1
+          - !GetAtt Network.Outputs.PrivateSubnet2
+      Environment:
+        Variables:
+          ELASTICACHE_ENDPOINT: !GetAtt RedisCluster.ConfigurationEndPoint.Address
+          ELASTICACHE_PORT: !GetAtt RedisCluster.ConfigurationEndPoint.Port
+          LATEST_CONTENT_KEY: "articles:latest"
+          BLOG_COUNT_KEY: "blog:count:"
+      Events:
+        OnCreateEvent:
+          Type: CloudWatchEvent
+          Properties:
+            EventBusName: !Sub ${ProjectName}-${Stage}-eventbus
+            Pattern:
+              detail-type:
+                - article_created
+
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !GetAtt Network.Outputs.VPC
+      GroupDescription: Enable Redis access
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+
+  ElastiCacheIntegrationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: elasticache-integration/
+      Policies:
+        - VPCAccessPolicy: {}
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+        SubnetIds:
+          - !GetAtt Network.Outputs.PrivateSubnet1
+          - !GetAtt Network.Outputs.PrivateSubnet2
+      Environment:
+        Variables:
+          ELASTICACHE_ENDPOINT: !GetAtt RedisCluster.ConfigurationEndPoint.Address
+          ELASTICACHE_PORT: !GetAtt RedisCluster.ConfigurationEndPoint.Port
+          LATEST_CONTENT_KEY: "articles:latest"
+          POPULAR_CONTENT_KEY: "articles:popular"
+          BLOG_COUNT_KEY: "blog:count:"
+
+  ## AppSync Integration ##
+  ElastiCacheIntegrationDataSource:
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !Ref AppSyncApiId
+      Name: ElastiCacheIntegration
+      Description: Lambda function to integrate with Elasticache
+      Type: AWS_LAMBDA
+      ServiceRoleArn: !GetAtt AppSyncServiceRole.Arn
+      LambdaConfig:
+        LambdaFunctionArn: !GetAtt ElastiCacheIntegrationFunction.Arn
+
+  # Query.latestArticles resolver
+  LatestArticlesQueryResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !Ref AppSyncApiId
+      TypeName: Query
+      FieldName: latestArticles
+      Kind: PIPELINE
+      PipelineConfig:
+        Functions:
+          - !GetAtt GetLatestArticlesFunction.FunctionId
+          - !GetAtt BatchGetArticlesFunctions.FunctionId
+      RequestMappingTemplate: |
+        {}
+      ResponseMappingTemplate: |
+        $util.toJson($ctx.prev.result)
+
+  # Query.popularArticles resolver
+  PopularArticlesQueryResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !Ref AppSyncApiId
+      TypeName: Query
+      FieldName: popularArticles
+      Kind: PIPELINE
+      PipelineConfig:
+        Functions:
+          - !GetAtt GetPopularArticlesFunction.FunctionId
+          - !GetAtt BatchGetArticlesFunctions.FunctionId
+      RequestMappingTemplate: |
+        {}
+      ResponseMappingTemplate: |
+        $util.toJson($ctx.prev.result)
+
+  # Get latest articles via elasticache integration data source
+  GetLatestArticlesFunction:
+    Type: AWS::AppSync::FunctionConfiguration
+    Properties:
+      ApiId: !Ref AppSyncApiId
+      DataSourceName: !GetAtt ElastiCacheIntegrationDataSource.Name
+      FunctionVersion: "2018-05-29"
+      Name: GetLatestArticles
+      Description: >
+        Queries ElastiCache via Lambda data source to retrieve list of
+        latest article ids.
+      RequestMappingTemplate: |
+        {
+          "version": "2017-02-28",
+          "operation": "Invoke",
+          "payload": {
+            "action": "latestArticles",
+            "args":  {
+              "limit": $util.defaultIfNull($ctx.args.limit, 10),
+              "nextToken": "$util.defaultIfNullOrEmpty($ctx.args.nextToken, '')"
+            }
+          }
+        }
+      ResponseMappingTemplate: |
+        #if($ctx.result && $ctx.result.error)
+          $util.error($ctx.result.error)
+        #end
+        $util.toJson($ctx.result)
+
+  # Get popular articles via elasticache integration data source
+  GetPopularArticlesFunction:
+    Type: AWS::AppSync::FunctionConfiguration
+    Properties:
+      ApiId: !Ref AppSyncApiId
+      DataSourceName: !GetAtt ElastiCacheIntegrationDataSource.Name
+      FunctionVersion: "2018-05-29"
+      Name: GetPopularArticles
+      Description: >
+        Queries ElastiCache via Lambda data source to retrieve list of
+        popular article ids.
+      RequestMappingTemplate: |
+        {
+          "version": "2017-02-28",
+          "operation": "Invoke",
+          "payload": {
+            "action": "popularArticles",
+            "args":  {
+              "limit": $util.defaultIfNull($ctx.args.limit, 10),
+              "nextToken": "$util.defaultIfNullOrEmpty($ctx.args.nextToken, '')"
+            }
+          }
+        }
+      ResponseMappingTemplate: |
+        #if($ctx.result && $ctx.result.error)
+          $util.error($ctx.result.error)
+        #end
+        $util.toJson($ctx.result)
+
+  # Loads details on batch of Articles from DynamoDB
+  BatchGetArticlesFunctions:
+    Type: AWS::AppSync::FunctionConfiguration
+    Properties:
+      ApiId: !Ref AppSyncApiId
+      DataSourceName: ArticleTable # this seems to be consistent across environments
+      FunctionVersion: "2018-05-29"
+      Name: BatchGetArticles
+      Description: >
+        Retrieves batch of articles from DynamoDB data source.
+      RequestMappingTemplate: !Sub |
+        #if($ctx.prev.result.ids.size() == 0)
+          #set($result = {})
+          $util.qr($result.put("items", []))
+          $util.qr($result.put("nextToken", $ctx.prev.result.nextToken))
+          #return($result)
+        #end
+        #set($ids = [])
+        #foreach($result in $ctx.prev.result.ids)
+          #set($map = {})
+          $util.qr($map.put("id", $util.dynamodb.toString($result)))
+          $util.qr($ids.add($map))
+        #end
+        {
+          "version" : "2018-05-29",
+          "operation" : "BatchGetItem",
+          "tables" : {
+            "${ArticlesTable}": {
+              "keys": $util.toJson($ids),
+              "consistentRead": true
+            }
+          }
+        }
+      ResponseMappingTemplate: !Sub |
+        #if($ctx.result && $ctx.result.error)
+          $util.error($ctx.result.error)
+        #end
+        {
+          "items": $util.toJson($ctx.result.data.${ArticlesTable}),
+          "nextToken": "$util.defaultIfNullOrEmpty($ctx.prev.result.nextToken, '')"
+        }
+
+  AppSyncServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service:
+                - appsync.amazonaws.com
+      Policies:
+        - PolicyName: !Sub "${ProjectName}-appsync-elasticache-data-source-policy-${Stage}"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource:
+                  - !GetAtt ElastiCacheIntegrationFunction.Arn
+
+
+  ## Redis ##
+  RedisCluster:
+    Type: AWS::ElastiCache::ReplicationGroup
+    Properties:
+      AutoMinorVersionUpgrade: true
+      # enable Cluster Mode
+      CacheParameterGroupName: default.redis5.0.cluster.on
+      CacheNodeType: !Ref ElasticacheInstanceClass
+      CacheSubnetGroupName:  !Ref RedisSubnetGroup
+      Engine: redis
+      EngineVersion: !Ref RedisEngineVersion
+      NumNodeGroups: 1
+      Port: 6379
+      ReplicasPerNodeGroup: 1
+      ReplicationGroupDescription: !Sub ${ProjectName} Redis
+      SecurityGroupIds:
+        - !Ref RedisSecurityGroup
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+
+  RedisSubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      Description: Redis subnet group
+      SubnetIds:
+        - !GetAtt Network.Outputs.PrivateSubnet1
+        - !GetAtt Network.Outputs.PrivateSubnet2
+
+  RedisSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !GetAtt Network.Outputs.VPC
+      GroupDescription: Enable Redis access
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          SourceSecurityGroupId: !Ref LambdaSecurityGroup
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+
+  ### Analytics ###
+  AnalyticsStreamProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Timeout: 240
+      CodeUri: analytics-event-processor/
+      Policies:
+        - VPCAccessPolicy: {}
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+        SubnetIds:
+          - !GetAtt Network.Outputs.PrivateSubnet1
+          - !GetAtt Network.Outputs.PrivateSubnet2
+      Environment:
+        Variables:
+          ELASTICACHE_ENDPOINT: !GetAtt RedisCluster.ConfigurationEndPoint.Address
+          ELASTICACHE_PORT: !GetAtt RedisCluster.ConfigurationEndPoint.Port
+          POPULAR_CONTENT_KEY: "articles:popular"
+
+  Analytics:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "./analytics.yaml"
+      Parameters:
+        Stage: !Ref Stage
+        ProjectName: !Ref ProjectName
+        PinpointApplicationId: !Ref PinpointApplicationId
+        StreamProcessorFunctionArn: !GetAtt AnalyticsStreamProcessorFunction.Arn
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Stage
+          Value: !Ref Stage
+
+  ### Network ###
+  Network:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "./network.yaml"
+      Parameters:
+        Stage: !Ref Stage
+        ProjectName: !Ref ProjectName
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Stage
+          Value: !Ref Stage
