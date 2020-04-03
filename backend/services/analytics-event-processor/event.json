@@ -1,56 +1,12 @@
 {
-    "event_type": "pageView",
-    "event_timestamp": 1585001271160,
-    "arrival_timestamp": 1585001249309,
-    "event_version": "3.1",
-    "application": {
-        "app_id": "459c1e1e07e94352a1eb04cb8b22ff5b",
-        "cognito_identity_pool_id": "us-east-1:66b7e518-e94c-4e43-8e2e-14ca0f335003",
-        "sdk": {},
-        "version_name": "Firefox/72.0"
-    },
-    "client": {
-        "client_id": "a52c3310-6d50-11ea-915f-e5b00e616d8d",
-        "cognito_id": "us-east-1:08ee12c3-58a7-4006-a55a-287f65d867d7"
-    },
-    "device": {
-        "make": "Gecko",
-        "model": "Firefox",
-        "platform": {
-            "name": "macintel"
+    "invocationId": "bdd8e388-a884-4d88-8186-6880dac3c6a1",
+    "deliveryStreamArn": "arn:aws:firehose:us-east-1:487757292854:deliverystream/amplify-aws-news-developmen-14-EventDeliveryStream-B6Z3KUF7AQ0T",
+    "region": "us-east-1",
+    "records": [
+        {
+            "recordId": "49605331643243235206630430010481115121546135202877669378000000",
+            "approximateArrivalTimestamp": 1585004916877,
+            "data": "ewogICAgImV2ZW50X3R5cGUiOiAicGFnZVZpZXciLAogICAgImV2ZW50X3RpbWVzdGFtcCI6IDE1ODUwMDEyNzExNjAsCiAgICAiYXJyaXZhbF90aW1lc3RhbXAiOiAxNTg1MDAxMjQ5MzA5LAogICAgImV2ZW50X3ZlcnNpb24iOiAiMy4xIiwKICAgICJhcHBsaWNhdGlvbiI6IHsKICAgICAgICAiYXBwX2lkIjogIjQ1OWMxZTFlMDdlOTQzNTJhMWViMDRjYjhiMjJmZjViIiwKICAgICAgICAiY29nbml0b19pZGVudGl0eV9wb29sX2lkIjogInVzLWVhc3QtMTo2NmI3ZTUxOC1lOTRjLTRlNDMtOGUyZS0xNGNhMGYzMzUwMDMiLAogICAgICAgICJzZGsiOiB7fSwKICAgICAgICAidmVyc2lvbl9uYW1lIjogIkZpcmVmb3gvNzIuMCIKICAgIH0sCiAgICAiY2xpZW50IjogewogICAgICAgICJjbGllbnRfaWQiOiAiYTUyYzMzMTAtNmQ1MC0xMWVhLTkxNWYtZTViMDBlNjE2ZDhkIiwKICAgICAgICAiY29nbml0b19pZCI6ICJ1cy1lYXN0LTE6MDhlZTEyYzMtNThhNy00MDA2LWE1NWEtMjg3ZjY1ZDg2N2Q3IgogICAgfSwKICAgICJkZXZpY2UiOiB7CiAgICAgICAgIm1ha2UiOiAiR2Vja28iLAogICAgICAgICJtb2RlbCI6ICJGaXJlZm94IiwKICAgICAgICAicGxhdGZvcm0iOiB7CiAgICAgICAgICAgICJuYW1lIjogIm1hY2ludGVsIgogICAgICAgIH0KICAgIH0sCiAgICAic2Vzc2lvbiI6IHsKICAgICAgICAic2Vzc2lvbl9pZCI6ICJiYjg4OWRlMS02ZDUyLTExZWEtYTFlOC1jZDlhMWQyZjkyNDQiLAogICAgICAgICJzdGFydF90aW1lc3RhbXAiOiAxNTg1MDAxMjY4OTI2CiAgICB9LAogICAgImF0dHJpYnV0ZXMiOiB7CiAgICAgICAgInBhdGgiOiAiL2FydGljbGUvM2Q3ZjJjN2FhMWQ0NjE1NTY5YjBmYzk3NWRiOWU2ZjMiLAogICAgICAgICJhcnRpY2xlSWQiOiAiM2Q3ZjJjN2FhMWQ0NjE1NTY5YjBmYzk3NWRiOWU2ZjMiLAogICAgICAgICJibG9nSWQiOiAiMWQ3MzliNzlhMWMwYjhiZmNlNDM3NmE1YjdhOTQ4Y2QiLAogICAgICAgICJ0aXRsZSI6ICJbQXJ0aWNsZV0gSGFsb2RvYzogQnVpbGRpbmcgdGhlIEZ1dHVyZSBvZiBUZWxlLUhlYWx0aCBPbmUgTWljcm9zZXJ2aWNlIGF0IGEgVGltZSIKICAgIH0sCiAgICAiZW5kcG9pbnQiOiB7CiAgICAgICAgIkVuZHBvaW50U3RhdHVzIjogIkFDVElWRSIsCiAgICAgICAgIk9wdE91dCI6ICJBTEwiLAogICAgICAgICJSZXF1ZXN0SWQiOiAiMmQ3YzZjZmUtYjM3YS00MWZlLThiMjEtNGVmM2NhOTk4OGIwIiwKICAgICAgICAiTG9jYXRpb24iOiB7fSwKICAgICAgICAiRGVtb2dyYXBoaWMiOiB7CiAgICAgICAgICAgICJNYWtlIjogIkdlY2tvIiwKICAgICAgICAgICAgIk1vZGVsIjogIkZpcmVmb3giLAogICAgICAgICAgICAiTW9kZWxWZXJzaW9uIjogIjcyLjAiLAogICAgICAgICAgICAiQXBwVmVyc2lvbiI6ICJGaXJlZm94LzcyLjAiLAogICAgICAgICAgICAiUGxhdGZvcm0iOiAibWFjaW50ZWwiCiAgICAgICAgfSwKICAgICAgICAiRWZmZWN0aXZlRGF0ZSI6ICIyMDIwLTAzLTIzVDIyOjA3OjI5LjMwM1oiLAogICAgICAgICJBdHRyaWJ1dGVzIjoge30sCiAgICAgICAgIk1ldHJpY3MiOiB7fSwKICAgICAgICAiVXNlciI6IHsKICAgICAgICAgICAgIlVzZXJJZCI6ICJ1cy1lYXN0LTE6MDhlZTEyYzMtNThhNy00MDA2LWE1NWEtMjg3ZjY1ZDg2N2Q3IgogICAgICAgIH0sCiAgICAgICAgIkFwcGxpY2F0aW9uSWQiOiAiNDU5YzFlMWUwN2U5NDM1MmExZWIwNGNiOGIyMmZmNWIiLAogICAgICAgICJJZCI6ICJhNTJjMzMxMC02ZDUwLTExZWEtOTE1Zi1lNWIwMGU2MTZkOGQiLAogICAgICAgICJDb2hvcnRJZCI6ICIxMyIsCiAgICAgICAgIkNyZWF0aW9uRGF0ZSI6ICIyMDIwLTAzLTIzVDIxOjUyOjUyLjc3NloiCiAgICB9LAogICAgImF3c0FjY291bnRJZCI6ICI0ODc3NTcyOTI4NTQiCn0="
         }
-    },
-    "session": {
-        "session_id": "bb889de1-6d52-11ea-a1e8-cd9a1d2f9244",
-        "start_timestamp": 1585001268926
-    },
-    "attributes": {
-        "path": "/article/3d7f2c7aa1d4615569b0fc975db9e6f3",
-        "id": "3d7f2c7aa1d4615569b0fc975db9e6f3",
-        "title": "[Article] Halodoc: Building the Future of Tele-Health One Microservice at a Time"
-    },
-    "endpoint": {
-        "EndpointStatus": "ACTIVE",
-        "OptOut": "ALL",
-        "RequestId": "2d7c6cfe-b37a-41fe-8b21-4ef3ca9988b0",
-        "Location": {},
-        "Demographic": {
-            "Make": "Gecko",
-            "Model": "Firefox",
-            "ModelVersion": "72.0",
-            "AppVersion": "Firefox/72.0",
-            "Platform": "macintel"
-        },
-        "EffectiveDate": "2020-03-23T22:07:29.303Z",
-        "Attributes": {},
-        "Metrics": {},
-        "User": {
-            "UserId": "us-east-1:08ee12c3-58a7-4006-a55a-287f65d867d7"
-        },
-        "ApplicationId": "459c1e1e07e94352a1eb04cb8b22ff5b",
-        "Id": "a52c3310-6d50-11ea-915f-e5b00e616d8d",
-        "CohortId": "13",
-        "CreationDate": "2020-03-23T21:52:52.776Z"
-    },
-    "awsAccountId": "487757292854"
+    ]
 }

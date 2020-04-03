@@ -19,15 +19,13 @@ let redis = new Redis.Cluster([
 
 async function incrementArticleReadCount(articleId, blogId) {
   try {
-    const pipeline = redis.pipeline();
-    pipeline.zincrby(POPULAR_CONTENT_KEY, 1, articleId);
+    let work = [ redis.zincrby(POPULAR_CONTENT_KEY, 1, articleId) ];
     
     if (blogId) {
-      pipeline.zincrby(`${POPULAR_CONTENT_KEY}:${blogId}`, 1, articleId);
+      work.push(redis.zincrby(`${POPULAR_CONTENT_KEY}:${blogId}`, 1, articleId));
     }
 
-    await pipeline.exec();
-    
+    await Promise.all(work);
   } catch(error) {
     console.error(`[ERROR] ${error}`)
   }
@@ -41,19 +39,21 @@ async function incrementArticleReadCount(articleId, blogId) {
 exports.handler = async(event) => {
   // console.log(JSON.stringify(event));
 
-  const output = event.records.map((record) => {
-    let payload = Buffer.from(record.data, "base64").toString("ascii");
-    const { event_type, attributes: { path, articleId, blogId }} = JSON.parse(payload);
-    if (event_type === "pageView" && path.startsWith("/article")) {
-      incrementArticleReadCount(articleId, blogId);
-    }
-
-    return {
-      recordId: record.recordId,
-      result: 'Ok',
-      data: record.data
-    };
-  });
+  const output = await Promise.all(
+    event.records.map(async record => {
+      let payload = Buffer.from(record.data, "base64").toString("ascii");
+      const { event_type, attributes: { path, articleId, blogId }} = JSON.parse(payload);
+      if (event_type === "pageView" && path.startsWith("/article")) {
+        await incrementArticleReadCount(articleId, blogId);
+      }
+  
+      return {
+        recordId: record.recordId,
+        result: 'Ok',
+        data: record.data
+      };
+    })
+  );
 
   console.log(`Processing completed.  Successful records ${output.length}.`);
   return { records: output };  
