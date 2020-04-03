@@ -4,11 +4,11 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { Sidebar } from 'semantic-ui-react';
 
 import './App.scss';
-import AppSidebar from './components/AppSidebar';
-import Footer from './components/Footer';
+import AppSidebar from './components/shared/AppSidebar';
+import Footer from './components/shared/Footer';
 import ArticleView from './pages/ArticleView';
 import BlogView from './pages/BlogView';
-import LatestArticles from './pages/LatestArticles';
+import Home from './pages/Home';
 
 const App: React.FC = () => {
   return (
@@ -22,7 +22,7 @@ const App: React.FC = () => {
                 <Switch>
                   <Route path="/article/:id"><ArticleView /></Route>
                   <Route path="/blog/:id"><BlogView /></Route>
-                  <Route exact path="/"><LatestArticles /></Route>
+                  <Route exact path="/"><Home /></Route>
                 </Switch>
               </div>
               <Footer />

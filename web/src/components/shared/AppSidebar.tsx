@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Image, Menu } from 'semantic-ui-react';
 
 import { DataStore } from '@aws-amplify/datastore';
-import { Blog } from '../models';
+import { Blog } from '../../models';
 
 interface BlogMenuItemProps {
   blog: Blog
