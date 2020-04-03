@@ -45,3 +45,6 @@ blogs:
   -
     title: "AWS Open Source Blog"
     url: "https://aws.amazon.com/blogs/opensource/feed/"
+  -
+    title: "AWS Training and Certification Blog"
+    url: "https://aws.amazon.com/blogs/training-and-certification/feed/"
