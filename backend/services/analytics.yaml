@@ -115,14 +115,20 @@ Resources:
                 Resource:
                   - !Sub "${EventStorageBucket.Arn}"
                   - !Sub "${EventStorageBucket.Arn}/*"
+                  - "arn:aws:s3:::%FIREHOSE_BUCKET_NAME%"
+                  - "arn:aws:s3:::%FIREHOSE_BUCKET_NAME%/*"
         - PolicyName: "invoke-lambda-policy"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
-                  - "lambda:InvokeFunction"
                   - "lambda:GetFunctionConfiguration"
+                Resource:
+                  - !Sub "${StreamProcessorFunctionArn}"
+              - Effect: Allow
+                Action:
+                  - "lambda:InvokeFunction"
                 Resource:
                   - !Sub "${StreamProcessorFunctionArn}:*"
         - PolicyName: "cloudwatch-logs-policy"
