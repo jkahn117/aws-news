@@ -65,7 +65,7 @@ init: ##=> Initialize environment
 deploy.content: ##=> Deploy content loading services
 		$(info [*] Deploying content services...)
 		cd backend/content && \
-				sam build && \
+				cd newContentEvent && npm install && cd .. && \
 				sam package \
 						--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
 						--output-template-file packaged.yaml && \
