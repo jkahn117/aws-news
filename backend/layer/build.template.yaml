@@ -96,6 +96,16 @@ Resources:
                   - "ssm:AddTagsToResource"
                 Resource:
                   - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*"
+        - PolicyName: "get-parameter"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "ssm:GetParameter"
+                  - "ssm:GetParameters"
+                Resource:
+                  - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/news/${Stage}/backend/loader/layer"
 
 Outputs:
   LayerBuildPipelineName:
