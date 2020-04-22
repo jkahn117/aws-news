@@ -11,19 +11,3 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
-.ui.secondary.pointing.menu {
-  margin-top: -3rem;
-}
-
-.ui.secondary.pointing.menu a.item {
-  padding-left: 2rem;
-  padding-right: 2rem;
-}
-
-.ui.secondary.pointing.menu a:first-child {
-  margin-left: auto;
-}
-
-.ui.secondary.pointing.menu a:last-child {
-  margin-right: 1rem;
-}

@@ -1,5 +1,5 @@
 .main {
-  margin-left: 210px;
+  // margin-left: 210px;
   
   .content {
     padding: 2rem;
@@ -9,6 +9,31 @@
 
 .container.text img {
   max-width: 100%;
+}
+
+.ui.secondary.pointing.menu {
+  margin-top: -3rem;
+
+  a.item {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  a:first-child {
+    margin-left: auto;
+  }
+
+  a:last-child {
+    margin-right: 1rem;
+  }
+}
+
+.ui.vertical.left.fixed.menu {
+  .item.last {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+  }
 }
 
 footer {

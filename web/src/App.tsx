@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 
-import { Sidebar } from 'semantic-ui-react';
+import { Grid, Responsive } from 'semantic-ui-react';
 
 import './App.scss';
 import AppSidebar from './components/shared/AppSidebar';
@@ -12,11 +12,12 @@ import Home from './pages/Home';
 
 const App: React.FC = () => {
   return (
-    <div className="App">
-      <Sidebar.Pusher>
-        <div className="full height">
-          <Router>
+    <Grid stretched className="App">
+        <Router>
+          <Responsive as={ Grid.Column } width={ 4 } minWidth={ Responsive.onlyTablet.minWidth }>
             <AppSidebar />
+          </Responsive>
+          <Grid.Column width={ 12 }>
             <div className="main">
               <div className="content">
                 <Switch>
@@ -27,10 +28,10 @@ const App: React.FC = () => {
               </div>
               <Footer />
             </div>
-          </Router>
-        </div>
-      </Sidebar.Pusher>
-    </div>
+          </Grid.Column>
+        </Router>
+      
+    </Grid>
   );
 }
 

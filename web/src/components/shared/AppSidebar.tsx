@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-import { Image, Menu } from 'semantic-ui-react';
+import { Icon, Image, Menu } from 'semantic-ui-react';
 
 import { DataStore } from '@aws-amplify/datastore';
 import { Blog } from '../../models';
@@ -20,6 +20,17 @@ const BlogMenuItem = ({ blog } : BlogMenuItemProps) => {
       active={ pathname === `/blog/${blog.id}` }
     >
         { blog.title }
+    </Menu.Item>
+  );
+};
+
+const ProfileMenuItem = () => {
+
+  return (
+    <Menu.Item className="last">
+      <Menu.Header>
+        <Icon name='user circle outline' size='large' />
+      </Menu.Header>
     </Menu.Item>
   );
 };
@@ -56,7 +67,6 @@ const AppSidebar = () => {
 
   return (
     <Menu
-      as={ Menu }
       inverted
       vertical
       fixed="left"
@@ -81,6 +91,8 @@ const AppSidebar = () => {
         )}
         </Menu.Menu>
       </Menu.Item>
+
+      <ProfileMenuItem />
     </Menu>
   )
 };
