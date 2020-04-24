@@ -1,44 +1,50 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Moment from 'react-moment';
-import { Item, List, Loader, Visibility } from 'semantic-ui-react';
+import VisibilitySensor from 'react-visibility-sensor';
+
+import Loader from '../shared/Loader';
 import { Article } from '../../models';
 
 interface ArticleItemProps {
-  article: Article
+  article: Article;
+  onVisible(): void;
 }
 
-const ArticleItem = ({ article } : ArticleItemProps) => {
-  return (
-    <Item>
-      <Item.Image size="medium" src={ article.image } />
+const ArticleItem = ({ article, onVisible } : ArticleItemProps) => {
+  function onVisibilityChange(isVisible:boolean) {
+    if (isVisible) {
+      onVisible();
+    }
+  }
 
-      <Item.Content>
-        <Item.Header as={ Link } to={ `/article/${article.id}` }>
-          { article.title }
-        </Item.Header>
-        <Item.Meta>
-          <List horizontal bulleted>
-            <List.Item>
+  return (
+    <article className="media">
+      <figure className="media-left is-hidden-mobile" style={{ marginLeft: '10px' }}>
+        <p className="image is-5x4">
+          <img style={{ maxWidth: '300px' }} src={ article.image } alt={ article.title } />
+        </p>
+      </figure>
+
+      <VisibilitySensor onChange={ onVisibilityChange } partialVisibility>
+        <article className="media-content">
+          <div className="content">
+            <h4 className="title is-4">
+              <Link to={ `/article/${article.id}` }>{ article.title }</Link>
+            </h4>
+            <h5 className="subtitle is-6 has-text-weight-light	">
+              <span><Moment format="MMM DD YYYY" date={ article.publishedAt } /></span>
+              
+              <span>
               { article.blog ?
-                <Link to={ `/blog/${article.blog.id}` }>{ article.blog.title }</Link>
-                :
-                "AWS Blog"
-              }
-            </List.Item>
-            <List.Item>
-              <Moment format="MMM DD YYYY" date={ article.publishedAt } />
-            </List.Item>
-          </List>
-        </Item.Meta>
-        <Item.Description>
-          { article.excerpt }
-        </Item.Description>
-        <Item.Meta>
-          <Link to={ `/article/${article.id}` }>Read more...</Link>
-        </Item.Meta>
-      </Item.Content>
-    </Item>
+                  <Link to={ `/blog/${article.blog.id}` }>{ article.blog.title }</Link> : "AWS Blog" }
+              </span>
+            </h5>
+            <p>{ article.excerpt }</p>
+          </div>
+        </article>
+      </VisibilitySensor>
+    </article>
   );
 };
 
@@ -54,26 +60,27 @@ const ArticleList = ({ articles, loading, loadMore } : ArticleListProps) => {
   }, [ loadMore ])
   
 
-  function onBottomVisible() {
-    console.log("-- onBottomVisible --")
-    if (loading) { return; }
-    loadMore();
+  function onItemVisible(itemIndex:number) {
+    if ((articles.length - 2) === itemIndex) {
+      if (loading) { return; }
+      console.log('... loading more ...');
+      loadMore();
+    }
   }
 
   return (
-    <Visibility
-      onBottomVisible={ onBottomVisible }
-      once={ false }
-    >
-      <Item.Group>
-        { articles.map((article, index) => 
-          <ArticleItem article={ article } key={ index } />
-        )}
-      </Item.Group>
-      { loading &&
-        <Loader active inline='centered'></Loader>
-      }
-    </Visibility>
+    <div style={{ paddingRight: '1.5em' }}>
+      { articles.map((article, index) =>
+          <ArticleItem article={ article }
+                        key={ index }
+                        onVisible={ () => onItemVisible(index) } />
+      )}
+      <div className="has-text-centered">
+        { loading &&
+            <Loader />
+        }
+      </div>
+    </div>
   );
 };
 
