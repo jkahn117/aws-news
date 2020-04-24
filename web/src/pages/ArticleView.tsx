@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import Skeleton from 'react-loading-skeleton';
 import Showdown from 'showdown';
 import Moment from 'react-moment';
-
-import { Breadcrumb, Container, Header, Label } from 'semantic-ui-react';
 
 import { DataStore } from '@aws-amplify/datastore';
 import Storage from '@aws-amplify/storage';
@@ -39,7 +38,59 @@ const ArticleContent = ({ contentUri } : ArticleContentProps) => {
   }
 
   return (
-    <div dangerouslySetInnerHTML={ makeHtmlFromContent() } />
+    <div className="content" dangerouslySetInnerHTML={ makeHtmlFromContent() } />
+  );
+};
+
+interface ArticleLayoutProps {
+  article: Article;
+}
+
+const ArticleLayout = ({ article } : ArticleLayoutProps) => {
+
+  return (
+    <article>
+      <div className="hero">
+        <div className="hero-body">
+          { article ? (
+            <>
+              <nav className="breadcrumb" aria-label="breadcrumbs">
+                <ul>
+                  <li><Link to={ `/blog/${article.blog?.id}` }>{ article.blog?.title }</Link></li>
+                </ul>
+              </nav>
+              <h1 className="title is-2">{ article.title }</h1>
+              <h5 className="subtitle">
+                <span>by { article.author }</span>
+                <span><Moment format="MMM DD YYYY" date={ article.publishedAt } /></span>
+              </h5>
+            </>
+          ) : (
+            <>
+              <Skeleton width={50} />
+              <Skeleton height={50} />
+            </>
+          ) }
+        </div>
+      </div>
+
+      <hr />
+      
+      <div className="container" style={{ padding: '0 3em 0 1.5em' }}>
+        <ArticleContent contentUri={ article.contentUri } />
+
+        <div className="tags" style={{ marginTop: '3em' }}>
+          { article.tags?.map((t, idx) =>
+            <span className="tag" key={ idx }>{ t }</span>
+          )}
+        </div>
+
+        <p>
+          <em>Originally published at: </em>
+          <a href={ article.url } target="_new">{ article.url }</a>
+        </p>
+      </div>
+    </article>
   );
 };
 
@@ -72,32 +123,9 @@ const ArticleView = () => {
   }
 
   return (
-    <div>
+    <div className="container">
       { article ? (
-        <Container text>
-          <Breadcrumb>
-            <Breadcrumb.Section link as={ Link } to={ `/blog/${article.blog?.id}` }>
-              { article.blog?.title }
-            </Breadcrumb.Section>
-          </Breadcrumb>
-          <Header as="h1">{ article.title }</Header>
-          <Header sub>
-            by { article.author } | <Moment format="MMM DD YYYY" date={ article.publishedAt } />
-          </Header>
-
-          <ArticleContent contentUri={ article.contentUri } />
-
-          <div className="tags">
-          { article.tags?.map((t, idx) =>
-            <Label key={ idx }>{ t }</Label>
-          )}
-          </div>
-
-          <p>
-            <em>Originally published at: </em>
-            <a href={ article.url } target="_new">{ article.url }</a>
-          </p>
-        </Container>
+        <ArticleLayout article= { article } />
       ) : (
         <p>Loading...</p>
       )}

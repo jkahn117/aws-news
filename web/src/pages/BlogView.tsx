@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import Skeleton from 'react-loading-skeleton';
 import Moment from 'react-moment';
 
-import { Header, Image, Placeholder } from 'semantic-ui-react';
 import './BlogView.scss';
 
 import { DataStore } from '@aws-amplify/datastore';
@@ -18,14 +18,15 @@ const ArticleCard = ({ article, index } : ArticleCardProps) => {
   return (
     <article>
       <div className="img-wrapper">
-        <Image src={ article.image } />
+        <img src={ article.image } alt={ article.title } />
       </div>
-      <Header as={ index === 0 ? 'h2' : 'h3' }>
+
+      <h3 className={ `title ${ index === 0 ? 'is-3' : 'is-4' }` }>
         <Link to={ `/article/${article.id}` }>{ article.title }</Link>
-      </Header>
-      <Header sub>
+      </h3>
+      <h5 className={ `subtitle ${ index === 0 ? 'is-5' : 'is-6' }` }>
         <Moment format="MMM DD YYYY" date={ article.publishedAt } />
-      </Header>
+      </h5>
       <p>{ article.excerpt }</p>
     </article>
   );
@@ -33,17 +34,19 @@ const ArticleCard = ({ article, index } : ArticleCardProps) => {
 
 const LoadingArticleCard = () => {
   return (
-    <Placeholder fluid>
-      <Placeholder.Header>
-        <Placeholder.Image />
-        <Placeholder.Line length="full" />
-      </Placeholder.Header>
-      <Placeholder.Paragraph>
-        <Placeholder.Line length="long" />
-        <Placeholder.Line length="medium" />
-        <Placeholder.Line length="long" />
-      </Placeholder.Paragraph>
-    </Placeholder>
+    <>
+      <Skeleton height={ 200 } />
+      <p style={{ paddingTop: '0.8rem' }}>
+        <Skeleton height={ 30 } />
+        <Skeleton height={ 20 } />
+      </p>
+      <p style={{ paddingTop: '0.5rem' }}>
+        <Skeleton width='95%' />
+        <Skeleton width='85%' />
+        <Skeleton width='75%' />
+        <Skeleton width='80%' />
+      </p>
+    </>
   );
 };
 
@@ -122,29 +125,31 @@ const BlogView = () => {
   }
 
   return (
-    <div>
-      <section>
-        { blog ? (
-          <Header as="h1">{ blog.title }</Header>
-        ) : (
-          <Placeholder.Line length="long" />
-        ) }
-        <div className="frontpage-wrapper">
-          <div className="frontpage">
-            { articles.map((article, idx) =>
-              <div className={ `fp-cell fp-cell--${idx+1}` } key={ idx }>
-                { blog && typeof article === "object" ? (
-                  <ArticleCard article={ article } index={ idx } />
-                ) : (
-                  <LoadingArticleCard/>                  
-                ) }
-                
-              </div>
-            )}
-          </div>
+    <section>
+      <div className="hero">
+        <div className="hero-body">
+          { blog ? (
+            <h1 className="title is-1">{ blog.title }</h1>
+          ) : (
+            <Skeleton height={50} />
+          ) }
         </div>
-      </section>
-    </div>
+      </div>
+      <div className="frontpage-wrapper">
+        <div className="frontpage">
+          { articles.map((article, idx) =>
+            <div className={ `fp-cell fp-cell--${idx+1}` } key={ idx }>
+              { blog && typeof article === "object" ? (
+                <ArticleCard article={ article } index={ idx } />
+              ) : (
+                <LoadingArticleCard/>                  
+              ) }
+              
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
   )
 };
 

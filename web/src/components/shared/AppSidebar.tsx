@@ -1,7 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-
-import { Icon, Image, Menu } from 'semantic-ui-react';
+import { NavLink } from 'react-router-dom';
 
 import { DataStore } from '@aws-amplify/datastore';
 import { Blog } from '../../models';
@@ -11,27 +9,15 @@ interface BlogMenuItemProps {
 };
 
 const BlogMenuItem = ({ blog } : BlogMenuItemProps) => {
-  let { pathname } = useLocation();
-
   return (
-    <Menu.Item
-      as={ Link }
-      to={ `/blog/${blog.id}` }
-      active={ pathname === `/blog/${blog.id}` }
-    >
+    <li>
+      <NavLink
+        to={ `/blog/${blog.id}` }
+        activeClassName="is-active"
+      >
         { blog.title }
-    </Menu.Item>
-  );
-};
-
-const ProfileMenuItem = () => {
-
-  return (
-    <Menu.Item className="last">
-      <Menu.Header>
-        <Icon name='user circle outline' size='large' />
-      </Menu.Header>
-    </Menu.Item>
+      </NavLink>
+    </li>
   );
 };
 
@@ -66,34 +52,21 @@ const AppSidebar = () => {
   }, [ listBlogs ]);
 
   return (
-    <Menu
-      inverted
-      vertical
-      fixed="left"
-    >
-      <Menu.Item>
-        <div style={{ width: '100%' }}>
-          <Image
-            src="/aws.png"
-            size="tiny"
-            style={{ display: 'block', margin: '0 auto' }}
-            as={ Link }
-            to="/" />
-        </div>
-      </Menu.Item>
-
-      <Menu.Item>
-        <Menu.Header>Blogs</Menu.Header>
-
-        <Menu.Menu>
-        { blogs.map((blog) =>
+    <aside className="menu">
+      <figure className="image">
+        <NavLink to="/">
+          <img src="/aws.png" alt="AWS News" className="has-image-centered" style={{ maxWidth: '150px' }} />
+        </NavLink>
+      </figure>
+      <p className="menu-label">
+        Blogs
+      </p>
+      <ul className="menu-list">
+      { blogs.map((blog) =>
           <BlogMenuItem key={ blog.id } blog={ blog } />
         )}
-        </Menu.Menu>
-      </Menu.Item>
-
-      <ProfileMenuItem />
-    </Menu>
+      </ul>
+    </aside>
   )
 };
 
