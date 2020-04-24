@@ -36,6 +36,9 @@ const LatestArticles = () => {
   
   const loadMoreArticles = useCallback(() => {
     async function loadMore() {
+      // if nextToken isn't set, we don't have more to load
+      if (nextToken.current === "") { return; }
+
       setIsLoading(true);
       try {
         const { data: { latestArticles: { items:_articles, nextToken:_token } } } =

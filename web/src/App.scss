@@ -1,30 +1,117 @@
-.main {
-  margin-left: 210px;
+@charset "utf-8";
+
+.navbar {
+  margin-bottom: 1rem;
   
-  .content {
-    padding: 2rem;
-    padding-top: 3rem;
+  .navbar-item > img {
+    margin-right: 1rem;
   }
 }
 
-.container.text img {
-  max-width: 100%;
+body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
 }
-
-footer {
-  border-top: 1px solid #ccc;
-  box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.08) inset;
-  background-color: #fafafa;
-  padding: 1rem 0;
-  text-align: center;
+.main {
+  margin: 0 auto;
   width: 100%;
 }
 
-html.ios {
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
+.footer {
+  margin-top: 2rem;
 }
-html.ios,
-html.ios body {
-  height: initial !important;
+
+ul.inline {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+
+  li + li::before {
+    content: "";
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 0.5ch;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background-color: currentColor;
+  }
 }
+
+.has-image-centered {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.menu {
+  .menu-label {
+    padding-left: 2em;
+  }
+}
+
+article {
+  h5 {
+    margin-top: 1em;
+
+    span + span::before {
+      content: "";
+      display: inline-block;
+      vertical-align: middle;
+      margin: 0 0.5ch;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background-color: currentColor;
+    }
+  }
+}
+
+
+// // Set your brand colors
+$grey-lighter: hsl(0, 0%, 86%);
+$smile: #ff9900;
+$squidink: #232f3e;
+$dark-squidink: #161E2D;
+$white: #fff;
+
+// // Update Bulma's global variables
+$menu-item-color: hsl(0, 0%, 96%);
+$menu-label-color: hsl(0, 0%, 93%);
+$menu-list-link-padding: 0.5em 0.75em 0.5em 2em;
+$menu-item-active-color: $dark-squidink;
+$menu-item-active-background-color: $white;
+
+$tabs-link-active-color: $smile;
+$tabs-link-active-border-bottom-color: $smile;
+
+$link: $squidink;
+
+// // Update some of Bulma's component variables
+$footer-background-color: $white;
+$footer-color: $dark-squidink;
+
+.has-squidink-background {
+  background-color: $squidink;
+}
+
+.footer {
+  border-top: 1px solid $grey-lighter;
+}
+
+@import '../node_modules/bulma/sass/utilities/_all.sass';
+@import '../node_modules/bulma/sass/base/_all.sass';
+@import '../node_modules/bulma/sass/components/breadcrumb.sass';
+@import '../node_modules/bulma/sass/components/media.sass';
+@import '../node_modules/bulma/sass/components/menu.sass';
+@import '../node_modules/bulma/sass/components/navbar.sass';
+@import '../node_modules/bulma/sass/components/tabs.sass';
+@import '../node_modules/bulma/sass/elements/button.sass';
+@import '../node_modules/bulma/sass/elements/container.sass';
+@import '../node_modules/bulma/sass/elements/image.sass';
+@import '../node_modules/bulma/sass/elements/tag.sass';
+@import '../node_modules/bulma/sass/elements/title.sass';
+@import '../node_modules/bulma/sass/grid/columns.sass';
+@import '../node_modules/bulma/sass/layout/hero.sass';
+@import '../node_modules/bulma/sass/layout/footer.sass';
+@import '../node_modules/bulma/sass/layout/section.sass';

@@ -1,35 +1,36 @@
 import React, { useState } from 'react';
 
-import { Tab, Header, TabProps } from 'semantic-ui-react';
+import Tabs, { Pane } from '../components/shared/Tabs';
 import LatestArticles from '../components/article/LatestArticles';
 import PopularArticles from '../components/article/PopularArticles';
 
 const Home = () => {
   const [ selectedIndex, setSelectedIndex ] = useState(0);
 
-  // @ts-ignore
-  const panes = [
+  const panes:Pane[] = [
     {
       menuItem: 'Latest',
-      render: () => <Tab.Pane as='div'><LatestArticles /></Tab.Pane>
+      render: () => <LatestArticles />
     },
     {
       menuItem: 'Popular',
-      render: () => <Tab.Pane as='div'><PopularArticles /></Tab.Pane>
+      render: () => <PopularArticles />
     }
   ];
 
-  // @ts-ignore
-  function handleTabChange(_, { activeIndex }:TabProps) {
+  function handleTabChange(activeIndex:Number) {
     setSelectedIndex(activeIndex ? Number(activeIndex) : 0);
   }
 
   return (
     <>
-      <Header as='h1'>{ panes[selectedIndex].menuItem } Articles</Header>
-      <Tab menu={{ color: 'orange', secondary: true, pointing: true }}
-          panes={ panes }
-          onTabChange={ handleTabChange } />
+      <div className="hero">
+        <div className="hero-body">
+          <h1 className="title is-1">{ panes[selectedIndex].menuItem } Articles</h1>
+        </div>
+      </div>
+      
+      <Tabs panes={ panes } onTabChange={ handleTabChange } />
     </>
   );
 };
