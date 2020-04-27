@@ -41,6 +41,7 @@ const PopularArticles = () => {
       
       setIsLoading(true);
       try {
+        // @ts-ignore
         const { data: { popularArticles: { items:articles, nextToken:_token } } } =
           await API.graphql(graphqlOperation(PopularArticlesQuery, { limit, nextToken: nextToken.current }));
         // @ts-ignore
