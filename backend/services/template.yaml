@@ -67,7 +67,8 @@ Resources:
           ELASTICACHE_ENDPOINT: !GetAtt RedisCluster.ConfigurationEndPoint.Address
           ELASTICACHE_PORT: !GetAtt RedisCluster.ConfigurationEndPoint.Port
           LATEST_CONTENT_KEY: "articles:latest"
-          BLOG_COUNT_KEY: "blog:count:"
+          ARTICLE_COUNT_KEY: "{article:count}"
+          BLOG_COUNT_KEY: "{blog:count}"
       Events:
         OnCreateEvent:
           Type: CloudWatchEvent
