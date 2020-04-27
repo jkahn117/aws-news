@@ -41,6 +41,7 @@ const LatestArticles = () => {
 
       setIsLoading(true);
       try {
+        // @ts-ignore
         const { data: { latestArticles: { items:_articles, nextToken:_token } } } =
           await API.graphql(graphqlOperation(LatestArticlesQuery, { limit, nextToken: nextToken.current }));
         // @ts-ignore

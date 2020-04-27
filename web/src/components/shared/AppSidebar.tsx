@@ -53,7 +53,7 @@ const AppSidebar = () => {
 
   return (
     <aside className="menu">
-      <figure className="image">
+      <figure className="image" style={{ marginTop: '1rem' }}>
         <NavLink to="/">
           <img src="/aws.png" alt="AWS News" className="has-image-centered" style={{ maxWidth: '150px' }} />
         </NavLink>
