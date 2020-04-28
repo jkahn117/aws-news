@@ -1,5 +1,8 @@
 --- 
 blogs: 
+  -
+    title: "AWS News Blog"
+    url: "https://aws.amazon.com/blogs/aws/feed/"
   - 
     title: "AWS Compute Blog"
     url: "https://aws.amazon.com/blogs/compute/feed/"
