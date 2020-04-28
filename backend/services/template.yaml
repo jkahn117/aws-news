@@ -40,6 +40,26 @@ Parameters:
     Type: String
     Description: Application ID for Pinpoint -- created by Amplify
 
+  RedisLatestContentKey:
+    Type: String
+    Description: Redis latest content key
+    Default: "articles:latest"
+  
+  RedisPopularContentKey:
+    Type: String
+    Description: Redis popular content key
+    Default: "articles:popular"
+
+  RedisArticleCountKey:
+    Type: String
+    Description: Redis article count key
+    Default: "{article:count}"
+
+  RedisBlogCountKey:
+    Type: String
+    Description: Redis blog count key
+    Default: "{blog:count}"
+
 Globals:
   Function:
     Runtime: nodejs12.x
@@ -66,9 +86,9 @@ Resources:
         Variables:
           ELASTICACHE_ENDPOINT: !GetAtt RedisCluster.ConfigurationEndPoint.Address
           ELASTICACHE_PORT: !GetAtt RedisCluster.ConfigurationEndPoint.Port
-          LATEST_CONTENT_KEY: "articles:latest"
-          ARTICLE_COUNT_KEY: "{article:count}"
-          BLOG_COUNT_KEY: "{blog:count}"
+          LATEST_CONTENT_KEY: !Ref RedisLatestContentKey
+          ARTICLE_COUNT_KEY: !Ref RedisArticleCountKey
+          BLOG_COUNT_KEY: !Ref RedisBlogCountKey
       Events:
         OnCreateEvent:
           Type: CloudWatchEvent
@@ -103,10 +123,11 @@ Resources:
         Variables:
           ELASTICACHE_ENDPOINT: !GetAtt RedisCluster.ConfigurationEndPoint.Address
           ELASTICACHE_PORT: !GetAtt RedisCluster.ConfigurationEndPoint.Port
-          LATEST_CONTENT_KEY: "articles:latest"
-          POPULAR_CONTENT_KEY: "articles:popular"
-          BLOG_COUNT_KEY: "blog:count:"
-
+          LATEST_CONTENT_KEY: !Ref RedisLatestContentKey
+          POPULAR_CONTENT_KEY: !Ref RedisPopularContentKey
+          BLOG_COUNT_KEY: !Ref RedisBlogCountKey
+          ARTICLE_COUNT_KEY: !Ref RedisArticleCountKey
+          
   ## AppSync Integration ##
   ElastiCacheIntegrationDataSource:
     Type: AWS::AppSync::DataSource
@@ -339,7 +360,7 @@ Resources:
         Variables:
           ELASTICACHE_ENDPOINT: !GetAtt RedisCluster.ConfigurationEndPoint.Address
           ELASTICACHE_PORT: !GetAtt RedisCluster.ConfigurationEndPoint.Port
-          POPULAR_CONTENT_KEY: "articles:popular"
+          POPULAR_CONTENT_KEY: !Ref RedisPopularContentKey
 
   Analytics:
     Type: AWS::CloudFormation::Stack
