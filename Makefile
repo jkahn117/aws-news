@@ -150,6 +150,8 @@ _install_dev_packages:
 	$(info [*] Upgrading Python SAM CLI and CloudFormation linter to latest...)
 	python3 -m pip install --upgrade --user cfn-lint aws-sam-cli
 
+	sam --version
+
 define HELP_MESSAGE
 
 	AWS News Makefile
