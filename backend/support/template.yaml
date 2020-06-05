@@ -24,8 +24,8 @@ Resources:
       CompatibleRuntimes:
         - ruby2.7
       RetentionPolicy: Delete
-      Metadata:
-        BuildMethod: ruby2.7 # @see https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/building-layers.html
+    Metadata:
+      BuildMethod: ruby2.7 # @see https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/building-layers.html
 
   LayerParameter:
     Type: AWS::SSM::Parameter
