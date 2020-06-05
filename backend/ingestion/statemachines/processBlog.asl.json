@@ -1,0 +1,51 @@
+{
+  "Comment": "Check AWS Blog for new content",
+  "StartAt": "Check blog for new posts",
+  "States": {
+    "Check blog for new posts": {
+      "Type": "Task",
+      "Resource": "${LambdaInvoke}",
+      "Parameters": {
+        "FunctionName": "${ProcessBlogFunction}",
+        "Payload": {
+          "blog.$": "$.Blog"
+        }
+      },
+      "ResultPath": "$.Result",
+      "OutputPath": "$.Result.Payload",
+      "Next": "Update blog lastImportAt timestamp",
+      "Catch": [{
+        "ErrorEquals": [ "States.ALL" ],
+        "Next": "Handle error"
+      }]
+    },
+    "Update blog lastImportAt timestamp": {
+      "Type": "Task",
+      "Resource": "${DDBUpdateItem}",
+      "Parameters": {
+        "TableName": "${BlogsTable}",
+        "Key": {
+          "id": { "S.$": "$.BlogId" }
+        },
+        "UpdateExpression": "SET #li = :importAt",
+        "ExpressionAttributeNames": {
+          "#li": "lastImportAt"
+        },
+        "ExpressionAttributeValues": {
+          ":importAt": { "S.$": "$.ImportAt" }
+        }
+      },
+      "End": true
+    },
+    "Handle error": {
+      "Type": "Task",
+      "Resource": "${SQSSendMessage}",
+      "Parameters": {
+        "QueueUrl": "${ProcessFailureQueue}",
+        "MessageBody": "$"
+      },
+      "ResultPath": "$.SQS",
+      "End": true
+    }
+  }
+}

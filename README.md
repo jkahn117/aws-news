@@ -25,46 +25,24 @@ AWS News requires the following prerequisites:
 ## Deployment
 
 1. Fork this repository, note the URL in your GitHub account.
->>> need to override the default github repo info
-2. [Create a personal access token for GitHub](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) with scopes `repo` and `admin:repo_hook`. Name the token "aws-news-build".
-3. Copy the token value (it will not be visible again).
-4. Create a new secret in AWS Secrets Manager:
 
-  ``` bash
-  aws secretsmanager create-secret --name GitHubOAuthToken --secret-string ACCESS_TOKEN
-  ```
-
-5. Deploy the build stack. In addition, we will modify the CodeBuild project created as part of this stack to use privileged mode -- this allows CodeBuild to use the Docker daemon.
-
-  ``` bash
-  make deploy.build
-  ```
-
-Note that the Pipeline will start immediately and the first build will fail. This is because we need to set CodeBuild to privileged mode. The Makefile will perform this update but not in time to catch the build. After the initial failure, all be well.
-
-  ``` bash
-  make build.run
-  ```
-
-To deploy AWS News:
-
-1. Deploy Amplify project
+2. Deploy Amplify project
   ``` bash
   cd web
 
   amplify init --app <FORKED_GITHUB_URL>
   ```
-2. Choose to create a new environment (e.g. "dev")
-3. Check the status, you should see API, Auth, and Storage modules:
+3. Choose to create a new environment (e.g. "dev")
+4. Check the status, you should see API, Auth, and Storage modules:
   ``` bash
   amplify status
   ```
-4. Push the environment to the cloud
+5. Push the environment to the cloud
   ``` bash
   amplify push
   ```
-5. Connect app in Amplify Console to the newly created backend
-6. Amplify will build other backend components and the frontend
+6. Connect app in Amplify Console to the newly created backend
+7. Amplify will build other backend components and the frontend
 
 Next, load articles
 
@@ -99,3 +77,7 @@ amplify delete
 ## Acknowledgements
 
 Heitor Lessa's [AWS Serverless Airline Booking](https://github.com/aws-samples/aws-serverless-airline-booking) project helped identify several useful patterns for managing deployment.
+
+## Changes
+
+* **June 2020** - rework organization; add new [SAM support for Step Functions](https://aws.amazon.com/blogs/compute/simplifying-application-orchestration-with-aws-step-functions-and-aws-sam/); add new support for [building layers](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/building-layers.html)

@@ -4,7 +4,7 @@ backend:
     preBuild:
       commands:
         - echo Installing required packages for build...
-        - make _install_dev_packages   # install dev tools, e.g. SAM CLI
+        - make _i6nstall_dev_packages   # install dev tools, e.g. SAM CLI
     build:
       commands:
         - echo Amplify build...
@@ -18,13 +18,19 @@ backend:
         - export AWS_REGION=$(jq -r '.providers.awscloudformation.Region' ./amplify/\#current-cloud-backend/amplify-meta.json)
         # Amplify generated resources
         - export APPSYNC_API_ID=$(jq -r '.api[(.api | keys)[0]].output.GraphQLAPIIdOutput' ./amplify/\#current-cloud-backend/amplify-meta.json)
+        - make export.parameter NAME="/news/${AWS_BRANCH}/amplify/api/id" VALUE=${APPSYNC_API_ID}
         - export APPSYNC_ENDPOINT=$(jq -r '.api[(.api | keys)[0]].output.GraphQLAPIEndpointOutput' ./amplify/\#current-cloud-backend/amplify-meta.json)
+        - make export.parameter NAME="/news/${AWS_BRANCH}/amplify/api/endpoint" VALUE=${APPSYNC_ENDPOINT}
         - echo Generating datasources.json ....
         - make init
         - export BLOGS_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "BlogTable") | .dynamodbConfig.tableName' datasources.json)
+        - make export.parameter NAME="/news/${AWS_BRANCH}/amplify/storage/table/blogs" VALUE=${BLOGS_TABLE_NAME}
         - export ARTICLES_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "ArticleTable") | .dynamodbConfig.tableName' datasources.json)
+        - make export.parameter NAME="/news/${AWS_BRANCH}/amplify/storage/table/articles" VALUE=${ARTICLES_TABLE_NAME}
         - export CONTENT_BUCKET=$(jq -r '.storage[(.storage | keys)[0]].output.BucketName' ./amplify/\#current-cloud-backend/amplify-meta.json)
+        - make export.parameter NAME="/news/${AWS_BRANCH}/amplify/storage/bucket/content" VALUE=${CONTENT_BUCKET}
         - export PINPOINT_APP_ID=$(jq -r '.analytics[(.analytics | keys)[0]].output.Id' ./amplify/\#current-cloud-backend/amplify-meta.json)
+        - make export.parameter NAME="/news/${AWS_BRANCH}/amplify/analytics/app/id" VALUE=${CONTENT_BUCKET}
         # Deploy backend, including content service and support layer
         - echo Deploy backend components...
         - make deploy

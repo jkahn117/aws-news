@@ -15,28 +15,30 @@ Parameters:
     Default: 'aws-news'
 
 Resources:
-  LoaderDependencyLayer:
+  IngestionDependenciesLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: !Sub "aws-news-${Stage}-loader-dependencies"
-      Description: Dependencies for aws-news loader
-      ContentUri: dependencies.zip
+      LayerName: !Sub "aws-news-${Stage}-ingestion-dependencies"
+      Description: Dependencies for aws-news ingestion functions
+      ContentUri: ingestion-dependencies
       CompatibleRuntimes:
         - ruby2.7
-      LicenseInfo: 'MIT'
       RetentionPolicy: Delete
+      Metadata:
+        BuildMethod: ruby2.7 # @see https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/building-layers.html
 
   LayerParameter:
     Type: AWS::SSM::Parameter
     Properties:
-      Name: !Sub "/news/${Stage}/backend/loader/layer"
+      Name: !Sub "/news/${Stage}/backend/support/ingestion/layer"
       Type: String
-      Value: !Ref LoaderDependencyLayer
-      Description: Loader Dependency Layer ARN
+      Value: !Ref IngestionDependenciesLayer
+      Description: Ingestion Dependencies Layer ARN
       Tags:
         Environment: !Ref Stage
+        ProjectName: !Ref ProjectName
 
 Outputs:
-  LoaderDependencyLayerArn:
+  IngestionDependenciesLayerArn:
     Description: Loader Dependency Layer ARN
-    Value: !Ref LoaderDependencyLayer
+    Value: !Ref IngestionDependenciesLayer

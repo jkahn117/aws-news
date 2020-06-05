@@ -6,81 +6,89 @@ AMPLIFY_ENV ?= dev
 STACK_NAME ?= "UNDEFINED"
 DEPLOYMENT_BUCKET_NAME ?= "UNDEFINED"
 AWS_REGION ?= "UNDEFINED"
-# Amplify generated resources
-APPSYNC_API_ID ?= "UNDEFINED"
-APPSYNC_ENDPOINT ?= "UNDEFINED"
-BLOGS_TABLE_NAME ?= "UNDEFINED"
-ARTICLES_TABLE_NAME ?= "UNDEFINED"
-CONTENT_BUCKET ?= "UNDEFINED"
-PINPOINT_APP_ID ?= "UNDEFINED"
 
 target:
 		$(info ${HELP_MESSAGE})
 		@exit 0
 
-deploy.build: ##=> Setup the layer build environment
-		$(info [*] Setup build environment...)
-		cd backend/layer && \
-				sam deploy \
-						--template-file build.template.yaml \
-						--stack-name aws-news-build-${AMPLIFY_ENV} \
-						--capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
-						--parameter-overrides \
-								Stage=${AMPLIFY_ENV}
-		aws cloudformation wait stack-create-complete --stack-name aws-news-build-${AMPLIFY_ENV}
-		$(MAKE) _deploy.set_codebuild_privileged_mode
-
-_deploy.set_codebuild_privileged_mode: ##=>
-		$(info [*] Setting privileged mode on CodeBuild project...)
-		$(eval PIPELINE_STACK := $(shell aws cloudformation list-stack-resources --stack-name aws-news-build-${AMPLIFY_ENV} | jq -r '.StackResourceSummaries[] | select(.LogicalResourceId == "PipelineApp").PhysicalResourceId' | grep -Eo '\/(.*)\/' | grep -Eo '[^\/]+'))
-		@echo Pipeline stack: ${PIPELINE_STACK}
-		$(eval BUILD_PROJECT := $(shell aws cloudformation list-stack-resources --stack-name ${PIPELINE_STACK} | jq -r '.StackResourceSummaries[] | select(.LogicalResourceId == "BuildProject").PhysicalResourceId'))
-		@echo Build project: ${BUILD_PROJECT}
-		$(eval PACKAGE_BUCKET := $(shell aws cloudformation describe-stacks --stack-name ${PIPELINE_STACK} | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "ArtifactsBucketName").OutputValue'))
-		@echo Artifact bucket: ${PACKAGE_BUCKET}
-		aws codebuild update-project --name ${BUILD_PROJECT} \
-						--environment "{ \"type\": \"LINUX_CONTAINER\", \
-							\"image\": \"aws/codebuild/standard:2.0\", \
-							\"computeType\": \"BUILD_GENERAL1_SMALL\", \
-							\"privilegedMode\": true, \
-							\"environmentVariables\": [ { \"name\": \"PACKAGE_BUCKET\", \"value\": \"${PACKAGE_BUCKET}\", \"type\": \"PLAINTEXT\" } ] \
-						}"
-
-build.run: ##=> Initiate pipeline
-	$(info [*] Starting CodePipeline build of dependency layer...)
-	$(eval PIPELINE_STACK := $(shell aws cloudformation list-stack-resources --stack-name aws-news-build-${AMPLIFY_ENV} | jq -r '.StackResourceSummaries[] | select(.LogicalResourceId == "PipelineApp").PhysicalResourceId' | grep -Eo '\/(.*)\/' | grep -Eo '[^\/]+'))
-	$(eval PIPELINE_NAME := $(shell aws cloudformation list-stack-resources --stack-name ${PIPELINE_STACK} | jq -r '.StackResourceSummaries[] | select(.LogicalResourceId == "Pipeline").PhysicalResourceId'))
-	@echo Build project: ${PIPELINE_NAME}
-	aws codepipeline start-pipeline-execution --name ${PIPELINE_NAME}
-
 deploy: ##=> Deploy all services
 		$(info [*] Deploying...)
-		$(MAKE) deploy.content
+		$(MAKE) init
+		$(MAKE) deploy.support
+		$(MAKE) deploy.common
+		$(MAKE) deploy.ingestion
+		$(MAKE) deploy.analytics
 		$(MAKE) deploy.services
 
 init: ##=> Initialize environment
 		$(info [*] Initialize environment...)
 		aws appsync list-data-sources --api-id ${APPSYNC_API_ID} > datasources.json
 
-deploy.content: ##=> Deploy content loading services
-		$(info [*] Deploying content services...)
-		cd backend/content && \
-				cd newContentEvent && npm install && cd .. && \
+deploy.support: ##=> Deploy support package
+	$(info [*] Deploying support...)
+	cd backend/support && \
+		sam package \
+						--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
+						--output-template-file packaged.yaml && \
+		sam deploy \
+						--template-file packaged.yaml \
+						--stack-name ${STACK_NAME}-support \
+						--capabilities CAPABILITY_IAM \
+						--parameter-overrides \
+								Stage=${AMPLIFY_ENV}
+
+deploy.common: ##=> Deploy common resources
+	$(info [*] Deploying common resources...)
+	cd backend/common && \
+		sam package \
+						--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
+						--output-template-file packaged.yaml && \
+		sam deploy \
+						--template-file packaged.yaml \
+						--stack-name ${STACK_NAME}-common \
+						--capabilities CAPABILITY_IAM \
+						--parameter-overrides \
+								Stage=${AMPLIFY_ENV}
+
+deploy.ingestion: ##=> Deploy ingestion services
+		$(info [*] Deploying ingestion services...)
+		cd backend/ingestion && \
+				sam build && \
 				sam package \
 						--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
 						--output-template-file packaged.yaml && \
 				sam deploy \
 						--template-file packaged.yaml \
-						--stack-name ${STACK_NAME}-content \
+						--stack-name ${STACK_NAME}-ingestion \
 						--capabilities CAPABILITY_IAM \
 						--parameter-overrides \
 								Stage=${AMPLIFY_ENV} \
-								AppSyncApiId=${APPSYNC_API_ID} \
-								AppSyncEndpoint=${APPSYNC_ENDPOINT} \
-								BlogsTable=${BLOGS_TABLE_NAME} \
-								ArticlesTable=${ARTICLES_TABLE_NAME} \
-								ContentBucket=${CONTENT_BUCKET} \
+								AppSyncApiId=/news/${AMPLIFY_ENV}/amplify/api/id \
+								AppSyncEndpoint=/news/${AMPLIFY_ENV}/amplify/api/endpoint \
+								BlogsTable=/news/${AMPLIFY_ENV}/amplify/storage/table/blogs \
+								ArticlesTable=/news/${AMPLIFY_ENV}/amplify/storage/table/articles \
+								ContentBucket=/news/${AMPLIFY_ENV}/amplify/storage/bucket/content \
 								LayerArn=/news/${AMPLIFY_ENV}/backend/loader/layer
+
+deploy.analytics: ##=> Deploy analytics
+	$(info [*] Deploying analytics...)
+	cd backend/analytics && \
+			sam build && \
+			sam package \
+					--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
+					--output-template-file packaged.yaml && \
+			sam deploy \
+					--template-file packaged.yaml \
+					--stack-name ${STACK_NAME}-analytics \
+					--capabilities CAPABILITY_IAM \
+					--parameter-overrides \
+							Stage=${AMPLIFY_ENV} \
+							PinpointApplicationId=/news/${AMPLIFY_ENV}/amplify/analytics/app/id \
+							ElasticacheEndpoint=/news/${AMPLIFY_ENV}/common/elasticache/endpoint \
+							ElasticachePort=/news/${AMPLIFY_ENV}/common/elasticache/port \
+							ElasticacheAccessSG=/news/${AMPLIFY_ENV}/common/elasticache/sg \
+							LambdaSubnet1=/news/${AMPLIFY_ENV}/common/network/privsubnet1 \
+							LambdaSubnet2=/news/${AMPLIFY_ENV}/common/network/privsubnet2
 
 deploy.services: ##=> Deploy services used by API
 	$(info [*] Deploying API services...)
@@ -95,20 +103,44 @@ deploy.services: ##=> Deploy services used by API
 					--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
 					--parameter-overrides \
 							Stage=${AMPLIFY_ENV} \
-							AppSyncApiId=${APPSYNC_API_ID} \
-							ArticlesTable=${ARTICLES_TABLE_NAME} \
-							PinpointApplicationId=${PINPOINT_APP_ID}
+							AppSyncApiId=/news/${AMPLIFY_ENV}/amplify/api/id \
+							ArticlesTable=/news/${AMPLIFY_ENV}/amplify/storage/table/articles \
+							ElasticacheEndpoint=/news/${AMPLIFY_ENV}/common/elasticache/endpoint \
+							ElasticachePort=/news/${AMPLIFY_ENV}/common/elasticache/port \
+							ElasticacheAccessSG=/news/${AMPLIFY_ENV}/common/elasticache/sg \
+							LambdaSubnet1=/news/${AMPLIFY_ENV}/common/network/privsubnet1 \
+							LambdaSubnet2=/news/${AMPLIFY_ENV}/common/network/privsubnet2
 
 delete: ##=> Delete all
 		$(info [*] Deleting...)
 		$(MAKE) delete.services
-		$(MAKE) delete.content
+		$(MAKE) delete.analytics
+		$(MAKE) delete.ingestion
+		$(MAKE) delete.common
+		$(MAKE) delete.support
 
-delete.content: ##=> Delete content loading services
-		aws cloudformation delete-stack --stack-name $${STACK_NAME}-content
-
-delete.services: ##=> Delete API services
+delete.services: ##=> Delete services
 		aws cloudformation delete-stack --stack-name $${STACK_NAME}-services
+
+delete.analytics: ##=> Delete analytics
+		aws cloudformation delete-stack --stack-name $${STACK_NAME}-analytics
+
+delete.ingestion: ##=> Delete ingestion
+		aws cloudformation delete-stack --stack-name $${STACK_NAME}-ingestion
+
+delete.common: ##=> Delete common
+		aws cloudformation delete-stack --stack-name $${STACK_NAME}-common
+
+delete.support: ##=> Delete support
+		aws cloudformation delete-stack --stack-name $${STACK_NAME}-support
+
+export.parameter:
+	$(info [+] Adding new parameter named "${NAME}")
+	aws ssm put-parameter \
+		--name "$${NAME}" \
+		--type "String" \
+		--value "$${VALUE}" \
+		--overwrite
 
 #### HELPERS ####
 _install_dev_packages:
