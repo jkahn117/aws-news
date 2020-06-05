@@ -115,6 +115,18 @@ Resources:
                 - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BlogsTable}"
 
   ### Lambda ###
+  IngestionDependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub "aws-news-${Stage}-ingestion-dependencies"
+      Description: Dependencies for aws-news ingestion functions
+      ContentUri: ingestion-dependencies
+      CompatibleRuntimes:
+        - ruby2.7
+      RetentionPolicy: Delete
+    Metadata:
+      BuildMethod: ruby2.7
+
   LoadBlogsFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -130,7 +142,7 @@ Resources:
                 - events:PutEvents
               Resource: '*'
       Layers:
-        - !Sub "${LayerArn}" # fix per https://github.com/awslabs/aws-sam-cli/issues/1292
+        - !Ref IngestionDependenciesLayer
       Environment:
         Variables:
           BLOGS_TABLE: !Ref BlogsTable
@@ -154,7 +166,7 @@ Resources:
                 - events:PutEvents
               Resource: '*'
       Layers:
-        - !Sub "${LayerArn}" # fix per https://github.com/awslabs/aws-sam-cli/issues/1292
+        - !Ref IngestionDependenciesLayer
       Environment:
         Variables:
           ARTICLES_TABLE: !Ref ArticlesTable

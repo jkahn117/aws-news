@@ -14,7 +14,7 @@ target:
 deploy: ##=> Deploy all services
 		$(info [*] Deploying...)
 		$(MAKE) init
-		$(MAKE) deploy.support
+		# $(MAKE) deploy.support
 		$(MAKE) deploy.common
 		$(MAKE) deploy.ingestion
 		$(MAKE) deploy.analytics
@@ -24,6 +24,8 @@ init: ##=> Initialize environment
 		$(info [*] Initialize environment...)
 		aws appsync list-data-sources --api-id ${APPSYNC_API_ID} > datasources.json
 
+
+## DO WE NEED --use-cotainer FOR BUILD STEP HERE? WILL THAT WORK?
 deploy.support: ##=> Deploy support package
 	$(info [*] Deploying support...)
 	cd backend/support && \
@@ -54,7 +56,7 @@ deploy.common: ##=> Deploy common resources
 deploy.ingestion: ##=> Deploy ingestion services
 		$(info [*] Deploying ingestion services...)
 		cd backend/ingestion && \
-				sam build && \
+				sam build --use-container && \
 				sam package \
 						--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
 						--output-template-file packaged.yaml && \
