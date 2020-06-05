@@ -73,7 +73,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: 6379
           ToPort: 6379
-          SourceSecurityGroupId: !Ref LambdaSecurityGroup
+          SourceSecurityGroupId: !Ref ElasticacheAccessSecurityGroup
       Tags:
         - Key: Project
           Value: !Ref ProjectName
