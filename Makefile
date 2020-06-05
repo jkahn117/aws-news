@@ -69,7 +69,7 @@ deploy.ingestion: ##=> Deploy ingestion services
 								BlogsTable=/news/${AMPLIFY_ENV}/amplify/storage/table/blogs \
 								ArticlesTable=/news/${AMPLIFY_ENV}/amplify/storage/table/articles \
 								ContentBucket=/news/${AMPLIFY_ENV}/amplify/storage/bucket/content \
-								LayerArn=/news/${AMPLIFY_ENV}/backend/loader/layer
+								LayerArn=/news/${AMPLIFY_ENV}/backend/support/ingestion/layer
 
 deploy.analytics: ##=> Deploy analytics
 	$(info [*] Deploying analytics...)
