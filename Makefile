@@ -24,8 +24,6 @@ init: ##=> Initialize environment
 		$(info [*] Initialize environment...)
 		aws appsync list-data-sources --api-id ${APPSYNC_API_ID} > datasources.json
 
-
-## DO WE NEED --use-cotainer FOR BUILD STEP HERE? WILL THAT WORK?
 deploy.support: ##=> Deploy support package
 	$(info [*] Deploying support...)
 	cd backend/support && \
@@ -56,7 +54,7 @@ deploy.common: ##=> Deploy common resources
 deploy.ingestion: ##=> Deploy ingestion services
 		$(info [*] Deploying ingestion services...)
 		cd backend/ingestion && \
-				sam build --use-container && \
+				sam build && \
 				sam package \
 						--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
 						--output-template-file packaged.yaml && \
@@ -151,6 +149,12 @@ _install_dev_packages:
 	yum install jq -y
 	$(info [*] Upgrading Python SAM CLI and CloudFormation linter to latest...)
 	python3 -m pip install --upgrade --user cfn-lint aws-sam-cli
+
+	$(info [*] Update to Ruby 2.7 and set path...)
+	rvm install 2.7
+	rvm --default use ruby-2.7
+
+	ruby -v
 
 define HELP_MESSAGE
 
