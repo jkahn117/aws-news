@@ -130,7 +130,7 @@ Resources:
                 - events:PutEvents
               Resource: '*'
       Layers:
-        - !Ref LayerArn
+        - !Sub "${LayerArn}" # fix per https://github.com/awslabs/aws-sam-cli/issues/1292
       Environment:
         Variables:
           BLOGS_TABLE: !Ref BlogsTable
@@ -154,7 +154,7 @@ Resources:
                 - events:PutEvents
               Resource: '*'
       Layers:
-        - !Ref LayerArn
+        - !Sub "${LayerArn}" # fix per https://github.com/awslabs/aws-sam-cli/issues/1292
       Environment:
         Variables:
           ARTICLES_TABLE: !Ref ArticlesTable
