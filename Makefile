@@ -27,6 +27,7 @@ init: ##=> Initialize environment
 deploy.support: ##=> Deploy support package
 	$(info [*] Deploying support...)
 	cd backend/support && \
+		sam build && \
 		sam package \
 						--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
 						--output-template-file packaged.yaml && \
