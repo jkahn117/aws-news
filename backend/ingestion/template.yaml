@@ -65,7 +65,7 @@ Resources:
     Type: AWS::Serverless::StateMachine
     Properties:
       DefinitionUri: statemachines/loadBlogs.asl.json
-      StateMachineName: !Sub "aws-news-load-blogs-${Stage}"
+      Name: !Sub "aws-news-load-blogs-${Stage}"
       DefinitionSubstitutions:
         LoadBlogsFunction: !GetAtt LoadBlogsFunction.Arn
         SFNStartExecution: !Sub arn:aws:states:::states:startExecution
@@ -89,7 +89,7 @@ Resources:
     Type: AWS::StepFunctions::StateMachine
     Properties:
       DefinitionUri: statemachines/loadBlogs.asl.json
-      StateMachineName: !Sub "aws-news-process-blog-${Stage}"
+      Name: !Sub "aws-news-process-blog-${Stage}"
       DefinitionSubstitutions:
         LambdaInvoke: arn:aws:states:::lambda:invoke
         ProcessBlogFunction: !GetAtt ProcessBlogFunction.Arn
