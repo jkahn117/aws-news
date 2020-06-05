@@ -72,17 +72,17 @@ Resources:
         ProcessBlogStateMachine: !Ref ProcessBlogStateMachine
       Policies:
         - Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - lambda:InvokeFunction
-                Resource:
-                  - !GetAtt LoadBlogsFunction.Arn
-              - Effect: Allow
-                Action:
-                  - states:StartExecution
-                Resource:
-                  - !Ref ProcessBlogStateMachine
+          Statement:
+            - Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+              Resource:
+                - !GetAtt LoadBlogsFunction.Arn
+            - Effect: Allow
+              Action:
+                - states:StartExecution
+              Resource:
+                - !Ref ProcessBlogStateMachine
       
   
   ProcessBlogStateMachine:
@@ -97,22 +97,22 @@ Resources:
         SQSSendMessage: arn:aws:states:::sqs:sendMessage
       Policies:
         - Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - lambda:InvokeFunction
-                Resource:
-                  - !GetAtt ProcessBlogFunction.Arn
-              - Effect: Allow
-                Action:
-                  - sqs:SendMessage
-                Resource:
-                  - !GetAtt ProcessFailureQueue.Arn
-              - Effect: Allow
-                Action:
-                  - dynamodb:UpdateItem
-                Resource:
-                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BlogsTable}"
+          Statement:
+            - Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+              Resource:
+                - !GetAtt ProcessBlogFunction.Arn
+            - Effect: Allow
+              Action:
+                - sqs:SendMessage
+              Resource:
+                - !GetAtt ProcessFailureQueue.Arn
+            - Effect: Allow
+              Action:
+                - dynamodb:UpdateItem
+              Resource:
+                - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BlogsTable}"
 
   ### Lambda ###
   LoadBlogsFunction:
