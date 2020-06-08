@@ -237,4 +237,4 @@ Resources:
                 Action:
                   - states:StartExecution
                 Resource:
-                  - !Ref ProcessAllBlogsStateMachine
+                  - !Ref LoadBlogsStateMachine
