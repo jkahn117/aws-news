@@ -212,8 +212,8 @@ Resources:
       ScheduleExpression: cron(0 14,22 ? * MON-FRI *)
       State: ENABLED
       Targets:
-        - Arn: !Ref ProcessAllBlogsStateMachine
-          Id: ProcessAllBlogsStateMachine
+        - Arn: !Ref LoadBlogsStateMachine
+          Id: LoadBlogsStateMachine
           RoleArn: !GetAtt EventBridgeRole.Arn
 
   ### IAM ###
