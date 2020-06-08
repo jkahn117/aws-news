@@ -13,6 +13,7 @@ backend:
         - echo Exporting environment variables from Amplify...
         - if [ "${AWS_BRANCH}" = "master" ]; then export AMPLIFY_ENV=prod; fi
         - if [ "${AWS_BRANCH}" = "development" ]; then export AMPLIFY_ENV=dev; fi
+        - if [ "${AWS_BRANCH}" = "next" ]; then export AMPLIFY_ENV=dev; fi
         - export STACK_NAME=$(jq -r '.providers.awscloudformation.StackName' ./amplify/\#current-cloud-backend/amplify-meta.json)
         - export DEPLOYMENT_BUCKET_NAME=$(jq -r '.providers.awscloudformation.DeploymentBucketName' ./amplify/\#current-cloud-backend/amplify-meta.json)
         - export AWS_REGION=$(jq -r '.providers.awscloudformation.Region' ./amplify/\#current-cloud-backend/amplify-meta.json)
