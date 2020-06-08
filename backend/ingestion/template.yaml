@@ -120,7 +120,7 @@ Resources:
     Properties:
       LayerName: !Sub "aws-news-${Stage}-ingestion-dependencies"
       Description: Dependencies for aws-news ingestion functions
-      ContentUri: ingestion-dependencies
+      ContentUri: dependencies
       CompatibleRuntimes:
         - ruby2.7
       RetentionPolicy: Delete
