@@ -82,7 +82,7 @@ Resources:
       
   
   ProcessBlogStateMachine:
-    Type: AWS::StepFunctions::StateMachine
+    Type: AWS::Serverless::StateMachine
     Properties:
       DefinitionUri: statemachines/loadBlogs.asl.json
       Name: !Sub "aws-news-process-blog-${Stage}"
