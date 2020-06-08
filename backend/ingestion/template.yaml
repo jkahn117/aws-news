@@ -38,10 +38,6 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<String>
     Description: Content storage bucket -- created by Amplify
 
-  LayerArn:
-    Type: AWS::SSM::Parameter::Value<String>
-    Description: ARN for Lambda Layer
-
   EventBus:
     Type: AWS::SSM::Parameter::Value<String>
     Description: Name of custom event bus for this application

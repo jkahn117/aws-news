@@ -31,7 +31,7 @@ deploy.support: ##=> Deploy support package
 					--parameter-overrides \
 							Stage=${AMPLIFY_ENV}
 	aws cloudformation wait stack-update-complete --stack-name aws-news-support-${AMPLIFY_ENV}
-	#$(MAKE) _deploy.push_custom_build_image
+	$(MAKE) _deploy.push_custom_build_image
 
 _deploy.push_custom_build_image: ##=>
 	$(info [*] Pushing build image to ECR...)
@@ -75,7 +75,7 @@ deploy.ingestion: ##=> Deploy ingestion services
 							BlogsTable=/news/${AMPLIFY_ENV}/amplify/storage/table/blogs \
 							ArticlesTable=/news/${AMPLIFY_ENV}/amplify/storage/table/articles \
 							ContentBucket=/news/${AMPLIFY_ENV}/amplify/storage/bucket/content \
-							LayerArn=/news/${AMPLIFY_ENV}/backend/support/ingestion/layer
+							EventBus=/news/${AMPLIFY_ENV}/common/eventbus/name
 
 deploy.analytics: ##=> Deploy analytics
 	$(info [*] Deploying analytics...)
