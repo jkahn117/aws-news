@@ -64,7 +64,7 @@ Resources:
       Name: !Sub "aws-news-load-blogs-${Stage}"
       DefinitionSubstitutions:
         LoadBlogsFunction: !GetAtt LoadBlogsFunction.Arn
-        SFNStartExecution: !Sub arn:aws:states:::states:startExecution
+        SFNStartExecution: "arn:aws:states:::states:startExecution"
         ProcessBlogStateMachine: !Ref ProcessBlogStateMachine
       Policies:
         - Version: "2012-10-17"
@@ -87,10 +87,10 @@ Resources:
       DefinitionUri: statemachines/loadBlogs.asl.json
       Name: !Sub "aws-news-process-blog-${Stage}"
       DefinitionSubstitutions:
-        LambdaInvoke: arn:aws:states:::lambda:invoke
+        LambdaInvoke: "arn:aws:states:::lambda:invoke"
         ProcessBlogFunction: !GetAtt ProcessBlogFunction.Arn
-        DDBUpdateItem: arn:aws:states:::dynamodb:updateItem
-        SQSSendMessage: arn:aws:states:::sqs:sendMessage
+        DDBUpdateItem: "arn:aws:states:::dynamodb:updateItem"
+        SQSSendMessage: "arn:aws:states:::sqs:sendMessage"
       Policies:
         - Version: "2012-10-17"
           Statement:
