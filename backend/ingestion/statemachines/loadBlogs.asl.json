@@ -24,7 +24,7 @@
           "Process individual blog": {
             "Comment": "Process each blog in list provided by parent",
             "Type": "Task",
-            "Resource": "${SFNStartExecution}",
+            "Resource": "arn:aws:states:::states:startExecution",
             "Parameters": {
               "StateMachineArn": "${ProcessBlogStateMachine}",
               "Input": {

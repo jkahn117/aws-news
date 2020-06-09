@@ -64,7 +64,7 @@ Resources:
       Name: !Sub "aws-news-load-blogs-${Stage}"
       DefinitionSubstitutions:
         LoadBlogsFunction: !GetAtt LoadBlogsFunction.Arn
-        SFNStartExecution: "arn:aws:states:::states:startExecution"
+        # SFNStartExecution: "arn:aws:states:::states:startExecution"
         ProcessBlogStateMachine: !Ref ProcessBlogStateMachine
       Policies:
         - Version: "2012-10-17"
