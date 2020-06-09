@@ -31,7 +31,7 @@ backend:
         - export CONTENT_BUCKET=$(jq -r '.storage[(.storage | keys)[0]].output.BucketName' ./amplify/\#current-cloud-backend/amplify-meta.json)
         - make export.parameter NAME="/news/${AMPLIFY_ENV}/amplify/storage/bucket/content" VALUE=${CONTENT_BUCKET}
         - export PINPOINT_APP_ID=$(jq -r '.analytics[(.analytics | keys)[0]].output.Id' ./amplify/\#current-cloud-backend/amplify-meta.json)
-        - make export.parameter NAME="/news/${AMPLIFY_ENV}/amplify/analytics/app/id" VALUE=${CONTENT_BUCKET}
+        - make export.parameter NAME="/news/${AMPLIFY_ENV}/amplify/analytics/app/id" VALUE=${PINPOINT_APP_ID}
         # Deploy backend, including content service and support layer
         - echo Deploy backend components...
         - make deploy

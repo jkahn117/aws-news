@@ -19,7 +19,7 @@ Parameters:
     Default: 'aws-news'
 
   PinpointApplicationId:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
     Description: Application ID for Pinpoint -- created by Amplify
 
   ElasticacheEndpoint:
