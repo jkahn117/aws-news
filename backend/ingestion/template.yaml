@@ -84,7 +84,7 @@ Resources:
   ProcessBlogStateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
-      DefinitionUri: statemachines/loadBlogs.asl.json
+      DefinitionUri: statemachines/processBlog.asl.json
       Name: !Sub "aws-news-process-blog-${Stage}"
       DefinitionSubstitutions:
         LambdaInvoke: "arn:aws:states:::lambda:invoke"
