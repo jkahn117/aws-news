@@ -56,33 +56,6 @@ Globals:
       Env: !Ref Stage
 
 Resources:
-  LatestContentFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: latest-content/
-      Policies:
-        - VPCAccessPolicy: {}
-      VpcConfig:
-        SecurityGroupIds:
-          - !Ref ElasticacheAccessSG
-        SubnetIds:
-          - !Ref LambdaSubnet1
-          - !Ref LambdaSubnet2
-      Environment:
-        Variables:
-          ELASTICACHE_ENDPOINT: !Ref ElasticacheEndpoint
-          ELASTICACHE_PORT: !Ref ElasticachePort
-          LATEST_CONTENT_KEY: "articles:latest"
-          BLOG_COUNT_KEY: "blog:count:"
-      Events:
-        OnCreateEvent:
-          Type: CloudWatchEvent
-          Properties:
-            EventBusName: !Sub ${ProjectName}-${Stage}-eventbus
-            Pattern:
-              detail-type:
-                - article_created
-
   ElastiCacheIntegrationFunction:
     Type: AWS::Serverless::Function
     Properties:

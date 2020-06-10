@@ -23,6 +23,7 @@ init: ##=> Initialize environment
 	$(info [*] Initialize environment...)
 	aws appsync list-data-sources --api-id ${APPSYNC_API_ID} > datasources.json
 
+### Support deployed once when first launching project
 deploy.support: ##=> Deploy support package
 	$(info [*] Deploying support...)
 	aws cloudformation deploy \
@@ -44,6 +45,7 @@ _deploy.push_custom_build_image: ##=>
 		docker push ${REPO}:latest && \
 		echo "Finished push to ${REPO}:latest"
 
+#### Following deployments are for services
 deploy.common: ##=> Deploy common resources
 	$(info [*] Deploying common resources...)
 	cd backend/common && \
@@ -75,7 +77,12 @@ deploy.ingestion: ##=> Deploy ingestion services
 							BlogsTable=/news/${AMPLIFY_ENV}/amplify/storage/table/blogs \
 							ArticlesTable=/news/${AMPLIFY_ENV}/amplify/storage/table/articles \
 							ContentBucket=/news/${AMPLIFY_ENV}/amplify/storage/bucket/content \
-							EventBus=/news/${AMPLIFY_ENV}/common/eventbus/name
+							EventBus=/news/${AMPLIFY_ENV}/common/eventbus/name \
+							ElasticacheEndpoint=/news/${AMPLIFY_ENV}/common/elasticache/endpoint \
+							ElasticachePort=/news/${AMPLIFY_ENV}/common/elasticache/port \
+							ElasticacheAccessSG=/news/${AMPLIFY_ENV}/common/elasticache/sg \
+							LambdaSubnet1=/news/${AMPLIFY_ENV}/common/network/privsubnet1 \
+							LambdaSubnet2=/news/${AMPLIFY_ENV}/common/network/privsubnet2
 
 deploy.analytics: ##=> Deploy analytics
 	$(info [*] Deploying analytics...)

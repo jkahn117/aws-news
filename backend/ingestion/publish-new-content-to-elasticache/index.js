@@ -1,5 +1,5 @@
 /**
- * LatestContentFunction
+ * PublishNewContentToElasticache
  * 
  * This function is triggered by EventBridge payloads matching rules:
  *   - detail-type == article_created

@@ -42,6 +42,26 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<String>
     Description: Name of custom event bus for this application
 
+  ElasticacheEndpoint:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: Elasticache Endpoint
+
+  ElasticachePort:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: Elasticache Port
+
+  ElasticacheAccessSG:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::SecurityGroup::Id>
+    Description: Security Group allowing access to Elasticache
+
+  LambdaSubnet1:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>
+    Description: Subnet for Lambda 1
+
+  LambdaSubnet2:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>
+    Description: Subnet for Lambda 2
+
 Conditions:
   IsProduction: !Equals 
     - !Ref Stage
@@ -169,10 +189,10 @@ Resources:
           CONTENT_BUCKET: !Ref ContentBucket
           EVENT_BUS: !Ref EventBus
 
-  NewContentEventFunction:
+  PublishNewContentToAppSyncFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: handle-new-content/
+      CodeUri: publish-new-content-to-appsync/
       Handler: index.handler
       Runtime: nodejs12.x
       Policies:
@@ -195,6 +215,33 @@ Resources:
             Pattern:
               detail-type:
                 - blog_created
+                - article_created
+
+  PublishNewContentToElasticacheFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: publish-new-content-to-elasticache/
+      Policies:
+        - VPCAccessPolicy: {}
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref ElasticacheAccessSG
+        SubnetIds:
+          - !Ref LambdaSubnet1
+          - !Ref LambdaSubnet2
+      Environment:
+        Variables:
+          ELASTICACHE_ENDPOINT: !Ref ElasticacheEndpoint
+          ELASTICACHE_PORT: !Ref ElasticachePort
+          LATEST_CONTENT_KEY: "articles:latest"
+          BLOG_COUNT_KEY: "blog:count:"
+      Events:
+        OnCreateEvent:
+          Type: CloudWatchEvent
+          Properties:
+            EventBusName: !Sub ${ProjectName}-${Stage}-eventbus
+            Pattern:
+              detail-type:
                 - article_created
 
   ### SQS ###
