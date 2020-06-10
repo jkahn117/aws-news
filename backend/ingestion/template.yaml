@@ -121,7 +121,7 @@ Resources:
         - ruby2.7
       RetentionPolicy: Delete
     Metadata:
-      BuildMethod: ruby2.7
+      BuildMethod: makefile
 
   LoadBlogsFunction:
     Type: AWS::Serverless::Function
