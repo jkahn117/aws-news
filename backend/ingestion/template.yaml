@@ -221,6 +221,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: publish-new-content-to-elasticache/
+      Handler: index.handler
+      Runtime: nodejs12.x
       Policies:
         - VPCAccessPolicy: {}
       VpcConfig:
