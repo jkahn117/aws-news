@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Head from 'next/head';
 import useSWR from 'swr';
 import API, { graphqlOperation } from '@aws-amplify/api';
+import Analytics from '@aws-amplify/analytics';
 
 import PageHeader from '@/common/PageHeader';
 import ArticleCard from '@/article/ArticleCard';
@@ -71,6 +72,13 @@ export default function Home() {
 
   const { items, nextToken } = data;
 
+  Analytics.record({
+    name: 'pageView',
+    attributes: {
+      title: '[Home]'
+    }
+  });
+
   return (
     <>
       <Head>
@@ -78,7 +86,7 @@ export default function Home() {
       </Head>      
 
       <div className="hidden sm:block">
-        <PageHeader title="Latest Articles"/>
+        <PageHeader title={ `${ selectedView } Articles` }/>
 
         <div className="flex flex-row h-10 border-b border-gray-300 justify-center content-center text-sm">
           <div className="px-4 py m-2 inline">

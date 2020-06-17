@@ -3,8 +3,10 @@ import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import axios from 'axios';
 import Markdown from 'react-markdown';
+
 import API, { graphqlOperation } from '@aws-amplify/api';
 import Storage from '@aws-amplify/storage';
+import Analytics from '@aws-amplify/analytics';
 
 import { BlogSlug, ByLine } from '@/article/Util';
 import Loader from '@/ui/Loader';
@@ -51,6 +53,15 @@ export default function Article() {
   }
 
   if (!article) return <div><Loader /></div>
+
+  Analytics.record({
+    name: 'pageView',
+    attributes: {
+      title: `[Article] ${article.title}`,
+      articleId: article.id,
+      blogId: article.blog ? article.blog.id : null
+    }
+  });
 
   return (
     <>

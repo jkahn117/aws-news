@@ -2,6 +2,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import API, { graphqlOperation } from '@aws-amplify/api';
+import Analytics from '@aws-amplify/analytics';
 
 import Loader from '@/ui/Loader';
 import PageHeader from '@/common/PageHeader';
@@ -44,6 +45,14 @@ export default function Blog() {
   }
 
   if (!blog) return <div><Loader /></div>
+
+  Analytics.record({
+    name: 'pageView',
+    attributes: {
+      title: `[Blog] ${blog.title}`,
+      blogId: blog.id
+    }
+  });
 
   return (
     <>
