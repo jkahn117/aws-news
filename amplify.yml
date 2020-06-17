@@ -39,13 +39,13 @@ frontend:
   phases:
     preBuild:
       commands:
-        - cd web
+        - cd next
         - yarn install
     build:
       commands:
         - yarn run build
   artifacts:
-    baseDirectory: web/build
+    baseDirectory: next/out
     files:
       - "**/*"
   cache:
