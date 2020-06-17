@@ -26,23 +26,29 @@ AWS News requires the following prerequisites:
 
 1. Fork this repository, note the URL in your GitHub account.
 
-2. Deploy Amplify project
+2. Deploy the `support` stack. This includes an ECR Repository and a Docker image that will be used to build / deploy the application in Amplify Console. Note that building and then pushing the image can take some time, so grab a cup of coffee.
+
+  ``` bash
+  make deploy.support
+  ```
+
+3. Deploy Amplify project
   ``` bash
   cd web
 
   amplify init --app <FORKED_GITHUB_URL>
   ```
-3. Choose to create a new environment (e.g. "dev")
-4. Check the status, you should see API, Auth, and Storage modules:
+4. Choose to create a new environment (e.g. "dev")
+5. Check the status, you should see API, Auth, and Storage modules:
   ``` bash
   amplify status
   ```
-5. Push the environment to the cloud
+6. Push the environment to the cloud
   ``` bash
   amplify push
   ```
-6. Connect app in Amplify Console to the newly created backend
-7. Amplify will build other backend components and the frontend
+7. Connect app in Amplify Console to the newly created backend
+8. Amplify will build other backend components and the frontend
 
 Next, load articles
 

@@ -1,0 +1,13 @@
+// @see https://github.com/tailwindcss/tailwindcss/issues/1234
+{
+  "presets": [
+    [
+      "next/babel",
+      {
+        "styled-jsx": {
+          "plugins": [ "styled-jsx-plugin-postcss" ]
+        }
+      }
+    ]
+  ]
+}
