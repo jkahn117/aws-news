@@ -11,8 +11,10 @@
  */
 
 const Redis = require("ioredis");
+const Moment = require("moment");
 
 const LATEST_CONTENT_KEY = process.env.LATEST_CONTENT_KEY;
+const ARTICLE_COUNT_KEY = process.env.ARTICLE_COUNT_KEY;
 const BLOG_COUNT_KEY = process.env.BLOG_COUNT_KEY;
 
 let redis = new Redis.Cluster([
@@ -48,6 +50,7 @@ exports.handler = async(event) => {
   console.log(JSON.stringify(event));
 
   let { detail: { blogId, articleId } } = event;
+  const today = Moment().format("YYYYMMDD");
 
   try {
     // add blog to list of latest
@@ -57,7 +60,15 @@ exports.handler = async(event) => {
     await pipeline.exec();
 
     // increment count of articles on this blog
-    await pipeline.incr(BLOG_COUNT_KEY + blogId);
+    pipeline.zadd(`${BLOG_COUNT_KEY}:${blogId}:days`, 0, `${today}`);
+    pipeline.incr(`${BLOG_COUNT_KEY}:${blogId}`);
+    pipeline.incr(`${BLOG_COUNT_KEY}:${blogId}:${today}`);
+    await pipeline.exec();
+
+    pipeline.zadd(`${ARTICLE_COUNT_KEY}:days`, 0, `${today}`);
+    pipeline.incr(`${ARTICLE_COUNT_KEY}:${today}`);
+    pipeline.incr(`${ARTICLE_COUNT_KEY}:total`);
+    await pipeline.exec();
   } catch(error) {
     console.error(`[ERROR] ${error}`)
   }

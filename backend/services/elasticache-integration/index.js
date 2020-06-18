@@ -1,13 +1,9 @@
 /**
- * LatestContentFunction
+ * ElastiCacheIntegrationFunction
  * 
- * This function is triggered by EventBridge payloads matching rules:
- *   - detail-type == article_created
- * 
- * The function captures new article events published to EventBridge and
- * writes applicable data to Redis (ElastiCache), primarily for statitics
- * but also latest content.
- * 
+ * This function allows AWS AppSync to interoperate with Amazon
+ * ElastiCache (Redis). It provides a set of actions that correspond
+ * to data retrievals from ElastiCache.
  */
 
 const Redis = require("ioredis");
@@ -15,6 +11,7 @@ const Redis = require("ioredis");
 const LATEST_CONTENT_KEY = process.env.LATEST_CONTENT_KEY;
 const POPULAR_CONTENT_KEY = process.env.POPULAR_CONTENT_KEY;
 const BLOG_COUNT_KEY = process.env.BLOG_COUNT_KEY;
+const ARTICLE_COUNT_KEY = process.env.ARTICLE_COUNT_KEY;
 
 let redis = new Redis.Cluster([
   {
@@ -24,6 +21,31 @@ let redis = new Redis.Cluster([
 ]);
 
 /**
+ * Helper function to prepare response for list of article ids.
+ * @param {*} result 
+ */
+function _returnArticleList(result) {
+  const [ err1, articleIds ] = result[0];
+  const [ err2, length ] = result[1];
+  
+  if (err1 || err2) {
+    console.error(`[ERROR] ${err1}`);
+    console.error(`[ERROR] ${err2}`);
+    return {
+      error: "An error has occurred retrieving articles"
+    }
+  }
+
+  // going to max out at 50 articles, to avoid potentially being never ending
+  const nextIndex = Math.min(length, 50) > end ? end + 1 : null;
+
+  return {
+    ids: articleIds,
+    nextToken: nextIndex ? _encodeNextToken("Article", nextIndex) : ""
+  };
+}
+
+/**
  * Retrieves listing of latest articles ids and sets nextToken.
  * @param {Int} start 
  * @param {Int} limit 
@@ -31,32 +53,14 @@ let redis = new Redis.Cluster([
 async function getLatestArticles(start, limit) {
   try {
     const pipeline = redis.pipeline();
-  
     // get listing of article ids from list in desired range
     const end = (start + limit) - 1;
     pipeline.lrange(LATEST_CONTENT_KEY, start, end);
-
     // get the total length of the list to determine if we need to paginate
     pipeline.llen(LATEST_CONTENT_KEY);
 
     const result = await pipeline.exec();
-    const [ err1, articleIds ] = result[0];
-    const [ err2, length ] = result[1];
-    
-    if (err1 || err2) {
-      console.error(`[ERROR - lrange] ${err1}`);
-      console.error(`[ERROR - llen] ${err2}`);
-      return {
-        error: "An error has occurred retrieving latest articles"
-      }
-    }
-
-    const nextIndex = length > end ? end + 1 : null;
-
-    return {
-      ids: articleIds,
-      nextToken: nextIndex ? _encodeNextToken("Article", nextIndex) : ""
-    };
+    return _returnArticleList(result);
   } catch(error) {
     console.error(JSON.stringify(error));
     return { error: error.message };
@@ -71,33 +75,14 @@ async function getLatestArticles(start, limit) {
 async function getPopularArticles(start, limit) {
   try {
     const pipeline = redis.pipeline();
-
     // get the leaderboard for articles in the desired range
     const end = start + limit - 1;
     pipeline.zrevrange(POPULAR_CONTENT_KEY, start, end);
-
     // get the total number of articles in the leaderboard
     pipeline.zcount(POPULAR_CONTENT_KEY, 0, "+inf");
 
     const result = await pipeline.exec();
-    const [ err1, articleIds ] = result[0];
-    const [ err2, length ] = result[1];
-    
-    if (err1 || err2) {
-      console.error(`[ERROR - lrange] ${err1}`);
-      console.error(`[ERROR - llen] ${err2}`);
-      return {
-        error: "An error has occurred retrieving latest articles"
-      }
-    }
-
-    // going to max out at 50 popular articles, to avoid potentially being never ending
-    const nextIndex = Math.min(length, 50) > end ? end + 1 : null;
-
-    return {
-      ids: articleIds,
-      nextToken: nextIndex ? _encodeNextToken("Article", nextIndex) : ""
-    };
+    return _returnArticleList(result);
   } catch(error) {
     console.error(JSON.stringify(error));
     return { error: error.message };
@@ -122,6 +107,37 @@ function _encodeNextToken(type, nextIndex) {
   return Buffer.from(`${type}:${nextIndex}`).toString("base64");
 }
 
+async function getArticleMetrics() {
+  const pipeline = redis.pipeline();
+  // get total
+  pipeline.get(`${ARTICLE_COUNT_KEY}:total`);
+  // get days on which we have new articles
+  pipeline.zrevrange(`${ARTICLE_COUNT_KEY}:days`, 0, 6);
+  const result = await pipeline.exec();
+
+  const [ err1, totalCount ] = result[0];
+  const [ err2, days ] = result[1];
+
+  if (err1 || err2) {
+    console.error(`[ERROR] ${err1}`);
+    console.error(`[ERROR] ${err2}`);
+    return {
+      error: "An error has occurred retrieving articles"
+    }
+  }
+
+  for (let date of days) {
+    pipeline.get(`${ARTICLE_COUNT_KEY}:${date}`);
+  }
+
+  let dailyCounts = await pipeline.exec();
+
+  return {
+    total: totalCount,
+    dailyCounts: days.reduce((n, d, i) => { n[d] = dailyCounts[i]; return n }, {})
+  }
+}
+
 /**
  * 
  * Main handler function.
@@ -137,6 +153,10 @@ exports.handler = async(event) => {
       return await getLatestArticles(start, limit);
     case "popularArticles":
       return await getPopularArticles(start, limit);
+    // case "blogMetrics":
+    //   return null;
+    case "articleMetrics":
+      return null;
     default:
       throw("No such method");
   }

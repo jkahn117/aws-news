@@ -46,6 +46,26 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>
     Description: Subnet for Lambda 2
 
+  RedisLatestContentKey:
+    Type: String
+    Description: Redis latest content key
+    Default: "articles:latest"
+  
+  RedisPopularContentKey:
+    Type: String
+    Description: Redis popular content key
+    Default: "articles:popular"
+
+  RedisArticleCountKey:
+    Type: String
+    Description: Redis article count key
+    Default: "{article:count}"
+
+  RedisBlogCountKey:
+    Type: String
+    Description: Redis blog count key
+    Default: "{blog:count}"
+
 Globals:
   Function:
     Runtime: nodejs12.x
