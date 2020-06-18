@@ -75,6 +75,7 @@ export default function Home() {
   Analytics.record({
     name: 'pageView',
     attributes: {
+      path: '/',
       title: '[Home]'
     }
   });
@@ -106,7 +107,7 @@ export default function Home() {
       </div>
 
       <div className="divide-y divide-gray-300 sm:px-8 sm:space-y-4">
-        { items.sort((a, b) => (a.publishedAt > b.publishedAt) ? -1 : 1).map((article) =>
+        { items.filter(a => a).sort((a, b) => (a.publishedAt > b.publishedAt) ? -1 : 1).map((article) =>
           <ArticleCard article={ article } key={ article.id } />
         )}
       </div>

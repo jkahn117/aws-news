@@ -30,10 +30,9 @@ const getArticle = /* GraphQL */ `
   `;
 
 export default function Article() {
-  const router = useRouter();
-  const { id } = router.query;
+  const { asPath, query: { id: articleId } } = useRouter();
 
-  const fetcher = (query, articleId) => API.graphql(graphqlOperation(query, { id: articleId }))
+  const fetcher = (query, id) => API.graphql(graphqlOperation(query, { id }))
                                             .then(r => {
                                               const { data: { getArticle } } = r;
                                               return getArticle;
@@ -44,7 +43,7 @@ export default function Article() {
                                 .then(d => d.data)
                                 .catch(e => console.error(e));
 
-  const { data: article, error } = useSWR(id ? [ getArticle, id ] : null, fetcher);
+  const { data: article, error } = useSWR(articleId ? [ getArticle, articleId ] : null, fetcher);
   const { data: content } = useSWR(() => article.contentUri, storage);
 
   if (error) {
@@ -57,6 +56,7 @@ export default function Article() {
   Analytics.record({
     name: 'pageView',
     attributes: {
+      path: asPath,
       title: `[Article] ${article.title}`,
       articleId: article.id,
       blogId: article.blog ? article.blog.id : null

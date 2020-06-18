@@ -28,16 +28,15 @@ const getBlog = /* GraphQL */ `
   `;
 
 export default function Blog() {
-  const router = useRouter();
-  const { id } = router.query;
+  const { asPath, query: { id: blogId } } = useRouter();
 
-  const fetcher = (query, articleId) => API.graphql(graphqlOperation(query, { id: articleId }))
+  const fetcher = (query, id) => API.graphql(graphqlOperation(query, { id }))
                                             .then(r => {
                                               const { data: { getBlog } } = r;
                                               return getBlog;
                                             });
 
-  const { data: blog, error } = useSWR(id ? [ getBlog, id ] : null, fetcher);
+  const { data: blog, error } = useSWR(blogId ? [ getBlog, blogId ] : null, fetcher);
 
   if (error) {
     console.error(error);
@@ -49,6 +48,7 @@ export default function Blog() {
   Analytics.record({
     name: 'pageView',
     attributes: {
+      path: asPath,
       title: `[Blog] ${blog.title}`,
       blogId: blog.id
     }
