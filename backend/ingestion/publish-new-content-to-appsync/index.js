@@ -1,5 +1,5 @@
 /**
- * NewContentEventFunction
+ * PublishNewContentToAppSync
  * 
  * This function is triggered by EventBridge payloads matching rules:
  *   - detail-type == blog_created

@@ -1,0 +1,33 @@
+{
+  "name": "next",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build && next export",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@aws-amplify/analytics": "^3.2.0",
+    "@aws-amplify/api": "^3.1.16",
+    "@aws-amplify/auth": "^3.2.13",
+    "@aws-amplify/core": "^3.3.3",
+    "@aws-amplify/storage": "^3.2.6",
+    "@tailwindcss/ui": "^0.3.0",
+    "heroicons": "^0.3.6",
+    "moment": "^2.26.0",
+    "next": "9.4.4",
+    "next-svgr": "^0.0.2",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "react-markdown": "^4.3.1",
+    "react-moment": "^0.9.7",
+    "react-transition-group": "^4.4.1",
+    "swr": "^0.2.2"
+  },
+  "devDependencies": {
+    "postcss-preset-env": "^6.7.0",
+    "styled-jsx-plugin-postcss": "^2.0.1",
+    "tailwindcss": "^1.4.6"
+  }
+}

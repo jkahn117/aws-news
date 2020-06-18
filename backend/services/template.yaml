@@ -18,27 +18,33 @@ Parameters:
     Description: The name of this project
     Default: 'aws-news'
 
-  ElasticacheInstanceClass:
-    Type: String
-    Description: ElastiCache node instance type
-    Default: cache.t2.micro
-
-  RedisEngineVersion:
-    Type: String
-    Description: ElastiCache for Redis engine version
-    Default: 5.0.6
-
   AppSyncApiId:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
     Description: AWS AppSync API ID -- created by Amplify
 
   ArticlesTable:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
     Description: Name of DyanmoDB Articles table -- created by Amplify
 
-  PinpointApplicationId:
-    Type: String
-    Description: Application ID for Pinpoint -- created by Amplify
+  ElasticacheEndpoint:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: Elasticache Endpoint
+
+  ElasticachePort:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: Elasticache Port
+
+  ElasticacheAccessSG:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::SecurityGroup::Id>
+    Description: Security Group allowing access to Elasticache
+
+  LambdaSubnet1:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>
+    Description: Subnet for Lambda 1
+
+  LambdaSubnet2:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>
+    Description: Subnet for Lambda 2
 
   RedisLatestContentKey:
     Type: String
@@ -70,43 +76,6 @@ Globals:
       Env: !Ref Stage
 
 Resources:
-  LatestContentFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: latest-content/
-      Policies:
-        - VPCAccessPolicy: {}
-      VpcConfig:
-        SecurityGroupIds:
-          - !Ref LambdaSecurityGroup
-        SubnetIds:
-          - !GetAtt Network.Outputs.PrivateSubnet1
-          - !GetAtt Network.Outputs.PrivateSubnet2
-      Environment:
-        Variables:
-          ELASTICACHE_ENDPOINT: !GetAtt RedisCluster.ConfigurationEndPoint.Address
-          ELASTICACHE_PORT: !GetAtt RedisCluster.ConfigurationEndPoint.Port
-          LATEST_CONTENT_KEY: !Ref RedisLatestContentKey
-          ARTICLE_COUNT_KEY: !Ref RedisArticleCountKey
-          BLOG_COUNT_KEY: !Ref RedisBlogCountKey
-      Events:
-        OnCreateEvent:
-          Type: CloudWatchEvent
-          Properties:
-            EventBusName: !Sub ${ProjectName}-${Stage}-eventbus
-            Pattern:
-              detail-type:
-                - article_created
-
-  LambdaSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      VpcId: !GetAtt Network.Outputs.VPC
-      GroupDescription: Enable Redis access
-      Tags:
-        - Key: Project
-          Value: !Ref ProjectName
-
   ElastiCacheIntegrationFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -115,19 +84,18 @@ Resources:
         - VPCAccessPolicy: {}
       VpcConfig:
         SecurityGroupIds:
-          - !Ref LambdaSecurityGroup
+          - !Ref ElasticacheAccessSG
         SubnetIds:
-          - !GetAtt Network.Outputs.PrivateSubnet1
-          - !GetAtt Network.Outputs.PrivateSubnet2
+          - !Ref LambdaSubnet1
+          - !Ref LambdaSubnet2
       Environment:
         Variables:
-          ELASTICACHE_ENDPOINT: !GetAtt RedisCluster.ConfigurationEndPoint.Address
-          ELASTICACHE_PORT: !GetAtt RedisCluster.ConfigurationEndPoint.Port
-          LATEST_CONTENT_KEY: !Ref RedisLatestContentKey
-          POPULAR_CONTENT_KEY: !Ref RedisPopularContentKey
-          BLOG_COUNT_KEY: !Ref RedisBlogCountKey
-          ARTICLE_COUNT_KEY: !Ref RedisArticleCountKey
-          
+          ELASTICACHE_ENDPOINT: !Ref ElasticacheEndpoint
+          ELASTICACHE_PORT: !Ref ElasticachePort
+          LATEST_CONTENT_KEY: "articles:latest"
+          POPULAR_CONTENT_KEY: "articles:popular"
+          BLOG_COUNT_KEY: "blog:count:"
+
   ## AppSync Integration ##
   ElastiCacheIntegrationDataSource:
     Type: AWS::AppSync::DataSource
@@ -298,95 +266,3 @@ Resources:
                 Resource:
                   - !GetAtt ElastiCacheIntegrationFunction.Arn
 
-
-  ## Redis ##
-  RedisCluster:
-    Type: AWS::ElastiCache::ReplicationGroup
-    Properties:
-      AutoMinorVersionUpgrade: true
-      # enable Cluster Mode
-      CacheParameterGroupName: default.redis5.0.cluster.on
-      CacheNodeType: !Ref ElasticacheInstanceClass
-      CacheSubnetGroupName:  !Ref RedisSubnetGroup
-      Engine: redis
-      EngineVersion: !Ref RedisEngineVersion
-      NumNodeGroups: 1
-      Port: 6379
-      ReplicasPerNodeGroup: 1
-      ReplicationGroupDescription: !Sub ${ProjectName} Redis
-      SecurityGroupIds:
-        - !Ref RedisSecurityGroup
-      Tags:
-        - Key: Project
-          Value: !Ref ProjectName
-
-  RedisSubnetGroup:
-    Type: AWS::ElastiCache::SubnetGroup
-    Properties:
-      Description: Redis subnet group
-      SubnetIds:
-        - !GetAtt Network.Outputs.PrivateSubnet1
-        - !GetAtt Network.Outputs.PrivateSubnet2
-
-  RedisSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      VpcId: !GetAtt Network.Outputs.VPC
-      GroupDescription: Enable Redis access
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 6379
-          ToPort: 6379
-          SourceSecurityGroupId: !Ref LambdaSecurityGroup
-      Tags:
-        - Key: Project
-          Value: !Ref ProjectName
-
-  ### Analytics ###
-  AnalyticsStreamProcessorFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Timeout: 240
-      CodeUri: analytics-event-processor/
-      Policies:
-        - VPCAccessPolicy: {}
-      VpcConfig:
-        SecurityGroupIds:
-          - !Ref LambdaSecurityGroup
-        SubnetIds:
-          - !GetAtt Network.Outputs.PrivateSubnet1
-          - !GetAtt Network.Outputs.PrivateSubnet2
-      Environment:
-        Variables:
-          ELASTICACHE_ENDPOINT: !GetAtt RedisCluster.ConfigurationEndPoint.Address
-          ELASTICACHE_PORT: !GetAtt RedisCluster.ConfigurationEndPoint.Port
-          POPULAR_CONTENT_KEY: !Ref RedisPopularContentKey
-
-  Analytics:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: "./analytics.yaml"
-      Parameters:
-        Stage: !Ref Stage
-        ProjectName: !Ref ProjectName
-        PinpointApplicationId: !Ref PinpointApplicationId
-        StreamProcessorFunctionArn: !GetAtt AnalyticsStreamProcessorFunction.Arn
-      Tags:
-        - Key: Project
-          Value: !Ref ProjectName
-        - Key: Stage
-          Value: !Ref Stage
-
-  ### Network ###
-  Network:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: "./network.yaml"
-      Parameters:
-        Stage: !Ref Stage
-        ProjectName: !Ref ProjectName
-      Tags:
-        - Key: Project
-          Value: !Ref ProjectName
-        - Key: Stage
-          Value: !Ref Stage

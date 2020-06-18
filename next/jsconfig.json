@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/ui/*": [ "components/ui/*" ],
+      "@/common/*": [ "components/common/*" ],
+      "@/article/*": [ "components/article/*" ],
+      "@/hooks/*": [ "hooks/*" ],
+    }
+  }
+}
