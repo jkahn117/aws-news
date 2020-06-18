@@ -26,7 +26,7 @@ AWS News requires the following prerequisites:
 
 1. Fork this repository, note the URL in your GitHub account.
 
-2. Deploy the `support` stack. This includes an ECR Repository and a Docker image that will be used to build / deploy the application in Amplify Console. Note that building and then pushing the image can take some time, so grab a cup of coffee.
+2. Deploy the `support` stack. This includes an ECR Repository and a Docker image that will be used to build / deploy the application in Amplify Console. Note that building and then pushing the image can take some time, so grab a cup of coffee. Ensure that Docker is running.
 
   ``` bash
   make deploy.support
@@ -55,6 +55,12 @@ Next, load articles
 
 Start Step Functions state machine: "aws-news-process-all-blogs-dev"
 
+
+
+Amplify redirects
+</^[^.]+$|\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|ttf)$)([^.]+$)/>
+/index.html
+200
 
 
 
