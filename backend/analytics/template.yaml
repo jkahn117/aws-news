@@ -113,10 +113,6 @@ Resources:
         CompressionFormat: UNCOMPRESSED
         Prefix: events/
         ErrorOutputPrefix: errors/
-        # CloudWatchLoggingOptions:
-        #   Enabled: true
-        #   LogGroupName: !Sub "/aws/kinesisfirehose/EventDeliveryStream-${ProjectName}-${Stage}"
-        #   LogStreamName: S3Delivery
         ProcessingConfiguration:
           Enabled: true
           Processors:
@@ -124,6 +120,8 @@ Resources:
               Parameters:
                 - ParameterName: LambdaArn
                   ParameterValue: !GetAtt AnalyticsStreamProcessorFunction.Arn
+                - ParameterName: RoleArn
+                  ParameterValue: !GetAtt EventDeliveryRole.Arn
         RoleARN: !GetAtt EventDeliveryRole.Arn
 
   EventDeliveryRole:
@@ -164,10 +162,14 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - "lambda:InvokeFunction"
                   - "lambda:GetFunctionConfiguration"
                 Resource:
-                  - !Sub "${AnalyticsStreamProcessorFunction.Arn}:$LATEST"
+                  - !Sub "${AnalyticsStreamProcessorFunction.Arn}"
+              - Effect: Allow
+                Action:
+                  - "lambda:InvokeFunction"
+                Resource:
+                  - !Sub "${AnalyticsStreamProcessorFunction.Arn}:*"
         - PolicyName: "cloudwatch-logs-policy"
           PolicyDocument:
             Version: "2012-10-17"
