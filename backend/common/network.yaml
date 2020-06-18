@@ -6,10 +6,6 @@ Parameters:
     Type: String
     Description: The stage where the application is running in, e.g., dev, prod.
     Default: 'dev'
-    AllowedValues:
-      - 'dev'
-      - 'test'
-      - 'prod'
 
   ProjectName:
     Type: String
