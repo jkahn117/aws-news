@@ -55,7 +55,7 @@ const popularArticles = /* GraphQL */ `
 export default function Home() {
   const [ selectedView, setSelectedView ] = useState('latest');
 
-  const fetcher = query => API.graphql(graphqlOperation(query))
+  const fetcher = query => API.graphql(graphqlOperation(query, { limit: 25 }))
                               .then(r => {
                                 const { data: { latestArticles: latest, popularArticles: popular } } = r;
                                 return latest || popular;
