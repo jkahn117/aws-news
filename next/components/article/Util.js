@@ -7,10 +7,8 @@ export function BlogSlug({ article }) {
   const { blog } = article;
   if (!blog) return "";
 
-  
-
   return (
-    <Link href="/blog/[blog.id]" as={ `/blog/${blog.id}` }>
+    <Link href="/blog/[id]" as={ `/blog/${blog.id}` }>
       <a className="leading-5 font-medium sm:text-indigo-800 sm:text-xs">
         { blog.title }
       </a>
