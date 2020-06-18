@@ -43,8 +43,13 @@ exports.handler = async(event) => {
     event.records.map(async record => {
       let payload = Buffer.from(record.data, "base64").toString("ascii");
       const { event_type, attributes: { path, articleId, blogId }} = JSON.parse(payload);
-      if (event_type === "pageView" && path && path.startsWith("/article")) {
-        await incrementArticleReadCount(articleId, blogId);
+      try {
+        const { event_type, attributes: { path, articleId, blogId }} = JSON.parse(payload);
+        if (event_type === "pageView" && path && path.startsWith("/article")) {
+          await incrementArticleReadCount(articleId, blogId);
+        }
+      } catch (e) {
+        console.error(`[ERROR] JSON Parsing -- ${articleId}`)
       }
   
       return {
