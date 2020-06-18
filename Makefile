@@ -31,7 +31,7 @@ deploy.support: ##=> Deploy support package
 					--stack-name aws-news-support-${AMPLIFY_ENV} \
 					--parameter-overrides \
 							Stage=${AMPLIFY_ENV}
-	aws cloudformation wait stack-update-complete --stack-name aws-news-support-${AMPLIFY_ENV}
+	aws cloudformation wait stack-create-complete --stack-name aws-news-support-${AMPLIFY_ENV}
 	$(MAKE) _deploy.push_custom_build_image
 
 _deploy.push_custom_build_image: ##=>
@@ -39,7 +39,7 @@ _deploy.push_custom_build_image: ##=>
 	$(eval REPO := $(shell aws cloudformation describe-stacks --stack-name aws-news-support-${AMPLIFY_ENV} | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "BuilderRepository").OutputValue'))
 	$(eval BASE := $(shell aws cloudformation describe-stacks --stack-name aws-news-support-${AMPLIFY_ENV} | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "RepositoryBase").OutputValue'))
 	cd support && \
-		aws ecr get-login-password | docker login --username AWS --password-stdin ${BASE}
+		aws ecr get-login-password | docker login --username AWS --password-stdin ${BASE} && \
 		docker build -t aws-news-builder-${AMPLIFY_ENV} . && \
 		docker tag aws-news-builder-${AMPLIFY_ENV}:latest ${REPO}:latest && \
 		docker push ${REPO}:latest && \

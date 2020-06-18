@@ -24,7 +24,7 @@ let redis = new Redis.Cluster([
  * Helper function to prepare response for list of article ids.
  * @param {*} result 
  */
-function _returnArticleList(result) {
+function _returnArticleList(result, end) {
   const [ err1, articleIds ] = result[0];
   const [ err2, length ] = result[1];
   
@@ -60,7 +60,7 @@ async function getLatestArticles(start, limit) {
     pipeline.llen(LATEST_CONTENT_KEY);
 
     const result = await pipeline.exec();
-    return _returnArticleList(result);
+    return _returnArticleList(result, end);
   } catch(error) {
     console.error(JSON.stringify(error));
     return { error: error.message };
@@ -82,7 +82,7 @@ async function getPopularArticles(start, limit) {
     pipeline.zcount(POPULAR_CONTENT_KEY, 0, "+inf");
 
     const result = await pipeline.exec();
-    return _returnArticleList(result);
+    return _returnArticleList(result, end);
   } catch(error) {
     console.error(JSON.stringify(error));
     return { error: error.message };
