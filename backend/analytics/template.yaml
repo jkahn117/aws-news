@@ -109,6 +109,7 @@ Resources:
         CompressionFormat: UNCOMPRESSED
         Prefix: events/
         ErrorOutputPrefix: errors/
+        RoleARN: !GetAtt EventDeliveryRole.Arn
         ProcessingConfiguration:
           Enabled: true
           Processors:
@@ -116,9 +117,6 @@ Resources:
               Parameters:
                 - ParameterName: LambdaArn
                   ParameterValue: !GetAtt AnalyticsStreamProcessorFunction.Arn
-                - ParameterName: RoleArn
-                  ParameterValue: !GetAtt EventDeliveryRole.Arn
-        RoleARN: !GetAtt EventDeliveryRole.Arn
 
   EventDeliveryRole:
     Type: AWS::IAM::Role
@@ -159,13 +157,9 @@ Resources:
               - Effect: Allow
                 Action:
                   - "lambda:GetFunctionConfiguration"
-                Resource:
-                  - !Sub "${AnalyticsStreamProcessorFunction.Arn}"
-              - Effect: Allow
-                Action:
                   - "lambda:InvokeFunction"
                 Resource:
-                  - !Sub "${AnalyticsStreamProcessorFunction.Arn}:*"
+                  - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:*"
         - PolicyName: "cloudwatch-logs-policy"
           PolicyDocument:
             Version: "2012-10-17"
