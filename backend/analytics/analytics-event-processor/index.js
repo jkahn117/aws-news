@@ -49,7 +49,8 @@ exports.handler = async(event) => {
           await incrementArticleReadCount(articleId, blogId);
         }
       } catch (e) {
-        console.error(`[ERROR] JSON Parsing -- ${articleId}`)
+        console.error('[ERROR] JSON Parsing');
+        console.debug(payload);
       }
   
       return {
