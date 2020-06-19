@@ -1,0 +1,177 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Transform: 'AWS::Serverless-2016-10-31'
+
+Parameters:
+  Stage:
+    Type: String
+    Description: The stage where the application is running in, e.g., dev, prod.
+    Default: 'dev'
+
+  ProjectName:
+    Type: String
+    Description: The name of this project
+    Default: 'aws-news'
+
+  PinpointApplicationId:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: Application ID for Pinpoint -- created by Amplify
+
+  ElasticacheEndpoint:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: Elasticache Endpoint
+
+  ElasticachePort:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: Elasticache Port
+
+  ElasticacheAccessSG:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::SecurityGroup::Id>
+    Description: Security Group allowing access to Elasticache
+
+  LambdaSubnet1:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>
+    Description: Subnet for Lambda 1
+
+  LambdaSubnet2:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>
+    Description: Subnet for Lambda 2
+
+Globals:
+  Function:
+    Runtime: nodejs12.x
+    Handler: index.handler
+    Timeout: 25
+    Tags:
+      Project: !Ref ProjectName
+      Env: !Ref Stage
+
+Resources:
+  ### Analytics ###
+  AnalyticsStreamProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Timeout: 240
+      CodeUri: analytics-event-processor/
+      Policies:
+        - VPCAccessPolicy: {}
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref ElasticacheAccessSG
+        SubnetIds:
+          - !Ref LambdaSubnet1
+          - !Ref LambdaSubnet2
+      Environment:
+        Variables:
+          ELASTICACHE_ENDPOINT: !Ref ElasticacheEndpoint
+          ELASTICACHE_PORT: !Ref ElasticachePort
+          POPULAR_CONTENT_KEY: "articles:popular"
+
+  EventStream:
+    Type: AWS::Pinpoint::EventStream
+    Properties:
+      ApplicationId: !Ref PinpointApplicationId
+      DestinationStreamArn: !GetAtt EventDeliveryStream.Arn
+      RoleArn: !GetAtt PinpointRole.Arn
+
+  PinpointRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: pinpoint.amazonaws.com
+            Action: "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: "pinpoint-event-stream-policy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "firehose:PutRecordBatch"
+                  - "firehose:DescribeDeliveryStream"
+                Resource:
+                  - !Sub "${EventDeliveryStream.Arn}"
+
+  EventDeliveryStream:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      ExtendedS3DestinationConfiguration:
+        BucketARN: !GetAtt EventStorageBucket.Arn
+        BufferingHints:
+          IntervalInSeconds: 240
+          SizeInMBs: 10
+        CompressionFormat: UNCOMPRESSED
+        Prefix: events/
+        ErrorOutputPrefix: errors/
+        RoleARN: !GetAtt EventDeliveryRole.Arn
+        ProcessingConfiguration:
+          Enabled: true
+          Processors:
+            - Type: Lambda
+              Parameters:
+                - ParameterName: LambdaArn
+                  ParameterValue: !GetAtt AnalyticsStreamProcessorFunction.Arn
+
+  EventDeliveryRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: "sts:AssumeRole"
+            Condition:
+              StringEquals:
+                "sts:ExternalId": !Ref "AWS::AccountId"
+      Path: "/"
+      Policies:
+        - PolicyName: "firehose-delivery-policy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "s3:AbortMultipartUpload"
+                  - "s3:GetBucketLocation"
+                  - "s3:GetObject"
+                  - "s3:ListBucket"
+                  - "s3:ListBucketMultipartUploads"
+                  - "s3:PutObject"
+                Resource:
+                  - !Sub "${EventStorageBucket.Arn}"
+                  - !Sub "${EventStorageBucket.Arn}/*"
+                  - "arn:aws:s3:::%FIREHOSE_BUCKET_NAME%"
+                  - "arn:aws:s3:::%FIREHOSE_BUCKET_NAME%/*"
+        - PolicyName: "invoke-lambda-policy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "lambda:GetFunctionConfiguration"
+                  - "lambda:InvokeFunction"
+                Resource:
+                  - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:*"
+        - PolicyName: "cloudwatch-logs-policy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogStream"
+                  - "logs:CreateLogGroup"
+                  - "logs:PutLogEvents"
+                Resource:
+                  - "*"
+
+  EventStorageBucket:
+    Type: AWS::S3::Bucket
+    

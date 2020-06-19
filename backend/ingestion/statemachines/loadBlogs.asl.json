@@ -1,0 +1,44 @@
+{
+  "Comment": "Check AWS Blogs for new content.",
+  "StartAt": "Load blogs from DynamoDB",
+  "States": {
+    "Load blogs from DynamoDB": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "OutputPath": "$.Payload.items",
+      "Parameters": {
+        "FunctionName": "${LoadBlogsFunction}"
+      },
+      "Next": "Process blogs"
+    },
+    "Process blogs": {
+      "Type": "Map",
+      "Next": "Finish",
+      "ItemsPath": "$",
+      "Parameters": {
+        "blog.$": "$$.Map.Item.Value"
+      },
+      "Iterator": {
+        "StartAt": "Process individual blog",
+        "States": {
+          "Process individual blog": {
+            "Comment": "Process each blog in list provided by parent",
+            "Type": "Task",
+            "Resource": "arn:aws:states:::states:startExecution",
+            "Parameters": {
+              "StateMachineArn": "${ProcessBlogStateMachine}",
+              "Input": {
+                "AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$": "$$.Execution.Id",
+                "Blog.$": "$.blog"
+              }
+            },
+            "End": true
+          }
+        }
+      }
+    },
+    "Finish": {
+      "Type": "Succeed"
+    }
+  }
+}
