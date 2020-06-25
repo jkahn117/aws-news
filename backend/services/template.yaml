@@ -64,33 +64,46 @@ Parameters:
 
 Globals:
   Function:
-    Runtime: nodejs12.x
-    Handler: index.handler
-    Timeout: 25
+    Policies:
+      - VPCAccessPolicy: {}
+    VpcConfig:
+      SecurityGroupIds:
+        - !Ref ElasticacheAccessSG
+      SubnetIds:
+        - !Ref LambdaSubnet1
+        - !Ref LambdaSubnet2
+    Timeout: 5
     Tags:
       Project: !Ref ProjectName
       Env: !Ref Stage
+    Tracing: Active
+    Environment:
+      Variables:
+        ELASTICACHE_ENDPOINT: !Ref ElasticacheEndpoint
+        ELASTICACHE_PORT: !Ref ElasticachePort
 
 Resources:
-  ElastiCacheIntegrationFunction:
+  ElastiCacheArticleIntegrationFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: elasticache-integration/
-      Policies:
-        - VPCAccessPolicy: {}
-      VpcConfig:
-        SecurityGroupIds:
-          - !Ref ElasticacheAccessSG
-        SubnetIds:
-          - !Ref LambdaSubnet1
-          - !Ref LambdaSubnet2
+      Runtime: nodejs12.x
+      Handler: index.handler
+      CodeUri: elasticache-article-integration/
       Environment:
         Variables:
-          ELASTICACHE_ENDPOINT: !Ref ElasticacheEndpoint
-          ELASTICACHE_PORT: !Ref ElasticachePort
           LATEST_CONTENT_KEY: "articles:latest"
           POPULAR_CONTENT_KEY: "articles:popular"
-          BLOG_COUNT_KEY: "blog:count:"
+
+  ElastiCacheStatisticsIntegrationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: ruby2.7
+      Handler: app.handler
+      CodeUri: elasticache-stats-integration/
+      Environment:
+        Variables:
+          ARTICLE_COUNT_KEY: "article:count"
+          BLOG_COUNT_KEY: "blog:count"
 
   ## AppSync Integration ##
   ElastiCacheIntegrationDataSource:
@@ -102,7 +115,7 @@ Resources:
       Type: AWS_LAMBDA
       ServiceRoleArn: !GetAtt AppSyncServiceRole.Arn
       LambdaConfig:
-        LambdaFunctionArn: !GetAtt ElastiCacheIntegrationFunction.Arn
+        LambdaFunctionArn: !GetAtt ElastiCacheArticleIntegrationFunction.Arn
 
   # Query.latestArticles resolver
   LatestArticlesQueryResolver:
@@ -260,5 +273,5 @@ Resources:
                 Action:
                   - lambda:InvokeFunction
                 Resource:
-                  - !GetAtt ElastiCacheIntegrationFunction.Arn
+                  - !GetAtt ElastiCacheArticleIntegrationFunction.Arn
 

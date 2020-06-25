@@ -10,8 +10,6 @@ const Redis = require("ioredis");
 
 const LATEST_CONTENT_KEY = process.env.LATEST_CONTENT_KEY;
 const POPULAR_CONTENT_KEY = process.env.POPULAR_CONTENT_KEY;
-const BLOG_COUNT_KEY = process.env.BLOG_COUNT_KEY;
-const ARTICLE_COUNT_KEY = process.env.ARTICLE_COUNT_KEY;
 
 let redis = new Redis.Cluster([
   {
@@ -107,37 +105,6 @@ function _encodeNextToken(type, nextIndex) {
   return Buffer.from(`${type}:${nextIndex}`).toString("base64");
 }
 
-async function getArticleMetrics() {
-  const pipeline = redis.pipeline();
-  // get total
-  pipeline.get(`${ARTICLE_COUNT_KEY}:total`);
-  // get days on which we have new articles
-  pipeline.zrevrange(`${ARTICLE_COUNT_KEY}:days`, 0, 6);
-  const result = await pipeline.exec();
-
-  const [ err1, totalCount ] = result[0];
-  const [ err2, days ] = result[1];
-
-  if (err1 || err2) {
-    console.error(`[ERROR] ${err1}`);
-    console.error(`[ERROR] ${err2}`);
-    return {
-      error: "An error has occurred retrieving articles"
-    }
-  }
-
-  for (let date of days) {
-    pipeline.get(`${ARTICLE_COUNT_KEY}:${date}`);
-  }
-
-  let dailyCounts = await pipeline.exec();
-
-  return {
-    total: totalCount,
-    dailyCounts: days.reduce((n, d, i) => { n[d] = dailyCounts[i]; return n }, {})
-  }
-}
-
 /**
  * 
  * Main handler function.
@@ -153,10 +120,6 @@ exports.handler = async(event) => {
       return await getLatestArticles(start, limit);
     case "popularArticles":
       return await getPopularArticles(start, limit);
-    // case "blogMetrics":
-    //   return null;
-    case "articleMetrics":
-      return null;
     default:
       throw("No such method");
   }
