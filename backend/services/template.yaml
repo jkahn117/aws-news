@@ -64,8 +64,6 @@ Parameters:
 
 Globals:
   Function:
-    Policies:
-      - VPCAccessPolicy: {}
     VpcConfig:
       SecurityGroupIds:
         - !Ref ElasticacheAccessSG
@@ -89,6 +87,8 @@ Resources:
       Runtime: nodejs12.x
       Handler: index.handler
       CodeUri: elasticache-article-integration/
+      Policies:
+        - VPCAccessPolicy: {}
       Environment:
         Variables:
           LATEST_CONTENT_KEY: "articles:latest"
@@ -100,6 +100,8 @@ Resources:
       Runtime: ruby2.7
       Handler: app.handler
       CodeUri: elasticache-stats-integration/
+      Policies:
+        - VPCAccessPolicy: {}
       Environment:
         Variables:
           ARTICLE_COUNT_KEY: "article:count"
