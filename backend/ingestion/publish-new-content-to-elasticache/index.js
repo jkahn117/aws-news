@@ -47,30 +47,33 @@ let redis = new Redis.Cluster([
  * }
  */
 exports.handler = async(event) => {
-  console.log(JSON.stringify(event));
+  // console.log(JSON.stringify(event));
 
   let { detail: { blogId, articleId } } = event;
   const today = Moment().format("YYYYMMDD");
 
   try {
     // add blog to list of latest
-    const pipeline = redis.pipeline();
-    pipeline.lpush(LATEST_CONTENT_KEY, articleId);
-    pipeline.ltrim(LATEST_CONTENT_KEY, 0, 99);  
-    await pipeline.exec();
+    const p1 = redis.pipeline();
+    p1.lpush(LATEST_CONTENT_KEY, articleId);
+    p1.ltrim(LATEST_CONTENT_KEY, 0, 99);  
 
     // increment count of articles on this blog
-    pipeline.zadd(`${BLOG_COUNT_KEY}:${blogId}:days`, 0, `${today}`);
-    pipeline.incr(`${BLOG_COUNT_KEY}:${blogId}`);
-    pipeline.incr(`${BLOG_COUNT_KEY}:${blogId}:${today}`);
-    await pipeline.exec();
+    const p2 = redis.pipeline();
+    p2.zadd(`{${BLOG_COUNT_KEY}:${blogId}}:days`, 0, `${today}`);
+    p2.incr(`{${BLOG_COUNT_KEY}:${blogId}}`);
+    p2.incr(`{${BLOG_COUNT_KEY}:${blogId}}:${today}`);
 
-    pipeline.zadd(`${ARTICLE_COUNT_KEY}:days`, 0, `${today}`);
-    pipeline.incr(`${ARTICLE_COUNT_KEY}:${today}`);
-    pipeline.incr(`${ARTICLE_COUNT_KEY}:total`);
-    await pipeline.exec();
+    const p3 = redis.pipeline();
+    p3.zadd(`{${ARTICLE_COUNT_KEY}}:days`, 0, `${today}`);
+    p3.incr(`{${ARTICLE_COUNT_KEY}}:${today}`);
+    p3.incr(`{${ARTICLE_COUNT_KEY}}:total`);
+    
+    let result = await Promise.all([ p1.exec(), p2.exec(), p3.exec() ]);
+    console.log(result)
   } catch(error) {
-    console.error(`[ERROR] ${error}`)
+    console.error(`[ERROR] ${error}`);
+    throw error;
   }
 
   return;
