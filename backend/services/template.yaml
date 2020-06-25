@@ -102,6 +102,8 @@ Resources:
       CodeUri: elasticache-stats-integration/
       Policies:
         - VPCAccessPolicy: {}
+      Timeout: 10
+      MemorySize: 512
       Environment:
         Variables:
           ARTICLE_COUNT_KEY: "article:count"
