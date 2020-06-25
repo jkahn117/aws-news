@@ -33,6 +33,8 @@ backend:
         - export PINPOINT_APP_ID=$(jq -r '.analytics[(.analytics | keys)[0]].output.Id' ./amplify/\#current-cloud-backend/amplify-meta.json)
         - make export.parameter NAME="/news/${AMPLIFY_ENV}/amplify/analytics/app/id" VALUE=${PINPOINT_APP_ID}
         # Deploy backend, including content service and support layer
+        - echo Enable AWS X-Ray on AppSync API
+        - aws appsync update-graphql-api --api-id ${APPSYNC_API_ID} --name awsnews-${AMPLIFY_ENV} --xray-enabled
         - echo Deploy backend components...
         - make deploy
 frontend:
