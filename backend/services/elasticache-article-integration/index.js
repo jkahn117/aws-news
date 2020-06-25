@@ -1,9 +1,9 @@
 /**
- * ElastiCacheIntegrationFunction
+ * ElastiCacheArticleIntegrationFunction
  * 
  * This function allows AWS AppSync to interoperate with Amazon
  * ElastiCache (Redis). It provides a set of actions that correspond
- * to data retrievals from ElastiCache.
+ * to data retrievals from ElastiCache, specific to Articles.
  */
 
 const Redis = require("ioredis");
