@@ -110,17 +110,75 @@ Resources:
           BLOG_COUNT_KEY: "blog:count"
 
   ## AppSync Integration ##
-  ElastiCacheIntegrationDataSource:
+  ElastiCacheArticleIntegrationDataSource:
     Type: AWS::AppSync::DataSource
     Properties:
       ApiId: !Ref AppSyncApiId
       Name: ElastiCacheIntegration
-      Description: Lambda function to integrate with Elasticache
+      Description: Lambda function to integrate with Elasticache Articles
       Type: AWS_LAMBDA
       ServiceRoleArn: !GetAtt AppSyncServiceRole.Arn
       LambdaConfig:
         LambdaFunctionArn: !GetAtt ElastiCacheArticleIntegrationFunction.Arn
 
+  ElastiCacheStatisticsIntegrationDataSource:
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !Ref AppSyncApiId
+      Name: ElastiCacheStatsIntegration
+      Description: Lambda function to integrate with Elasticache Statistics
+      Type: AWS_LAMBDA
+      ServiceRoleArn: !GetAtt AppSyncServiceRole.Arn
+      LambdaConfig:
+        LambdaFunctionArn: !GetAtt ElastiCacheStatisticsIntegrationFunction.Arn
+
+  # Blog.stats resolver
+  BlogStatsFieldResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !Ref AppSyncApiId
+      TypeName: Blog
+      FieldName: stats
+      DataSourceName: !GetAtt ElastiCacheStatisticsIntegrationDataSource.Name
+      RequestMappingTemplate: |
+        {
+          "version": "2017-02-28",
+          "operation": "Invoke",
+          "payload": {
+            "action": "getBlogStats",
+            "args":  {
+              "blogId": $ctx.source.id
+            }
+          }
+        }
+      ResponseMappingTemplate: |
+        #if($ctx.result && $ctx.result.error)
+          $util.error($ctx.result.error)
+        #end
+        $util.toJson($ctx.result)
+
+  # Query.siteStatistics resolver
+  SiteStatisticsQueryResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !Ref AppSyncApiId
+      TypeName: Query
+      FieldName: siteStatistics
+      DataSourceName: !GetAtt ElastiCacheStatisticsIntegrationDataSource.Name
+      RequestMappingTemplate: |
+        {
+          "version": "2017-02-28",
+          "operation": "Invoke",
+          "payload": {
+            "action": "getArticleStats"
+          }
+        }
+      ResponseMappingTemplate: |
+        #if($ctx.result && $ctx.result.error)
+          $util.error($ctx.result.error)
+        #end
+        $util.toJson($ctx.result)
+  
   # Query.latestArticles resolver
   LatestArticlesQueryResolver:
     Type: AWS::AppSync::Resolver
@@ -160,7 +218,7 @@ Resources:
     Type: AWS::AppSync::FunctionConfiguration
     Properties:
       ApiId: !Ref AppSyncApiId
-      DataSourceName: !GetAtt ElastiCacheIntegrationDataSource.Name
+      DataSourceName: !GetAtt ElastiCacheArticleIntegrationDataSource.Name
       FunctionVersion: "2018-05-29"
       Name: GetLatestArticles
       Description: >
@@ -189,7 +247,7 @@ Resources:
     Type: AWS::AppSync::FunctionConfiguration
     Properties:
       ApiId: !Ref AppSyncApiId
-      DataSourceName: !GetAtt ElastiCacheIntegrationDataSource.Name
+      DataSourceName: !GetAtt ElastiCacheArticleIntegrationDataSource.Name
       FunctionVersion: "2018-05-29"
       Name: GetPopularArticles
       Description: >
@@ -278,4 +336,5 @@ Resources:
                   - lambda:InvokeFunction
                 Resource:
                   - !GetAtt ElastiCacheArticleIntegrationFunction.Arn
+                  - !GetAtt ElastiCacheStatisticsIntegrationFunction.Arn
 
