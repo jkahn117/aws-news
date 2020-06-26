@@ -61,7 +61,7 @@ exports.handler = async(event) => {
     // increment count of articles on this blog
     const p2 = redis.pipeline();
     p2.zadd(`{${BLOG_COUNT_KEY}:${blogId}}:days`, 0, `${today}`);
-    p2.incr(`{${BLOG_COUNT_KEY}:${blogId}}`);
+    p2.incr(`{${BLOG_COUNT_KEY}:${blogId}}:total`);
     p2.incr(`{${BLOG_COUNT_KEY}:${blogId}}:${today}`);
 
     const p3 = redis.pipeline();
