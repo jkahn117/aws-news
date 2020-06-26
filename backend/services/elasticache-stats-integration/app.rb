@@ -68,7 +68,7 @@ def get_stats_for(key)
   end
   
   {
-    total: total || 0,
-    daily: Hash[days.zip(daily_counts)]
+    total: total.to_i || 0,
+    daily: Hash[days.zip(daily_counts.map(&:to_i))]
   }
 end
