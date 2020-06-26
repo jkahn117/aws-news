@@ -165,6 +165,9 @@ Resources:
       ApiId: !Ref AppSyncApiId
       TypeName: Query
       FieldName: siteStatistics
+      CachingConfig:
+        CachingKeys:
+          - $context.arguments
       DataSourceName: !GetAtt ElastiCacheStatisticsIntegrationDataSource.Name
       RequestMappingTemplate: |
         {
@@ -188,6 +191,9 @@ Resources:
       TypeName: Query
       FieldName: latestArticles
       Kind: PIPELINE
+      CachingConfig:
+        CachingKeys:
+          - $context.arguments
       PipelineConfig:
         Functions:
           - !GetAtt GetLatestArticlesFunction.FunctionId
@@ -205,6 +211,9 @@ Resources:
       TypeName: Query
       FieldName: popularArticles
       Kind: PIPELINE
+      CachingConfig:
+        CachingKeys:
+          - $context.arguments
       PipelineConfig:
         Functions:
           - !GetAtt GetPopularArticlesFunction.FunctionId
