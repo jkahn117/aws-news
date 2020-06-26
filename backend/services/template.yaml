@@ -110,7 +110,7 @@ Resources:
           BLOG_COUNT_KEY: "blog:count"
 
   ## AppSync Integration ##
-  ElastiCacheArticleIntegrationDataSource:
+  ElastiCacheIntegrationDataSource:
     Type: AWS::AppSync::DataSource
     Properties:
       ApiId: !Ref AppSyncApiId
@@ -218,7 +218,7 @@ Resources:
     Type: AWS::AppSync::FunctionConfiguration
     Properties:
       ApiId: !Ref AppSyncApiId
-      DataSourceName: !GetAtt ElastiCacheArticleIntegrationDataSource.Name
+      DataSourceName: !GetAtt ElastiCacheIntegrationDataSource.Name
       FunctionVersion: "2018-05-29"
       Name: GetLatestArticles
       Description: >
@@ -247,7 +247,7 @@ Resources:
     Type: AWS::AppSync::FunctionConfiguration
     Properties:
       ApiId: !Ref AppSyncApiId
-      DataSourceName: !GetAtt ElastiCacheArticleIntegrationDataSource.Name
+      DataSourceName: !GetAtt ElastiCacheIntegrationDataSource.Name
       FunctionVersion: "2018-05-29"
       Name: GetPopularArticles
       Description: >
