@@ -1,0 +1,7 @@
+{
+  "action": "popularArticles",
+  "args": {
+    "limit": 10,
+    "nextToken": ""
+  }
+}

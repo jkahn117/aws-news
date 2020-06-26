@@ -7,7 +7,7 @@
 #
 
 require 'redis'
-require 'aws-xray-sdk'
+require 'aws-xray-sdk/lambda'
 
 @redis = nil
 
@@ -60,7 +60,7 @@ end
 private
 
 def get_stats_for(key)
-  XRay.recorder.begin_segment 'get_stats_from_redis'
+  XRay.recorder.begin_subsegment 'get_stats_from_redis'
 
   total, days = @redis.pipelined do
     @redis.get "{#{key}}:total"
@@ -71,7 +71,7 @@ def get_stats_for(key)
     days.each { |d| @redis.get("{#{key}}:#{d}") }
   end
 
-  XRay.recorder.end_segment
+  XRay.recorder.end_subsegment
 
   daily_data = []
   days.each_with_index do |day, idx|
