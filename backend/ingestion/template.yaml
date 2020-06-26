@@ -233,7 +233,8 @@ Resources:
           ELASTICACHE_ENDPOINT: !Ref ElasticacheEndpoint
           ELASTICACHE_PORT: !Ref ElasticachePort
           LATEST_CONTENT_KEY: "articles:latest"
-          BLOG_COUNT_KEY: "blog:count:"
+          BLOG_COUNT_KEY: "blog:count"
+          ARTICLE_COUNT_KEY: "article:count"
       Events:
         OnCreateEvent:
           Type: CloudWatchEvent

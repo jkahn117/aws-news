@@ -46,7 +46,8 @@
 							"Resource": [
 								{ "Fn::Sub": "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/${AppSyncApiId}/types/Subscription/*" },
 								{ "Fn::Sub": "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/${AppSyncApiId}/types/Query/fields/latestArticles" },
-								{ "Fn::Sub": "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/${AppSyncApiId}/types/Query/fields/popularArticles" }
+								{ "Fn::Sub": "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/${AppSyncApiId}/types/Query/fields/popularArticles" },
+								{ "Fn::Sub": "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/${AppSyncApiId}/types/Query/fields/siteStatistics" }
 							]
 						}
 					]
