@@ -166,8 +166,6 @@ Resources:
       TypeName: Query
       FieldName: siteStatistics
       CachingConfig:
-        CachingKeys:
-          - $context.arguments
         Ttl: 3600
       DataSourceName: !GetAtt ElastiCacheStatisticsIntegrationDataSource.Name
       RequestMappingTemplate: |
@@ -194,7 +192,7 @@ Resources:
       Kind: PIPELINE
       CachingConfig:
         CachingKeys:
-          - $context.arguments
+          - $context.args.nextToken
         Ttl: 3600
       PipelineConfig:
         Functions:
@@ -215,7 +213,7 @@ Resources:
       Kind: PIPELINE
       CachingConfig:
         CachingKeys:
-          - $context.arguments
+          - $context.args.nextToken
         Ttl: 3600
       PipelineConfig:
         Functions:
