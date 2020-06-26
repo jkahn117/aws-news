@@ -168,6 +168,7 @@ Resources:
       CachingConfig:
         CachingKeys:
           - $context.arguments
+        Ttl: 3600
       DataSourceName: !GetAtt ElastiCacheStatisticsIntegrationDataSource.Name
       RequestMappingTemplate: |
         {
@@ -194,6 +195,7 @@ Resources:
       CachingConfig:
         CachingKeys:
           - $context.arguments
+        Ttl: 3600
       PipelineConfig:
         Functions:
           - !GetAtt GetLatestArticlesFunction.FunctionId
@@ -214,6 +216,7 @@ Resources:
       CachingConfig:
         CachingKeys:
           - $context.arguments
+        Ttl: 3600
       PipelineConfig:
         Functions:
           - !GetAtt GetPopularArticlesFunction.FunctionId
