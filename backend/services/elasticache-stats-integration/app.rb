@@ -7,7 +7,7 @@
 #
 
 require 'redis'
-require 'aws-xray-sdk/lambda'
+require 'aws-xray-sdk'
 
 @redis = nil
 
@@ -37,11 +37,13 @@ end
 #
 def handler(event:, context:)
   unless @redis
-    begin
-      @redis = Redis.new(cluster: [ "redis://#{ENV['ELASTICACHE_ENDPOINT']}:#{ENV['ELASTICACHE_PORT']}" ])
-    rescue Exception => e
-      puts e.message
-      puts e.backtrace.inspect
+    XRay.recorder.capture('connect_to_redis') do |subsegment|
+      begin
+        @redis = Redis.new(cluster: [ "redis://#{ENV['ELASTICACHE_ENDPOINT']}:#{ENV['ELASTICACHE_PORT']}" ])
+      rescue Exception => e
+        puts e.message
+        puts e.backtrace.inspect
+      end
     end
   end
   
@@ -58,17 +60,29 @@ end
 private
 
 def get_stats_for(key)
+  XRay.recorder.begin_segment 'get_stats_from_redis'
+
   total, days = @redis.pipelined do
     @redis.get "{#{key}}:total"
     @redis.zrevrange("{#{key}}:days", 0, 6)
   end
   
-  daily_counts = @redis.pipelined do
+  daily_new_post_count = @redis.pipelined do
     days.each { |d| @redis.get("{#{key}}:#{d}") }
+  end
+
+  XRay.recorder.end_segment
+
+  daily_data = []
+  days.each_with_index do |day, idx|
+    daily_data << {
+      date: Date.parse(day).strftime('%Y-%m-%d'),
+      newPosts: daily_new_post_count[idx].to_i
+    }
   end
   
   {
     total: total.to_i || 0,
-    daily: Hash[days.zip(daily_counts.map(&:to_i))]
+    daily: daily_data
   }
 end

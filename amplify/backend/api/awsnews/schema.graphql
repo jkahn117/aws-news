@@ -46,8 +46,13 @@ type ArticleConnection {
 }
 
 type ArticleStatistics {
-  total: Int
-  daily: AWSJSON
+  total: Int!
+  daily: [DailyStatistic]!
+}
+
+type DailyStatistic {
+  date: AWSDate!
+  newPosts: Int
 }
 
 type Query {
