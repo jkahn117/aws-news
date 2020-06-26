@@ -147,7 +147,7 @@ Resources:
           "payload": {
             "action": "getBlogStats",
             "args":  {
-              "blogId": $ctx.source.id
+              "blogId": "$ctx.source.id"
             }
           }
         }
