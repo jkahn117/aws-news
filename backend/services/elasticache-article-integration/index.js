@@ -7,16 +7,13 @@
  */
 
 const Redis = require("ioredis");
+const AWSXRay = require('aws-xray-sdk');
+AWSXRay.capturePromise();
 
 const LATEST_CONTENT_KEY = process.env.LATEST_CONTENT_KEY;
 const POPULAR_CONTENT_KEY = process.env.POPULAR_CONTENT_KEY;
 
-let redis = new Redis.Cluster([
-  {
-    host: process.env.ELASTICACHE_ENDPOINT,
-    port: process.env.ELASTICACHE_PORT
-  }
-]);
+let redis = null;
 
 /**
  * Helper function to prepare response for list of article ids.
@@ -111,16 +108,30 @@ function _encodeNextToken(type, nextIndex) {
  * 
  */
 exports.handler = async(event) => {
-  // console.log(JSON.stringify(event));
+  const segment = AWSXRay.getSegment();
+  
+  console.log(JSON.stringify(event));
   const { action, args: { limit=10, nextToken }} = event;
   const start = nextToken !== "" ? _decodeNextToken(nextToken) : 0;
-
-  switch(action) {
-    case "latestArticles":
-      return await getLatestArticles(start, limit);
-    case "popularArticles":
-      return await getPopularArticles(start, limit);
-    default:
-      throw("No such method");
+  
+  if (!redis) {
+    const connectSegment = segment.addNewSubsegment("connect_to_redis");
+    redis = new Redis.Cluster([
+      {
+        host: process.env.ELASTICACHE_ENDPOINT,
+        port: process.env.ELASTICACHE_PORT
+      }
+    ]);
+    connectSegment.close();
   }
+  
+  AWSXRay.captureFunc('annotations', function(subsegment){
+    subsegment.addAnnotation('Action', action);
+  });
+  
+  return AWSXRay.captureAsyncFunc("load_articles", (subsegment) => {
+    const result = action === "latestArticles" ? getLatestArticles(start, limit) : getPopularArticles(start, limit);
+    subsegment.close();
+    return result;
+  })
 }
