@@ -87,7 +87,7 @@ Resources:
       Runtime: nodejs12.x
       Handler: index.handler
       CodeUri: elasticache-article-integration/
-      MemorySize: 256
+      MemorySize: 512
       Policies:
         - VPCAccessPolicy: {}
       Environment:
