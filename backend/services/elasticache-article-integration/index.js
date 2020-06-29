@@ -125,11 +125,8 @@ exports.handler = async(event) => {
     connectSegment.close();
   }
   
-  AWSXRay.captureFunc('annotations', function(subsegment){
-    subsegment.addAnnotation('Action', action);
-  });
-  
   return AWSXRay.captureAsyncFunc("load_articles", (subsegment) => {
+    subsegment.addAnnotation('Action', action);
     const result = action === "latestArticles" ? getLatestArticles(start, limit) : getPopularArticles(start, limit);
     subsegment.close();
     return result;
