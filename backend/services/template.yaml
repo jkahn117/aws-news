@@ -165,8 +165,8 @@ Resources:
       ApiId: !Ref AppSyncApiId
       TypeName: Query
       FieldName: siteStatistics
-      CachingConfig:
-        Ttl: 3600
+      # CachingConfig:
+      #   Ttl: 3600
       DataSourceName: !GetAtt ElastiCacheStatisticsIntegrationDataSource.Name
       RequestMappingTemplate: |
         {
@@ -190,10 +190,10 @@ Resources:
       TypeName: Query
       FieldName: latestArticles
       Kind: PIPELINE
-      CachingConfig:
-        CachingKeys:
-          - $context.args.nextToken
-        Ttl: 3600
+      # CachingConfig:
+      #   CachingKeys:
+      #     - $context.args.nextToken
+      #   Ttl: 3600
       PipelineConfig:
         Functions:
           - !GetAtt GetLatestArticlesFunction.FunctionId
@@ -211,10 +211,10 @@ Resources:
       TypeName: Query
       FieldName: popularArticles
       Kind: PIPELINE
-      CachingConfig:
-        CachingKeys:
-          - $context.args.nextToken
-        Ttl: 3600
+      # CachingConfig:
+      #   CachingKeys:
+      #     - $context.args.nextToken
+      #   Ttl: 3600
       PipelineConfig:
         Functions:
           - !GetAtt GetPopularArticlesFunction.FunctionId

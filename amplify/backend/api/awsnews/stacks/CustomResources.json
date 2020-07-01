@@ -56,16 +56,6 @@
 					{ "Ref": "UnauthRoleName" }
 				]
 			}
-		},
-		"ApiCache": {
-			"Type": "AWS::AppSync::ApiCache",
-			"Condition": "IsProduction",
-			"Properties": {
-				"ApiCachingBehavior": "PER_RESOLVER_CACHING",
-				"ApiId": { "Ref": "AppSyncApiId" },
-				"Ttl": 3600,
-				"Type": "T2_SMALL"
-			}
 		}
 	},
 	"Conditions": {
