@@ -75,6 +75,8 @@ def publish_new_article_event(article)
     "publishedAt": article.publishedAt
   }
 
+  event_detail["image"] = article.image if article.image
+
   resp = $eventbridge_client.put_events({
     entries: [
       {

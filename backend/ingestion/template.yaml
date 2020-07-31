@@ -138,7 +138,7 @@ Resources:
         - ruby2.7
       RetentionPolicy: Delete
     Metadata:
-      BuildMethod: makefile
+      BuildMethod: ruby2.7
 
   LoadBlogsFunction:
     Type: AWS::Serverless::Function
@@ -185,6 +185,28 @@ Resources:
           ARTICLES_TABLE: !Ref ArticlesTable
           CONTENT_BUCKET: !Ref ContentBucket
           EVENT_BUS: !Ref EventBus
+
+  ProcessArticleImageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: process-article-image/
+      Handler: index.handler
+      Runtime: nodejs12.x
+      MemorySize: 1024
+      Policies:
+        - S3WritePolicy:
+            BucketName: jkahn-demo
+      Environment:
+        Variables:
+          CONTENT_BUCKET: jkahn-demo
+      Events:
+        OnCreateEvent:
+          Type: CloudWatchEvent
+          Properties:
+            EventBusName: !Ref EventBus
+            Pattern:
+              detail-type:
+                - article_created
 
   PublishNewContentToAppSyncFunction:
     Type: AWS::Serverless::Function

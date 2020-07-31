@@ -1,13 +1,14 @@
 import Link from 'next/link';
 
-import { BlogSlug, BlogSlugWithDate } from './Util';
+import Image from '@/ui/Image';
+import { BlogSlugWithDate } from './Util';
 
 export default function ArticleCard({ article }) {
   return (
     <>
       <article className="relative pb-2/3 sm:flex sm:pb-0 sm:min-h-64">
         <div className="overflow-hidden sm:relative sm:max-w-sm sm:w-2/3 sm:py-4">
-          <img className="absolute h-full w-full object-cover"
+          <Image className="absolute h-full w-full object-cover"
             src={ article.image }
             alt={ article.title } />
         </div>
