@@ -45,18 +45,23 @@ async function processAndStoreImage(buffer, articleId, size, width) {
   const name = `${articleId}-${size}.webp`;
   await storeImage(image, name);
 
-  return Promise.resolve({ size: name });
+  return Promise.resolve({ size, name });
 }
 
-async function updateArticleRecord(articleIdm, images) {
+async function updateArticleRecord(articleId, images) {
   if (!ddbclient) { ddbclient = new DDB.DocumentClient(); }
+  
+  const sizedImages = images.reduce((acc, img) => {
+    acc[img.size] = img.name;
+    return acc;
+  }, {});
 
   return ddbclient.update({
     TableName: process.env.ARTICLES_TABLE,
     Key: { id: articleId },
     UpdateExpression: "set #i = :img",
-    ExpressionAttributeNames: { '#i': 'images' },
-    ExpressionAttribuetValues: { ':img': images }
+    ExpressionAttributeNames: { '#i': 'sizedImages' },
+    ExpressionAttributeValues: { ':img': sizedImages }
   }).promise();
 }
 
