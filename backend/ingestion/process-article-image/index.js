@@ -9,6 +9,7 @@
  * 
  */
 
+const DDB = require("aws-sdk/clients/dynamodb");
 const fetch = require("node-fetch");
 const S3 = require("aws-sdk/clients/s3");
 const sharp = require("sharp");
@@ -19,6 +20,7 @@ const DESIRED_WIDTHS = {
   'md': 400
 };
 
+let ddbclient = null;
 let s3client = null;
 
 async function processImage(buffer, width) {
@@ -43,7 +45,19 @@ async function processAndStoreImage(buffer, articleId, size, width) {
   const name = `${articleId}-${size}.webp`;
   await storeImage(image, name);
 
-  return Promise.resolve(name);
+  return Promise.resolve({ size: name });
+}
+
+async function updateArticleRecord(articleIdm, images) {
+  if (!ddbclient) { ddbclient = new DDB.DocumentClient(); }
+
+  return ddbclient.update({
+    TableName: process.env.ARTICLES_TABLE,
+    Key: { id: articleId },
+    UpdateExpression: "set #i = :img",
+    ExpressionAttributeNames: { '#i': 'images' },
+    ExpressionAttribuetValues: { ':img': images }
+  }).promise();
 }
 
 /**
@@ -89,13 +103,16 @@ exports.handler = async(event) => {
       return acc;
     }, []);
 
-    const result = await Promise.all(work);
+    const images = await Promise.all(work);
+
+    await updateArticleRecord(event.detail.articleId, images);
+
     return {
       error: null,
       result: {
         articleId: event.detail.articleId,
-        count: result.length,
-        images: result
+        count: images.length,
+        images
       }
     };
   } catch (error) {

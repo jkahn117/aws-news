@@ -68,6 +68,7 @@ Globals:
     Runtime: ruby2.7
     Handler: app.handler
     Timeout: 25
+    Tracing: Active
     Tags:
       Project: !Ref ProjectName
       Env: !Ref Stage
@@ -138,7 +139,7 @@ Resources:
         - ruby2.7
       RetentionPolicy: Delete
     Metadata:
-      BuildMethod: ruby2.7
+      BuildMethod: makefile
 
   LoadBlogsFunction:
     Type: AWS::Serverless::Function
@@ -194,11 +195,16 @@ Resources:
       Runtime: nodejs12.x
       MemorySize: 1024
       Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref ArticlesTable
         - S3WritePolicy:
-            BucketName: jkahn-demo
+            BucketName: !Ref ContentBucket
       Environment:
         Variables:
-          CONTENT_BUCKET: jkahn-demo
+          ARTICLES_TABLE: !Ref ArticlesTable
+          CONTENT_BUCKET: !Ref ContentBucket
+          # Keep-Alive, @see https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/node-reusing-connections.html
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
       Events:
         OnCreateEvent:
           Type: CloudWatchEvent
@@ -295,7 +301,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service: !Sub events.amazonaws.com
+              Service: events.amazonaws.com
             Action: sts:AssumeRole
       Policies:
         - PolicyName: EventBridgeStartStateMachine
