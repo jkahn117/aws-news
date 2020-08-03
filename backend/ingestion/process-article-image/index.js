@@ -60,7 +60,7 @@ async function updateArticleRecord(articleId, images) {
     TableName: process.env.ARTICLES_TABLE,
     Key: { id: articleId },
     UpdateExpression: "set #i = :img",
-    ExpressionAttributeNames: { '#i': 'sizedImages' },
+    ExpressionAttributeNames: { '#i': 'sizedImage' },
     ExpressionAttributeValues: { ':img': sizedImages }
   }).promise();
 }
