@@ -22,6 +22,10 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<String>
     Description: Name of DyanmoDB Articles table -- created by Amplify
 
+  ContentBucket:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: Content storage bucket -- created by Amplify
+
   ElasticacheEndpoint:
     Type: AWS::SSM::Parameter::Value<String>
     Description: Elasticache Endpoint
@@ -42,73 +46,101 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>
     Description: Subnet for Lambda 2
 
-  RedisLatestContentKey:
-    Type: String
-    Description: Redis latest content key
-    Default: "articles:latest"
-  
-  RedisPopularContentKey:
-    Type: String
-    Description: Redis popular content key
-    Default: "articles:popular"
-
-  RedisArticleCountKey:
-    Type: String
-    Description: Redis article count key
-    Default: "{article:count}"
-
-  RedisBlogCountKey:
-    Type: String
-    Description: Redis blog count key
-    Default: "{blog:count}"
-
 Globals:
   Function:
-    VpcConfig:
-      SecurityGroupIds:
-        - !Ref ElasticacheAccessSG
-      SubnetIds:
-        - !Ref LambdaSubnet1
-        - !Ref LambdaSubnet2
-    Timeout: 5
+    Runtime: ruby2.7
+    Handler: app.handler
     Tags:
       Project: !Ref ProjectName
       Env: !Ref Stage
+    Timeout: 5
     Tracing: Active
-    Environment:
-      Variables:
-        ELASTICACHE_ENDPOINT: !Ref ElasticacheEndpoint
-        ELASTICACHE_PORT: !Ref ElasticachePort
 
 Resources:
+  ContentServingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: content-serving/
+      Environment:
+        Variables:
+          ARTICLES_TABLE: !Ref ArticlesTable
+          CONTENT_BUCKET: !Ref ContentBucket
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ArticlesTable
+        - S3ReadPolicy:
+            BucketName: !Ref ContentBucket
+      Events:
+        content:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ContentApi
+            Method: GET
+            Path: /content/{id}
+        image:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ContentApi
+            Method: GET
+            Path: /image/{id}/{size}
+          
+  ContentApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      AccessLogSettings:
+        DestinationArn: !GetAtt ContentApiAccessLogs.Arn
+        Format: '{ "requestId": "$context.requestId", "userAgent": "$context.identity.userAgent", "httpMethod": "$context.httpMethod", "path": "$context.path", "status": "$context.status", "protocol": "$context.protocol", "integrationStatus": "$context.integrationStatus", "responseLatency": "$context.responseLatency" , "integrationErrorMessage":"$context.integrationErrorMessage" }'
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 60
+      FailOnWarnings: True
+      StageName: !Ref Stage
+      Tags:
+        Project: !Ref ProjectName
+        Env: !Ref Stage
+      
+
   ElastiCacheArticleIntegrationFunction:
     Type: AWS::Serverless::Function
     Properties:
       Runtime: nodejs12.x
       Handler: index.handler
       CodeUri: elasticache-article-integration/
-      MemorySize: 512
       Policies:
         - VPCAccessPolicy: {}
+      MemorySize: 512
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref ElasticacheAccessSG
+        SubnetIds:
+          - !Ref LambdaSubnet1
+          - !Ref LambdaSubnet2
       Environment:
         Variables:
           LATEST_CONTENT_KEY: "articles:latest"
           POPULAR_CONTENT_KEY: "articles:popular"
+          ELASTICACHE_ENDPOINT: !Ref ElasticacheEndpoint
+          ELASTICACHE_PORT: !Ref ElasticachePort
 
   ElastiCacheStatisticsIntegrationFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Runtime: ruby2.7
-      Handler: app.handler
       CodeUri: elasticache-stats-integration/
       Policies:
         - VPCAccessPolicy: {}
-      Timeout: 10
       MemorySize: 512
+      Timeout: 10
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref ElasticacheAccessSG
+        SubnetIds:
+          - !Ref LambdaSubnet1
+          - !Ref LambdaSubnet2
       Environment:
         Variables:
           ARTICLE_COUNT_KEY: "article:count"
           BLOG_COUNT_KEY: "blog:count"
+          ELASTICACHE_ENDPOINT: !Ref ElasticacheEndpoint
+          ELASTICACHE_PORT: !Ref ElasticachePort
 
   ## AppSync Integration ##
   ElastiCacheIntegrationDataSource:
@@ -349,3 +381,21 @@ Resources:
                   - !GetAtt ElastiCacheArticleIntegrationFunction.Arn
                   - !GetAtt ElastiCacheStatisticsIntegrationFunction.Arn
 
+  ContentApiUrlParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/news/${Stage}/services/content/api"
+      Type: String
+      Value: !Sub https://${ContentApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/${Stage}/
+      Description: URL for the Content API
+      Tags:
+        Environment: !Ref Stage
+        ProjectName: !Ref ProjectName
+
+  ContentApiAccessLogs:
+    Type: AWS::Logs::LogGroup
+
+Outputs:
+  ContentApiUrl:
+    Description: URL for the Content API
+    Value: !Sub https://${ContentApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/${Stage}/

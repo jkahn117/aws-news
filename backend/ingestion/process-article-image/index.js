@@ -36,7 +36,10 @@ async function storeImage(image, name) {
   return s3client.putObject({
     Bucket: process.env.CONTENT_BUCKET,
     Key: name,
-    Body: image
+    Body: image,
+    Metadata: {
+      'Content-Type': 'image/webp'
+    }
   }).promise();
 }
 
