@@ -15,8 +15,8 @@ $ddb_client = nil
 ## S3 Client
 $s3_client = nil
 
-ARTICLES_TABLE = 'Article-l6pswppyhzfnlk46cd3ii5k4ma-devel'
-CONTENT_BUCKET = 'aws-news22e8b0b356ca40dabae23f3b3e7ab9f0devel-devel'
+ARTICLES_TABLE = ENV['ARTICLES_TABLE']
+CONTENT_BUCKET = ENV['CONTENT_BUCKET']
 
 
 Article = Struct.new(:content_uri, :image)
@@ -29,17 +29,18 @@ def handler(event:, context:)
     $s3_client = Aws::S3::Client.new
   end
 
-  path = event['rawPath']
-  article_id, size = event['pathParameters'].values_at('id', 'size')
+  article_id = event.dig('pathParameters', 'id')
+  size = event.dig('queryStringParameters', 'size')
 
   article = get_article_metadata(article_id, size)
 
-  if path.start_with?('/content')
-    respond_with_content(uri: article.content_uri)
-  elsif path.start_with?('/image')
-    respond_with_image(uri: article.image)
-  else
-    failure(message: "Unknown action: #{path}")
+  case event['rawPath']
+    when /^\/\w+\/content/
+      respond_with_content(uri: article.content_uri)
+    when /^\/\w+\/image/
+      respond_with_image(uri: article.image)
+    else
+      failure(message: "Unknown action: #{path}")
   end
 end
 
@@ -99,7 +100,8 @@ def respond_with_image(uri:)
       key: uri
     })
 
-    content_type = resp.content_type || 'application/octet-stream'
+    # we expect webp to be the content-type
+    content_type = resp.content_type || 'image/webp'
 
     {
       isBase64Encoded: true,

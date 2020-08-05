@@ -1,11 +1,10 @@
 {
   "version": "2.0",
-  "routeKey": "$default",
+  "routeKey": "GET /content/{id}/{size}",
   "rawPath": "/image/9d1de8aeb7dbf7078e3348bdf9b2a71a/lg",
   "rawQueryString": "",
   "queryStringParameters": {
-    "parameter1": "value1,value2",
-    "parameter2": "value"
+    "size": "lg"
   },
   "requestContext": {
     "accountId": "123456789012",
@@ -20,7 +19,7 @@
       "userAgent": "agent"
     },
     "requestId": "id",
-    "routeKey": "$default",
+    "routeKey": "GET /content/{id}/{size}",
     "stage": "$default",
     "time": "12/Mar/2020:19:03:58 +0000",
     "timeEpoch": 1583348638390

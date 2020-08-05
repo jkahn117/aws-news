@@ -82,7 +82,7 @@ Resources:
           Properties:
             ApiId: !Ref ContentApi
             Method: GET
-            Path: /image/{id}/{size}
+            Path: /image/{id}
           
   ContentApi:
     Type: AWS::Serverless::HttpApi
