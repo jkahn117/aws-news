@@ -6,7 +6,7 @@ require 'aws-sdk-s3'
 require 'digest'
 require 'httparty'
 require 'nokogiri'
-require 'upmark'
+require 'kramdown'
 
 # S3 client
 $s3_client = Aws::S3::Client.new
@@ -95,7 +95,7 @@ class Article
     # Converts content to Markdown and writes to S3.
     def write_content_to_s3(bucket, key, content)
       $s3_client.put_object({
-        body: Upmark.convert(content),
+        body: Kramdown::Document(content, html_to_native: true).to_kramdown,
         bucket: bucket,
         key: "public/#{key}.md"
       })
