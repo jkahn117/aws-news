@@ -95,7 +95,7 @@ class Article
     # Converts content to Markdown and writes to S3.
     def write_content_to_s3(bucket, key, content)
       $s3_client.put_object({
-        body: Kramdown::Document(content, html_to_native: true).to_kramdown,
+        body: Kramdown::Document.new(content, html_to_native: true).to_kramdown,
         bucket: bucket,
         key: "public/#{key}.md"
       })
