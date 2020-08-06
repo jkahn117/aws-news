@@ -65,6 +65,7 @@ Resources:
         Variables:
           ARTICLES_TABLE: !Ref ArticlesTable
           CONTENT_BUCKET: !Ref ContentBucket
+          CACHE_COTNROL_VALUE: 'max-age=2592000'
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref ArticlesTable

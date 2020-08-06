@@ -80,7 +80,8 @@ def respond_with_content(uri:)
       isBase64Encoded: false,
       statusCode: 200,
       headers: {
-        'Content-Type': 'text/html'
+        'Content-Type': 'text/html',
+        'Cache-Control': ENV['CACHE_COTNROL_VALUE']
       },
       body: Kramdown::Document.new(resp.body.read).to_html
     }
@@ -107,7 +108,8 @@ def respond_with_image(uri:)
       isBase64Encoded: true,
       statusCode: 200,
       headers: {
-        'Content-Type': content_type
+        'Content-Type': content_type,
+        'Cache-Control': ENV['CACHE_COTNROL_VALUE']
       },
       body: Base64.encode64(resp.body.read)
     }
