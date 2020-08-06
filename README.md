@@ -72,7 +72,7 @@ If you are deploying the project manually, without the use of Amplify Console, y
 
 10. Expand the "Advanced Settings" section. Copy and paste the URI of your custom build image, e.g. "1234567890.dkr.ecr.us-east-1.amazonaws.com/aws-news-builder-dev". This value was outputted at the end of the `deploy.support` task or can be found by navigating to ECR in the AWS Console.
 
-![Amplify Build Configuration](images/amplify_build_configuration.png)
+![Amplify Build Configuration](images/amplify_build_config.png)
 
 11. Click "Continue" and confirm on the next screen. Then start your deployment. The initial deployment will take longer than subsquent updates, get another cup of coffee. When finished, Amplify Console will display a custom URL for the deployed application, but there will not be content yet.
 
