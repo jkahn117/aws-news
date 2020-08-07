@@ -37,9 +37,7 @@ async function storeImage(image, name) {
     Bucket: process.env.CONTENT_BUCKET,
     Key: name,
     Body: image,
-    Metadata: {
-      'Content-Type': 'image/webp'
-    }
+    ContentType: 'image/webp'
   }).promise();
 }
 
