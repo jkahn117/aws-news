@@ -12,6 +12,6 @@ gem "aws-sdk-dynamodb", "~> 1"
 
 gem "aws-sdk-eventbridge", "~> 1"
 
-gem "kramdown", "~> 2.3"
+gem "reverse_markdown", "~> 2.0"
 
 gem "nokogiri", "~> 1.10"
