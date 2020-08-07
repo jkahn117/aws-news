@@ -8,12 +8,14 @@ require 'aws-sdk-dynamodb'
 require 'aws-sdk-s3'
 require 'base64'
 require 'json'
-require 'kramdown'
+require 'redcarpet'
 
 ## DyanmoDB client instance
 $ddb_client = nil
 ## S3 Client
 $s3_client = nil
+
+$renderer = nil
 
 ARTICLES_TABLE = ENV['ARTICLES_TABLE']
 CONTENT_BUCKET = ENV['CONTENT_BUCKET']
@@ -67,9 +69,24 @@ def get_article_metadata(article_id, size)
 end
 
 #
+#
+#
+def get_renderer
+  Redcarpet::Render::HTML.new(
+    filter_html: true,
+    no_styles: true,
+    safe_links_only: true
+  )
+end
+
+#
 # Retrieve object from S3, convert from Markdown to HTML, and return.
 #
 def respond_with_content(uri:)
+  if $renderer.nil?
+    $renderer = get_renderer
+  end
+
   begin
     resp = $s3_client.get_object({
       bucket: CONTENT_BUCKET,
@@ -83,7 +100,7 @@ def respond_with_content(uri:)
         'Content-Type': 'text/html',
         'Cache-Control': ENV['CACHE_COTNROL_VALUE']
       },
-      body: Kramdown::Document.new(resp.body.read).to_html
+      body: Redcarpet::Markdown.new($renderer).render(resp.body.read)
     }
   rescue Aws::S3::Errors::NoSuchKey
     failure(message: 'Not found')
