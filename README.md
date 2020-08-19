@@ -103,9 +103,10 @@ amplify delete
 
 ## To Do
 
-* Enhance monitoring -- tracing, logging
-* Add personalization and auth needed
-* iOS (SwiftUI)
+- [ ] Enhance monitoring -- tracing, logging
+- [x] Modify Elasticache resolvers to use direct to Lambda
+- [ ] Add personalization and auth needed
+- [ ] iOS (SwiftUI)
 
 ## Authors
 
