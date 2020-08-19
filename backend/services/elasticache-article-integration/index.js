@@ -112,7 +112,7 @@ exports.handler = async(event) => {
   
   console.log(JSON.stringify(event));
   const { info: { fieldName: action, variables: { limit=10, nextToken }}} = event;
-  const start = nextToken !== "" ? _decodeNextToken(nextToken) : 0;
+  const start = nextToken && nextToken !== "" ? _decodeNextToken(nextToken) : 0;
   
   if (!redis) {
     const connectSegment = segment.addNewSubsegment("connect_to_redis");
