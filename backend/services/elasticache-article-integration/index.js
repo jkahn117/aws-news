@@ -86,7 +86,7 @@ async function getPopularArticles(start, limit) {
 
 /**
  * Decodes nextToken opaque token to retrieve next item index.
- * @param {String} nextToken 
+ * @param {String} nextToken
  */
 function _decodeNextToken(nextToken) {
   let str = Buffer.from(nextToken, "base64").toString("ascii");
@@ -111,7 +111,7 @@ exports.handler = async(event) => {
   const segment = AWSXRay.getSegment();
   
   console.log(JSON.stringify(event));
-  const { action, args: { limit=10, nextToken }} = event;
+  const { info: { fieldName: action, variables: { limit=10, nextToken }}} = event;
   const start = nextToken !== "" ? _decodeNextToken(nextToken) : 0;
   
   if (!redis) {

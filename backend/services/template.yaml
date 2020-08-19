@@ -268,23 +268,23 @@ Resources:
       Description: >
         Queries ElastiCache via Lambda data source to retrieve list of
         latest article ids.
-      RequestMappingTemplate: |
-        {
-          "version": "2017-02-28",
-          "operation": "Invoke",
-          "payload": {
-            "action": "latestArticles",
-            "args":  {
-              "limit": $util.defaultIfNull($ctx.args.limit, 10),
-              "nextToken": "$util.defaultIfNullOrEmpty($ctx.args.nextToken, '')"
-            }
-          }
-        }
-      ResponseMappingTemplate: |
-        #if($ctx.result && $ctx.result.error)
-          $util.error($ctx.result.error)
-        #end
-        $util.toJson($ctx.result)
+      # RequestMappingTemplate: |
+      #   {
+      #     "version": "2017-02-28",
+      #     "operation": "Invoke",
+      #     "payload": {
+      #       "action": "latestArticles",
+      #       "args":  {
+      #         "limit": $util.defaultIfNull($ctx.args.limit, 10),
+      #         "nextToken": "$util.defaultIfNullOrEmpty($ctx.args.nextToken, '')"
+      #       }
+      #     }
+      #   }
+      # ResponseMappingTemplate: |
+      #   #if($ctx.result && $ctx.result.error)
+      #     $util.error($ctx.result.error)
+      #   #end
+      #   $util.toJson($ctx.result)
 
   # Get popular articles via elasticache integration data source
   GetPopularArticlesFunction:
@@ -297,23 +297,23 @@ Resources:
       Description: >
         Queries ElastiCache via Lambda data source to retrieve list of
         popular article ids.
-      RequestMappingTemplate: |
-        {
-          "version": "2017-02-28",
-          "operation": "Invoke",
-          "payload": {
-            "action": "popularArticles",
-            "args":  {
-              "limit": $util.defaultIfNull($ctx.args.limit, 10),
-              "nextToken": "$util.defaultIfNullOrEmpty($ctx.args.nextToken, '')"
-            }
-          }
-        }
-      ResponseMappingTemplate: |
-        #if($ctx.result && $ctx.result.error)
-          $util.error($ctx.result.error)
-        #end
-        $util.toJson($ctx.result)
+      # RequestMappingTemplate: |
+      #   {
+      #     "version": "2017-02-28",
+      #     "operation": "Invoke",
+      #     "payload": {
+      #       "action": "popularArticles",
+      #       "args":  {
+      #         "limit": $util.defaultIfNull($ctx.args.limit, 10),
+      #         "nextToken": "$util.defaultIfNullOrEmpty($ctx.args.nextToken, '')"
+      #       }
+      #     }
+      #   }
+      # ResponseMappingTemplate: |
+      #   #if($ctx.result && $ctx.result.error)
+      #     $util.error($ctx.result.error)
+      #   #end
+      #   $util.toJson($ctx.result)
 
   # Loads details on batch of Articles from DynamoDB
   BatchGetArticlesFunctions:
