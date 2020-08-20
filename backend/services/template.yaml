@@ -82,7 +82,10 @@ Resources:
   ImageServingFunction:
     Type: AWS::Serverless::Function
     Properties:
+      Handler: index.handler
+      Runtime: nodejs12.x
       CodeUri: image/
+      MemorySize: 512
       Environment:
         Variables:
           ARTICLES_TABLE: !Ref ArticlesTable
