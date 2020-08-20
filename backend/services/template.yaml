@@ -78,6 +78,23 @@ Resources:
             ApiId: !Ref ContentApi
             Method: GET
             Path: /content/{id}
+
+  ImageServingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: image/
+      Environment:
+        Variables:
+          ARTICLES_TABLE: !Ref ArticlesTable
+          CONTENT_BUCKET: !Ref ContentBucket
+          CACHE_COTNROL_VALUE: 'max-age=2592000'
+          DEFAULT_IMAGE_WIDTH: 1024
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ArticlesTable
+        - S3ReadPolicy:
+            BucketName: !Ref ContentBucket
+      Events:
         image:
           Type: HttpApi
           Properties:

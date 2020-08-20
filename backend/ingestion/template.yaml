@@ -203,6 +203,7 @@ Resources:
         Variables:
           ARTICLES_TABLE: !Ref ArticlesTable
           CONTENT_BUCKET: !Ref ContentBucket
+          DESIRED_IMAGE_WIDTH: 1024
           # Keep-Alive, @see https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/node-reusing-connections.html
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
       Events:

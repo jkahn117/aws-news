@@ -1,5 +1,5 @@
 {
-  "name": "aws-news-process-article-image",
+  "name": "aws-news-backend-ingestion-process-article-image",
   "version": "1.0.0",
   "description": "Prepare article image for serving.",
   "main": "index.js",

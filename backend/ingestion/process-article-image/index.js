@@ -4,7 +4,7 @@
  * This function is triggered by EventBridge payloads matching rules:
  *   - detail-type == article_created
  * 
- * The function downloads, processes, and stores article images to improve
+ * The function downloads, processes, and stores article image to improve
  * performance when serving.
  * 
  */
@@ -14,55 +14,70 @@ const fetch = require("node-fetch");
 const S3 = require("aws-sdk/clients/s3");
 const sharp = require("sharp");
 
-const DESIRED_WIDTHS = {
-  'xl': 1024,
-  'lg': 800,
-  'md': 400
-};
+const DESIRED_IMAGE_WIDTH = process.env.DESIRED_IMAGE_WIDTH;
 
 let ddbclient = null;
 let s3client = null;
 
+/**
+ * Resizes the image to the desired width, using SharpJS (cover mode to
+ * fill dimensions). Also converts to JPEG format.
+ * @param {*} buffer 
+ * @param {*} width 
+ */
 async function processImage(buffer, width) {
   return await sharp(buffer)
-                        .resize({ width })
-                        .webp()
-                        .toBuffer();
+                  .resize({ width })
+                  // .webp()  // iOS does not support webp format until iOS 14
+                  .jpeg()
+                  .toBuffer();
 }
 
-async function storeImage(image, name) {
+/**
+ * Stores the image in the S3 bucket.
+ * @param {*} image 
+ * @param {*} name 
+ */
+async function storeImage(image, name, metadata) {
   if (!s3client) { s3client = new S3(); }
 
   return s3client.putObject({
     Bucket: process.env.CONTENT_BUCKET,
     Key: name,
     Body: image,
-    ContentType: 'image/webp'
+    ContentType: 'image/jpeg',
+    Metadata: metadata
   }).promise();
 }
 
-async function processAndStoreImage(buffer, articleId, size, width) {
-  const image = await processImage(buffer, width);
-  const name = `${articleId}-${size}.webp`;
-  await storeImage(image, name);
+/**
+ * Processes and then stores in the image.
+ * @param {*} buffer 
+ * @param {*} articleId 
+ * @param {*} size 
+ * @param {*} width 
+ */
+async function processAndStoreImage(buffer, baseName, desiredWidth=DESIRED_IMAGE_WIDTH, metadata={}) {
+  const image = await processImage(buffer, desiredWidth);
+  await storeImage(image, `${baseName}.jpg`, metadata);
 
-  return Promise.resolve({ size, name });
+  return Promise.resolve({ articleId, name, size: `${desiredWidth} px` });
 }
 
-async function updateArticleRecord(articleId, images) {
+/**
+ * Updates the Article record in DynamoDB by modifying the image field.
+ * @param {*} articleId 
+ * @param {*} images 
+ */
+async function updateArticleRecord(articleId, image) {
   if (!ddbclient) { ddbclient = new DDB.DocumentClient(); }
-  
-  const sizedImages = images.reduce((acc, img) => {
-    acc[img.size] = img.name;
-    return acc;
-  }, {});
 
   return ddbclient.update({
     TableName: process.env.ARTICLES_TABLE,
     Key: { id: articleId },
     UpdateExpression: "set #i = :img",
-    ExpressionAttributeNames: { '#i': 'sizedImage' },
-    ExpressionAttributeValues: { ':img': sizedImages }
+    ExpressionAttributeNames: { '#i': 'image' },
+    ExpressionAttributeValues: { ':img': image.name }
   }).promise();
 }
 
@@ -98,27 +113,28 @@ exports.handler = async(event) => {
   }
 
   const publishedAt = new Date(event.detail.publishedAt);
-  const name = `public/${publishedAt.getFullYear()}/${publishedAt.getMonth() + 1}/${event.detail.articleId}`;
+  const baseName = `public/${publishedAt.getFullYear()}/${publishedAt.getMonth() + 1}/${event.detail.articleId}`;
 
   try {
     const response = await fetch(event.detail.image);
     const buffer = await response.buffer();
 
-    let work = Object.entries(DESIRED_WIDTHS).reduce((acc, [ key, value ]) => {
-      acc.push(processAndStoreImage(buffer, name, key, value));
-      return acc;
-    }, []);
+    const result = processAndStoreImage(buffer,
+                                        baseName,
+                                        DESIRED_IMAGE_WIDTH,
+                                        {
+                                          articleId: event.detail.articleId,
+                                          origImageUrl: event.detail.image,
+                                          imageWidth: DESIRED_IMAGE_WIDTH
+                                        });
 
-    const images = await Promise.all(work);
-
-    await updateArticleRecord(event.detail.articleId, images);
+    await updateArticleRecord(event.detail.articleId, result);
 
     return {
       error: null,
       result: {
         articleId: event.detail.articleId,
-        count: images.length,
-        images
+        result
       }
     };
   } catch (error) {
