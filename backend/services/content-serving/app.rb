@@ -1,7 +1,8 @@
 #
 # ContentServingFunction
 #
-# This 
+# Serves article content by retrieving from Amazon S3 bucket, converting
+# from Markdown to HTML and returning result. 
 #
 
 require 'aws-sdk-dynamodb'
