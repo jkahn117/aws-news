@@ -95,7 +95,7 @@ Resources:
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref ArticlesTable
-        - S3ReadPolicy:
+        - S3CrudPolicy:
             BucketName: !Ref ContentBucket
       Events:
         image:

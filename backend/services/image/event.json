@@ -1,10 +1,10 @@
 {
   "version": "2.0",
   "routeKey": "GET /image/{id}",
-  "rawPath": "/image/133601ff1072e5b6eeb8d857dea93f35/lg",
+  "rawPath": "/image/133601ff1072e5b6eeb8d857dea93f35?size=400",
   "rawQueryString": "",
   "queryStringParameters": {
-    "size": "300"
+    "size": "400"
   },
   "requestContext": {
     "accountId": "123456789012",
@@ -13,7 +13,7 @@
     "domainPrefix": "id",
     "http": {
       "method": "GET",
-      "path": "/image/133601ff1072e5b6eeb8d857dea93f35/lg",
+      "path": "/image/133601ff1072e5b6eeb8d857dea93f35",
       "protocol": "HTTP/1.1",
       "sourceIp": "IP",
       "userAgent": "agent"
@@ -26,7 +26,7 @@
   },
   "body": "Hello from Lambda",
   "pathParameters": {
-    "id": "133601ff1072e5b6eeb8d857dea93f35"
+    "id": "7588a85cb0cf703e78174bafb24455f8"
   },
   "isBase64Encoded": false,
   "stageVariables": {

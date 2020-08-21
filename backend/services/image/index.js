@@ -62,8 +62,6 @@ async function resizeAndStoreImage(imageBaseKey, newImageKey, articleId, desired
  * @param {*} imageKey 
  */
 async function getImage(imageKey) {
-  console.log(imageKey)
-
   return s3client.getObject({
     Bucket: process.env.CONTENT_BUCKET,
     Key: imageKey
@@ -117,7 +115,7 @@ exports.handler = async(event) => {
   } catch (e) {
     if (e.code === 'NoSuchKey') {
       console.warn(`Image not found for key ${imageKey} -- generating...`);
-      buffer = (await resizeAndStoreImage(imageBaseKey, imageKey, articleId, size)).Body;
+      buffer = await resizeAndStoreImage(imageBaseKey, imageKey, articleId, size);
     } else {
       console.error(e);
       return {
