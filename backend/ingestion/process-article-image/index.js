@@ -14,7 +14,7 @@ const fetch = require("node-fetch");
 const S3 = require("aws-sdk/clients/s3");
 const sharp = require("sharp");
 
-const DESIRED_IMAGE_WIDTH = process.env.DESIRED_IMAGE_WIDTH;
+const DESIRED_IMAGE_WIDTH = Number(process.env.DESIRED_IMAGE_WIDTH);
 
 let ddbclient = null;
 let s3client = null;
