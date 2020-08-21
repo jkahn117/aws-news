@@ -41,6 +41,10 @@ frontend:
       commands:
         - cd next
         - yarn install
+        # write the value of the content service
+        - export CONTENT_API_URL=$(aws cloudformation describe-stacks --stack-name ${STACK_NAME}-services | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "ContentApiUrl").OutputValue')
+        - touch env.local
+        - echo 'NEXT_PUBLIC_CONTENT_API=${CONTENT_API_URL}' > env.local
     build:
       commands:
         - yarn run build
