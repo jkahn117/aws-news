@@ -42,7 +42,7 @@ private
 #
 # Retrieves metadata on article from DynamoDB.
 #
-def get_article_metadata(article_id, size)
+def get_article_metadata(article_id)
   if $ddb_client.nil?
     $ddb_client = Aws::DynamoDB::Client.new
   end

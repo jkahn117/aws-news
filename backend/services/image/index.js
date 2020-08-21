@@ -7,8 +7,8 @@
 
 
 const AWSXRay = require('aws-xray-sdk-core')
-const DDB = AWSXRay.captureAWS(require("aws-sdk/clients/dynamodb"));
-const S3 = AWSXRay.captureAWS(require("aws-sdk/clients/s3"));
+const DDB = require("aws-sdk/clients/dynamodb");
+const S3 = require("aws-sdk/clients/s3");
 const sharp = require("sharp");
 
 const DEFAULT_IMAGE_WIDTH = process.env.DEFAULT_IMAGE_WIDTH;
@@ -34,8 +34,6 @@ async function processImage(buffer, width) {
  * @param {*} name 
  */
 async function storeImage(image, name, metadata) {
-  if (!s3client) { s3client = new S3(); }
-
   return s3client.putObject({
     Bucket: process.env.CONTENT_BUCKET,
     Key: name,
@@ -66,8 +64,6 @@ async function resizeAndStoreImage(imageBaseKey, newImageKey, articleId, desired
  * @param {*} imageKey 
  */
 async function getImage(imageKey) {
-  if (!s3client) { s3client = new S3(); }
-
   return s3client.getObject({
     Bucket: process.env.CONTENT_BUCKET,
     Key: imageKey
@@ -79,13 +75,17 @@ async function getImage(imageKey) {
  * @param {*} articleId 
  */
 async function getArticleMetadata(articleId) {
-  if (!ddbclient) { ddbclient = new DDB.DocumentClient(); }
+  if (!ddbclient) {
+    // @see https://twitter.com/m4nl5r/status/1293207153306632195?s=11
+    ddbclient = new DDB.DocumentClient();
+    AWSXRay.captureAWSClient(ddbclient.service);
+  }
 
   return ddbclient.get({
     TableName: process.env.ARTICLES_TABLE,
     Key: { id: articleId },
     AttributesToGet: [
-      image
+      'image'
     ]
   }).promise();
 }
@@ -104,6 +104,8 @@ exports.handler = async(event) => {
   // query DDB for the base image key (no size included, this is the default image size)
   let imageBaseKey = await getArticleMetadata(articleId);
   let imageKey = imageBaseKey.replace(/\.jpg$/, `-${size}.jpg`);
+
+  if (!s3client) { s3client = AWSXRay.captureAWSClient(new S3()); }
 
   // check if the sized image exists in S3; if not, handle error by creating a new image and storing
   let buffer;
