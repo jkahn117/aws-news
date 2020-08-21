@@ -8,6 +8,7 @@ import API, { graphqlOperation } from '@aws-amplify/api';
 import Storage from '@aws-amplify/storage';
 import Analytics from '@aws-amplify/analytics';
 
+import ArticleImage from '@/article/ArticleImage';
 import { BlogSlug, ByLine } from '@/article/Util';
 import Loader from '@/ui/Loader';
 
@@ -38,13 +39,14 @@ export default function Article() {
                                               return getArticle;
                                             });
 
-  const storage = uri => Storage.get(uri)
-                                .then(signedUrl => axios(signedUrl))
-                                .then(d => d.data)
-                                .catch(e => console.error(e));
+  const fetchContent = id => API.get('content-api', `/content/${id}`, { responseType: 'text' })
+                                .then(r => {
+                                  return { __html: r };
+                                });
 
   const { data: article, error } = useSWR(articleId ? [ getArticle, articleId ] : null, fetcher);
-  const { data: content } = useSWR(() => article.contentUri, storage);
+  
+  const { data: content } = useSWR(articleId ? articleId : null, fetchContent);
 
   if (error) {
     console.error(error);
@@ -70,8 +72,10 @@ export default function Article() {
       </Head>
 
       <article className="relative">
-        <img className="w-full object-cover mb-4"
-          src={ article.image } alt={ article.title } />
+        <ArticleImage className="w-full object-cover mb-4"
+          article={ article }
+          imageSizes={[ 480, 800, 1024]}
+          sizes="(max-width: 480px) 100vw, (max-width: 800px) 800px, 1024px" />
 
         <div className="px-4">
           <BlogSlug article={ article } />
@@ -82,7 +86,8 @@ export default function Article() {
 
           <div className="content my-10 overflow-hidden">
             { content ? (
-              <Markdown source={ content } escapeHtml={ false } />
+              // <Markdown source={ content } escapeHtml={ false } />
+              <div dangerouslySetInnerHTML={ content } />
             ) : (
               <Loader />
             ) }
