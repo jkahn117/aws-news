@@ -14,7 +14,7 @@ const fetch = require("node-fetch");
 const S3 = require("aws-sdk/clients/s3");
 const sharp = require("sharp");
 
-const DESIRED_IMAGE_WIDTH = Number(process.env.DESIRED_IMAGE_WIDTH);
+const DESIRED_IMAGE_WIDTH = process.env.DESIRED_IMAGE_WIDTH;
 
 let ddbclient = null;
 let s3client = null;
@@ -61,7 +61,7 @@ async function processAndStoreImage(buffer, baseName, desiredWidth=DESIRED_IMAGE
   const image = await processImage(buffer, desiredWidth);
   await storeImage(image, `${baseName}.jpg`, metadata);
 
-  return Promise.resolve({ articleId, name, size: `${desiredWidth} px` });
+  return Promise.resolve({ name: `${baseName}.jpg`, size: `${desiredWidth} px` });
 }
 
 /**
@@ -71,6 +71,8 @@ async function processAndStoreImage(buffer, baseName, desiredWidth=DESIRED_IMAGE
  */
 async function updateArticleRecord(articleId, image) {
   if (!ddbclient) { ddbclient = new DDB.DocumentClient(); }
+
+  console.log(image)
 
   return ddbclient.update({
     TableName: process.env.ARTICLES_TABLE,
@@ -119,14 +121,14 @@ exports.handler = async(event) => {
     const response = await fetch(event.detail.image);
     const buffer = await response.buffer();
 
-    const result = processAndStoreImage(buffer,
-                                        baseName,
-                                        DESIRED_IMAGE_WIDTH,
-                                        {
-                                          articleId: event.detail.articleId,
-                                          origImageUrl: event.detail.image,
-                                          imageWidth: DESIRED_IMAGE_WIDTH
-                                        });
+    const result = await processAndStoreImage(buffer,
+                                              baseName,
+                                              Number(DESIRED_IMAGE_WIDTH),
+                                              {
+                                                articleId: event.detail.articleId,
+                                                origImageUrl: event.detail.image,
+                                                imageWidth: DESIRED_IMAGE_WIDTH
+                                              });
 
     await updateArticleRecord(event.detail.articleId, result);
 

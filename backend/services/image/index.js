@@ -51,11 +51,9 @@ async function storeImage(image, name, metadata) {
  * @param {*} width 
  */
 async function resizeAndStoreImage(imageBaseKey, newImageKey, articleId, desiredWidth=DEFAULT_IMAGE_WIDTH) {
-  const buffer = await getImage(imageBaseKey).Body;
-
-  const image = await processImage(buffer, desiredWidth);
+  const buffer = (await getImage(imageBaseKey)).Body;
+  const image = await processImage(buffer, Number(desiredWidth));
   await storeImage(image, newImageKey, { articleId, imageBaseKey });
-
   return Promise.resolve(image);
 }
 
@@ -64,6 +62,8 @@ async function resizeAndStoreImage(imageBaseKey, newImageKey, articleId, desired
  * @param {*} imageKey 
  */
 async function getImage(imageKey) {
+  console.log(imageKey)
+
   return s3client.getObject({
     Bucket: process.env.CONTENT_BUCKET,
     Key: imageKey
@@ -81,19 +81,21 @@ async function getArticleMetadata(articleId) {
     AWSXRay.captureAWSClient(ddbclient.service);
   }
 
-  return ddbclient.get({
+  let result = await ddbclient.get({
     TableName: process.env.ARTICLES_TABLE,
     Key: { id: articleId },
     AttributesToGet: [
       'image'
     ]
   }).promise();
+
+  return result.Item;
 }
 
 /**
  * 
  * Main handler function.
-
+ * 
  */
 exports.handler = async(event) => {
   // console.log(JSON.stringify(event));
@@ -102,19 +104,20 @@ exports.handler = async(event) => {
   console.log(`Loading image for article ${articleId}, @ ${size} px`);
 
   // query DDB for the base image key (no size included, this is the default image size)
-  let imageBaseKey = await getArticleMetadata(articleId);
-  let imageKey = imageBaseKey.replace(/\.jpg$/, `-${size}.jpg`);
+  const metadata = await getArticleMetadata(articleId);
+  const imageBaseKey = metadata.image;
+  const imageKey = imageBaseKey.replace(/\.jpg$/, `-${size}.jpg`);
 
   if (!s3client) { s3client = AWSXRay.captureAWSClient(new S3()); }
 
   // check if the sized image exists in S3; if not, handle error by creating a new image and storing
   let buffer;
   try {
-    buffer = await getImage(imageKey).Body;
+    buffer = (await getImage(imageKey)).Body;
   } catch (e) {
-    if (e instanceof NoSuchKeyError) {
-      console.error('NO SUCH KEY')
-      buffer = resizeAndStoreImage(imageBaseKey, imageKey, articleId, size);
+    if (e.code === 'NoSuchKey') {
+      console.warn(`Image not found for key ${imageKey} -- generating...`);
+      buffer = (await resizeAndStoreImage(imageBaseKey, imageKey, articleId, size)).Body;
     } else {
       console.error(e);
       return {
