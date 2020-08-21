@@ -108,14 +108,22 @@ exports.handler = async(event) => {
 
   if (!s3client) { s3client = AWSXRay.captureAWSClient(new S3()); }
 
+  const segment = AWSXRay.getSegment();
+  segment.addMetadata('articleId', articleId, 'content-serving-image');
+
   // check if the sized image exists in S3; if not, handle error by creating a new image and storing
   let buffer;
   try {
     buffer = (await getImage(imageKey)).Body;
+    segment.addAnnotation('NEW_IMAGE_GENERATED', false);
   } catch (e) {
     if (e.code === 'NoSuchKey') {
       console.warn(`Image not found for key ${imageKey} -- generating...`);
+
+      const resizeSegment = segment.addNewSubsegment('resize_and_store_image');
       buffer = await resizeAndStoreImage(imageBaseKey, imageKey, articleId, size);
+      resizeSegment.close();
+      segment.addAnnotation('NEW_IMAGE_GENERATED', true);
     } else {
       console.error(e);
       return {
