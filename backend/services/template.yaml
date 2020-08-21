@@ -61,6 +61,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: content-serving/
+      MemorySize: 512
       Environment:
         Variables:
           ARTICLES_TABLE: !Ref ArticlesTable
@@ -111,6 +112,17 @@ Resources:
       AccessLogSettings:
         DestinationArn: !GetAtt ContentApiAccessLogs.Arn
         Format: '{ "requestId": "$context.requestId", "userAgent": "$context.identity.userAgent", "httpMethod": "$context.httpMethod", "path": "$context.path", "status": "$context.status", "protocol": "$context.protocol", "integrationStatus": "$context.integrationStatus", "responseLatency": "$context.responseLatency" , "integrationErrorMessage":"$context.integrationErrorMessage" }'
+      CorsConfiguration:
+        AllowHeaders:
+          - authorization
+          - x-amz-date
+          - x-amz-security-token
+        AllowMethods:
+          - GET
+          - OPTIONS
+        AllowOrigins:
+          - http://localhost:3000
+          - https://news.iamjkahn.com
       DefaultRouteSettings:
         ThrottlingBurstLimit: 60
       FailOnWarnings: True
@@ -419,4 +431,4 @@ Resources:
 Outputs:
   ContentApiUrl:
     Description: URL for the Content API
-    Value: !Sub https://${ContentApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/${Stage}/
+    Value: !Sub https://${ContentApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/${Stage}
