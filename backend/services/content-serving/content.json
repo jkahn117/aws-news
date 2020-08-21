@@ -1,0 +1,37 @@
+{
+  "version": "2.0",
+  "routeKey": "GET /content/{id}",
+  "rawPath": "/dev/content/9d1de8aeb7dbf7078e3348bdf9b2a71a",
+  "rawQueryString": "",
+  "queryStringParameters": {
+    "parameter1": "value1,value2",
+    "parameter2": "value"
+  },
+  "requestContext": {
+    "accountId": "123456789012",
+    "apiId": "api-id",
+    "domainName": "id.execute-api.us-east-1.amazonaws.com",
+    "domainPrefix": "id",
+    "http": {
+      "method": "GET",
+      "path": "/content/9d1de8aeb7dbf7078e3348bdf9b2a71a",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "IP",
+      "userAgent": "agent"
+    },
+    "requestId": "id",
+    "routeKey": "GET /content/{id}",
+    "stage": "$default",
+    "time": "12/Mar/2020:19:03:58 +0000",
+    "timeEpoch": 1583348638390
+  },
+  "body": "Hello from Lambda",
+  "pathParameters": {
+    "id": "9d1de8aeb7dbf7078e3348bdf9b2a71a"
+  },
+  "isBase64Encoded": false,
+  "stageVariables": {
+    "stageVariable1": "value1",
+    "stageVariable2": "value2"
+  }
+}

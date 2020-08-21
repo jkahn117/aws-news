@@ -6,7 +6,7 @@ require 'aws-sdk-s3'
 require 'digest'
 require 'httparty'
 require 'nokogiri'
-require 'upmark'
+require 'reverse_markdown'
 
 # S3 client
 $s3_client = Aws::S3::Client.new
@@ -95,12 +95,38 @@ class Article
     # Converts content to Markdown and writes to S3.
     def write_content_to_s3(bucket, key, content)
       $s3_client.put_object({
-        body: Upmark.convert(content),
+        body: ReverseMarkdown.convert(sanitize_content content),
         bucket: bucket,
         key: "public/#{key}.md"
       })
     end
 
+    # Replace offending characters with ASCII equivalents
+    def sanitize_content(content)
+      bad_chars_replacements = {
+        '“' => '"',  # 0x201c
+        '”' => '"',  # 0x201d
+        '’' => '\'', # 0x72
+        '’' => '\'', # 0x74
+        '—' => '-',  # 0x77
+        '–' => '-',  # 0x20
+
+      }
+
+      opts = {
+        invalid: :replace,
+        replace: '',
+        # handle any other character
+        fallback: lambda { |char|
+          # if no replacement, use a blank
+          bad_chars_replacements.fetch(char, '')
+        }
+      }
+
+      content.encode(Encoding.find('ASCII'), opts)
+    end
+
+    # Retreive the main image, included as metadata in the HTML source
     def get_main_image(url)
       page = HTTParty.get(url)
       doc = Nokogiri::HTML(page)

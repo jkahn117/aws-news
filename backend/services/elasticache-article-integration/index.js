@@ -86,7 +86,7 @@ async function getPopularArticles(start, limit) {
 
 /**
  * Decodes nextToken opaque token to retrieve next item index.
- * @param {String} nextToken 
+ * @param {String} nextToken
  */
 function _decodeNextToken(nextToken) {
   let str = Buffer.from(nextToken, "base64").toString("ascii");
@@ -111,8 +111,8 @@ exports.handler = async(event) => {
   const segment = AWSXRay.getSegment();
   
   console.log(JSON.stringify(event));
-  const { action, args: { limit=10, nextToken }} = event;
-  const start = nextToken !== "" ? _decodeNextToken(nextToken) : 0;
+  const { info: { fieldName: action, variables: { limit=10, nextToken }}} = event;
+  const start = nextToken && nextToken !== "" ? _decodeNextToken(nextToken) : 0;
   
   if (!redis) {
     const connectSegment = segment.addNewSubsegment("connect_to_redis");
@@ -125,11 +125,8 @@ exports.handler = async(event) => {
     connectSegment.close();
   }
   
-  AWSXRay.captureFunc('annotations', function(subsegment){
-    subsegment.addAnnotation('Action', action);
-  });
-  
   return AWSXRay.captureAsyncFunc("load_articles", (subsegment) => {
+    subsegment.addAnnotation('ACTION', action);
     const result = action === "latestArticles" ? getLatestArticles(start, limit) : getPopularArticles(start, limit);
     subsegment.close();
     return result;

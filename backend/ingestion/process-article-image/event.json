@@ -1,0 +1,17 @@
+{
+  "version": "0",
+  "id": "a4a137e6-4545-8740-3516-0e882cd075e7",
+  "detail-type": "article_created",
+  "source": "arn:aws:lambda:us-east-2:XXXXXXXXXXXX:function:ProcessBlogFunction",
+  "account": "XXXXXXXXXXXX",
+  "time": "2020-01-03T23:06:29Z",
+  "region": "us-east-2",
+  "resources": [],
+  "detail": {
+    "articleId": "9d1de8aeb7dbf7078e3348bdf9b2a71a",
+    "title": "Building a visual search application with Amazon SageMaker and Amazon ES",
+    "blogId": "0781a0b75d204ed379ffba67da1e0db1",
+    "publishedAt": "2020-06-29T15:36:21+00:00",
+    "image": "https://d2908q01vomqb2.cloudfront.net/f1f836cb4ea6efb2a0b1b99f41ad8b103eff4b59/2020/06/26/visual-search-sagemaker-001.jpg"
+  }
+}

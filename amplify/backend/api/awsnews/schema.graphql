@@ -38,6 +38,7 @@ type Article
   excerpt: String
   tags: [String]
   blog: Blog @connection(fields: [ "blogId" ])
+  sizedImage: SizedImage
 }
 
 type ArticleConnection {
@@ -53,6 +54,12 @@ type ArticleStatistics {
 type DailyStatistic {
   date: AWSDate!
   newPosts: Int
+}
+
+type SizedImage {
+  md: String
+  lg: String
+  xl: String
 }
 
 type Query {

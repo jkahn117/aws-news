@@ -9,12 +9,28 @@ import Footer from '@/common/Footer';
 import awsconfig from '../aws-exports';
 import Amplify from '@aws-amplify/core';
 import Analytics from '@aws-amplify/analytics';
+import API from '@aws-amplify/api';
+import Auth from '@aws-amplify/auth';
 Amplify.configure(awsconfig);
 
 Analytics.autoTrack("session", {
   enable: true,
   type: "SPA"
 });
+
+// configure the content API separately ... for reasons unknown and to use a Next.js environment variable
+API.configure({
+  endpoints: [
+    {
+      name: 'content-api',
+      endpoint: process.env.NEXT_PUBLIC_CONTENT_API,
+      // custom_header: async () => {
+      //   return { Authorization: `Bearer ${(await Auth.currentSession()).getAccessToken().getJwtToken()}` }
+      // }
+    }
+  ]
+});
+
 
 export default function MyApp({ Component, pageProps }) {
   return (

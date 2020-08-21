@@ -119,6 +119,7 @@ deploy.services: ##=> Deploy services used by API
 							Stage=${AMPLIFY_ENV} \
 							AppSyncApiId=/news/${AMPLIFY_ENV}/amplify/api/id \
 							ArticlesTable=/news/${AMPLIFY_ENV}/amplify/storage/table/articles \
+							ContentBucket=/news/${AMPLIFY_ENV}/amplify/storage/bucket/content \
 							ElasticacheEndpoint=/news/${AMPLIFY_ENV}/common/elasticache/endpoint \
 							ElasticachePort=/news/${AMPLIFY_ENV}/common/elasticache/port \
 							ElasticacheAccessSG=/news/${AMPLIFY_ENV}/common/elasticache/sg \

@@ -68,6 +68,7 @@ Globals:
     Runtime: ruby2.7
     Handler: app.handler
     Timeout: 25
+    Tracing: Active
     Tags:
       Project: !Ref ProjectName
       Env: !Ref Stage
@@ -186,6 +187,34 @@ Resources:
           CONTENT_BUCKET: !Ref ContentBucket
           EVENT_BUS: !Ref EventBus
 
+  ProcessArticleImageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: process-article-image/
+      Handler: index.handler
+      Runtime: nodejs12.x
+      MemorySize: 1024
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref ArticlesTable
+        - S3WritePolicy:
+            BucketName: !Ref ContentBucket
+      Environment:
+        Variables:
+          ARTICLES_TABLE: !Ref ArticlesTable
+          CONTENT_BUCKET: !Ref ContentBucket
+          DESIRED_IMAGE_WIDTH: 1024
+          # Keep-Alive, @see https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/node-reusing-connections.html
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+      Events:
+        OnCreateEvent:
+          Type: CloudWatchEvent
+          Properties:
+            EventBusName: !Ref EventBus
+            Pattern:
+              detail-type:
+                - article_created
+
   PublishNewContentToAppSyncFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -273,7 +302,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service: !Sub events.amazonaws.com
+              Service: events.amazonaws.com
             Action: sts:AssumeRole
       Policies:
         - PolicyName: EventBridgeStartStateMachine

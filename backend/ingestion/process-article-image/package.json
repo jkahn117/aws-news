@@ -1,0 +1,13 @@
+{
+  "name": "aws-news-backend-ingestion-process-article-image",
+  "version": "1.0.0",
+  "description": "Prepare article image for serving.",
+  "main": "index.js",
+  "author": "jkahn",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "aws-sdk": "^2.724.0",
+    "node-fetch": "^2.6.0",
+    "sharp": "^0.25.4"
+  }
+}
