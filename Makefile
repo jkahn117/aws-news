@@ -126,6 +126,17 @@ deploy.services: ##=> Deploy services used by API
 							LambdaSubnet1=/news/${AMPLIFY_ENV}/common/network/privsubnet1 \
 							LambdaSubnet2=/news/${AMPLIFY_ENV}/common/network/privsubnet2
 
+deploy.cdn: ##=> Deploy the CloudFront distribution
+	$(info [*] Deploying API services...)
+	cd backend/services && \
+			sam deploy \
+					--template-file cdn.yaml \
+					--stack-name ${STACK_NAME}-cdn \
+					--capabilities CAPABILITY_IAM \
+					--parameter-overrides \
+							Stage=${AMPLIFY_ENV} \
+							ContentApiUrl=/news/${AMPLIFY_ENV}/services/content/api
+
 delete: ##=> Delete all
 	$(info [*] Deleting...)
 	$(MAKE) delete.services

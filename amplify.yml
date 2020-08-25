@@ -35,6 +35,7 @@ backend:
         # Deploy backend, including content service and support layer
         - echo Deploy backend components...
         - make deploy
+        - if [ "${AMPLIFY_ENV}" = "prod" ]; then make deploy.cdn; fi
 frontend:
   phases:
     preBuild:
@@ -43,6 +44,7 @@ frontend:
         - yarn install
         # write the value of the content service
         - export CONTENT_API_URL=$(aws cloudformation describe-stacks --stack-name ${STACK_NAME}-services | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "ContentApiUrl").OutputValue')
+        - if [ "${AMPLIFY_ENV}" = "prod" ]; then export CONTENT_API_URL=$(aws cloudformation describe-stacks --stack-name ${STACK_NAME}-cdn | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "DistributionDNSName").OutputValue'); fi
         - touch .env.local
         - echo 'NEXT_PUBLIC_CONTENT_API=${CONTENT_API_URL}' > .env.local
     build:
