@@ -419,7 +419,7 @@ Resources:
     Properties:
       Name: !Sub "/news/${Stage}/services/content/api"
       Type: String
-      Value: !Sub https://${ContentApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/${Stage}/
+      Value: !Sub ${ContentApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}
       Description: URL for the Content API
       Tags:
         Environment: !Ref Stage

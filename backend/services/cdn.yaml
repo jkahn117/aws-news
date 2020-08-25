@@ -1,0 +1,56 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+  Stage:
+    Type: String
+    Description: The stage where the application is running in, e.g., dev, prod.
+    Default: 'dev'
+
+  ProjectName:
+    Type: String
+    Description: The name of this project
+    Default: 'aws-news'
+
+  ContentApiUrl:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: AWS News content API url
+
+Resources:
+  ContentApiDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: !Sub Belongs to ${ProjectName} project (${Stage})
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          Compress: true
+          # Replace after https://github.com/aws-cloudformation/aws-cloudformation-coverage-roadmap/issues/571
+          ForwardedValues:
+            QueryString: true
+          TargetOriginId: !Sub ${ProjectName}-${Stage}
+          ViewerProtocolPolicy: https-only
+        Enabled: true
+        Origins:
+          - DomainName: !Ref ContentApiUrl
+            Id: !Sub ${ProjectName}-${Stage}
+            CustomOriginConfig:
+                OriginProtocolPolicy: https-only
+                OriginSSLProtocols:
+                  - TLSv1.2
+            OriginPath: !Sub /${Stage}
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+      Tags:
+        - Key: Environment
+          Value: !Ref Stage
+        - Key: ProjectName
+          Value: !Ref ProjectName
+
+Outputs:
+  DistributionDNSName:
+    Description: DNS name for distribution
+    Value: !Sub https://${ContentApiDistribution.DomainName}
