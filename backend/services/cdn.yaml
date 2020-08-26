@@ -28,9 +28,14 @@ Resources:
             - HEAD
             - OPTIONS
           Compress: true
+          DefaultTTL: 86400
+          MaxTTL: 31536000
+          MinTTL: 0
           # Replace after https://github.com/aws-cloudformation/aws-cloudformation-coverage-roadmap/issues/571
           ForwardedValues:
             QueryString: true
+            QueryStringCacheKeys:
+              - size
           TargetOriginId: !Sub ${ProjectName}-${Stage}
           ViewerProtocolPolicy: https-only
         Enabled: true
