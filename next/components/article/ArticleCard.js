@@ -11,7 +11,7 @@ export default function ArticleCard({ article }) {
           <ArticleImage className="absolute h-full w-full object-cover"
             article={ article }
             imageSizes={ [ 480, 800, 1024 ] }
-            sizes="(max-width: 480px) 100vw, (max-width: 800px) 800px, 1024px" />
+            sizes="(max-width: 480px) 480px, (max-width: 800px) 800px, 1024px" />
         </div>
         <div className="absolute top-0 bg-gray-800 opacity-75 w-full h-full sm:hidden">
           {/* Nothing here */}

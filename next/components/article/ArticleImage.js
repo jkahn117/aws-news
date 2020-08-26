@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 
+import LazyImage from '@/ui/LazyImage';
+
 export default function ArticleImage({ article, imageSizes, sizes, className }) {
   const [ imageSrc, setImageSrc ] = useState('');
   const [ imageSrcSet, setImageSrcSet ] = useState(null);
@@ -23,8 +25,9 @@ export default function ArticleImage({ article, imageSizes, sizes, className }) 
   }, [ article ]);
 
   return (
-    <img src={ imageSrc } alt={ article ? article.title : ' ' }
-        srcSet={ imageSrcSet } width={ 400 }
+    <LazyImage src={ imageSrc }
+        alt={ article ? article.title : ' ' }
+        srcset={ imageSrcSet }
         sizes={ sizes }
         className={ className } />
   );
