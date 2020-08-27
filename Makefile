@@ -124,7 +124,8 @@ deploy.services: ##=> Deploy services used by API
 							ElasticachePort=/news/${AMPLIFY_ENV}/common/elasticache/port \
 							ElasticacheAccessSG=/news/${AMPLIFY_ENV}/common/elasticache/sg \
 							LambdaSubnet1=/news/${AMPLIFY_ENV}/common/network/privsubnet1 \
-							LambdaSubnet2=/news/${AMPLIFY_ENV}/common/network/privsubnet2
+							LambdaSubnet2=/news/${AMPLIFY_ENV}/common/network/privsubnet2 \
+							ImageProcessingDependenciesLayer=/news/${AMPLIFY_ENV}/dependencies/image/layer
 
 deploy.cdn: ##=> Deploy the CloudFront distribution
 	$(info [*] Deploying API services...)
