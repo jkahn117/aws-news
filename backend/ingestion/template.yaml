@@ -58,6 +58,10 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>
     Description: Subnet for Lambda 2
 
+  ImageProcessingDependenciesLayer:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: Image processing dependencies Lambda Layer
+
 Conditions:
   IsProduction: !Equals 
     - !Ref Stage
@@ -200,6 +204,8 @@ Resources:
             TableName: !Ref ArticlesTable
         - S3WritePolicy:
             BucketName: !Ref ContentBucket
+      Layers:
+        - !Ref ImageProcessingDependenciesLayer
       Environment:
         Variables:
           ARTICLES_TABLE: !Ref ArticlesTable

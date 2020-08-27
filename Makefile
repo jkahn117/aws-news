@@ -66,7 +66,7 @@ deploy.ingestion: ##=> Deploy ingestion services
 			sam package \
 					--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
 					--output-template-file packaged.yaml && \
-			sam deploy \
+			aws cloudformation deploy \
 					--template-file packaged.yaml \
 					--stack-name ${STACK_NAME}-ingestion \
 					--capabilities CAPABILITY_IAM \
@@ -82,7 +82,8 @@ deploy.ingestion: ##=> Deploy ingestion services
 							ElasticachePort=/news/${AMPLIFY_ENV}/common/elasticache/port \
 							ElasticacheAccessSG=/news/${AMPLIFY_ENV}/common/elasticache/sg \
 							LambdaSubnet1=/news/${AMPLIFY_ENV}/common/network/privsubnet1 \
-							LambdaSubnet2=/news/${AMPLIFY_ENV}/common/network/privsubnet2
+							LambdaSubnet2=/news/${AMPLIFY_ENV}/common/network/privsubnet2 \
+							ImageProcessingDependenciesLayer=/news/${AMPLIFY_ENV}/common/layer/image/arn
 
 deploy.analytics: ##=> Deploy analytics
 	$(info [*] Deploying analytics...)
@@ -111,7 +112,7 @@ deploy.services: ##=> Deploy services used by API
 			sam package \
 					--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
 					--output-template-file packaged.yaml && \
-			sam deploy \
+			aws cloudformation deploy \
 					--template-file packaged.yaml \
 					--stack-name ${STACK_NAME}-services \
 					--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
@@ -124,7 +125,8 @@ deploy.services: ##=> Deploy services used by API
 							ElasticachePort=/news/${AMPLIFY_ENV}/common/elasticache/port \
 							ElasticacheAccessSG=/news/${AMPLIFY_ENV}/common/elasticache/sg \
 							LambdaSubnet1=/news/${AMPLIFY_ENV}/common/network/privsubnet1 \
-							LambdaSubnet2=/news/${AMPLIFY_ENV}/common/network/privsubnet2
+							LambdaSubnet2=/news/${AMPLIFY_ENV}/common/network/privsubnet2 \
+							ImageProcessingDependenciesLayer=/news/${AMPLIFY_ENV}/common/layer/image/arn
 
 deploy.cdn: ##=> Deploy the CloudFront distribution
 	$(info [*] Deploying API services...)

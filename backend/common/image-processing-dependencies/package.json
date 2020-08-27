@@ -1,0 +1,12 @@
+{
+  "name": "aws-news-backend-comment-image-processing-dependencies",
+  "version": "1.0.0",
+  "description": "Image processing dependencies.",
+  "main": "index.js",
+  "author": "jkahn",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "aws-sdk": "^2.724.0",
+    "sharp": "^0.25.4"
+  }
+}
