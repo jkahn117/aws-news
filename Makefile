@@ -49,6 +49,7 @@ _deploy.push_custom_build_image: ##=>
 deploy.common: ##=> Deploy common resources
 	$(info [*] Deploying common resources...)
 	cd backend/common && \
+		sam build && \
 		sam package \
 						--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
 						--output-template-file packaged.yaml && \
