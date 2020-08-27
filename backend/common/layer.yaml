@@ -20,7 +20,7 @@ Resources:
     Properties:
       LayerName: !Sub "aws-news-${Stage}-image-processing-dependencies"
       Description: Dependencies for aws-news image processing functions
-      ContentUri: dependencies
+      ContentUri: image-processing-dependencies
       CompatibleRuntimes:
         - nodejs10.x
         - nodejs12.x

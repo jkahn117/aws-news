@@ -146,18 +146,6 @@ Resources:
     Metadata:
       BuildMethod: makefile
 
-  ImageProcessingDependenciesLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: !Sub "aws-news-${Stage}-image-dependencies"
-      Description: Dependencies for aws-news image processing functions
-      ContentUri: image-dependencies
-      CompatibleRuntimes:
-        - nodejs12.x
-      RetentionPolicy: Delete
-    Metadata:
-      BuildMethod: nodejs12.x
-
   LoadBlogsFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -333,15 +321,3 @@ Resources:
                   - states:StartExecution
                 Resource:
                   - !Ref LoadBlogsStateMachine
-
-  ## Parameter Store -- values used by other stacks
-  ImageProcessingDependenciesLayerParameter:
-    Type: AWS::SSM::Parameter
-    Properties:
-      Name: !Sub "/news/${Stage}/dependencies/image/layer"
-      Type: String
-      Value: !Ref ImageProcessingDependenciesLayer
-      Description: ARN of image processing dependencies Lambda Layer
-      Tags:
-        Environment: !Ref Stage
-        ProjectName: !Ref ProjectName
