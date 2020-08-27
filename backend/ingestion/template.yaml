@@ -109,6 +109,7 @@ Resources:
         LambdaInvoke: "arn:aws:states:::lambda:invoke"
         ProcessBlogFunction: !GetAtt ProcessBlogFunction.Arn
         SQSSendMessage: "arn:aws:states:::sqs:sendMessage"
+        ProcessFailureQueue: !Ref ProcessFailureQueue
       Policies:
         - Version: "2012-10-17"
           Statement:
