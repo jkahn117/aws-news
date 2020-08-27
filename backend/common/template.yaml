@@ -161,6 +161,20 @@ Resources:
         Environment: !Ref Stage
         ProjectName: !Ref ProjectName
 
+  ### Lambda Layer ###
+  Layer:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "./layer.yaml"
+      Parameters:
+        Stage: !Ref Stage
+        ProjectName: !Ref ProjectName
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Stage
+          Value: !Ref Stage
+
   ### Network ###
   Network:
     Type: AWS::CloudFormation::Stack
