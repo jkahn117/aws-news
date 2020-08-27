@@ -162,18 +162,29 @@ Resources:
         ProjectName: !Ref ProjectName
 
   ### Lambda Layer ###
-  Layer:
-    Type: AWS::CloudFormation::Stack
+  ImageProcessingDependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
     Properties:
-      TemplateURL: "./layer.yaml"
-      Parameters:
-        Stage: !Ref Stage
-        ProjectName: !Ref ProjectName
+      LayerName: !Sub "aws-news-${Stage}-image-processing-dependencies"
+      Description: Dependencies for aws-news image processing functions
+      ContentUri: image-processing-dependencies
+      CompatibleRuntimes:
+        - nodejs10.x
+        - nodejs12.x
+      RetentionPolicy: Delete
+    Metadata:
+      BuildMethod: nodejs12.x
+
+  ImageProcessingDependenciesParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/news/${Stage}/common/layer/image/arn"
+      Type: String
+      Value: !Ref ImageProcessingDependenciesLayer
+      Description: Layer ARN for image processing layer
       Tags:
-        - Key: Project
-          Value: !Ref ProjectName
-        - Key: Stage
-          Value: !Ref Stage
+        Environment: !Ref Stage
+        ProjectName: !Ref ProjectName
 
   ### Network ###
   Network:
