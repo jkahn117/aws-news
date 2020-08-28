@@ -58,6 +58,10 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>
     Description: Subnet for Lambda 2
 
+  ImageProcessingDependenciesLayer:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: Image processing dependencies Lambda Layer
+
 Conditions:
   IsProduction: !Equals 
     - !Ref Stage
@@ -109,6 +113,7 @@ Resources:
         LambdaInvoke: "arn:aws:states:::lambda:invoke"
         ProcessBlogFunction: !GetAtt ProcessBlogFunction.Arn
         SQSSendMessage: "arn:aws:states:::sqs:sendMessage"
+        ProcessFailureQueue: !Ref ProcessFailureQueue
       Policies:
         - Version: "2012-10-17"
           Statement:
@@ -134,7 +139,7 @@ Resources:
     Properties:
       LayerName: !Sub "aws-news-${Stage}-ingestion-dependencies"
       Description: Dependencies for aws-news ingestion functions
-      ContentUri: dependencies
+      ContentUri: ingestion-dependencies
       CompatibleRuntimes:
         - ruby2.7
       RetentionPolicy: Delete
@@ -199,6 +204,8 @@ Resources:
             TableName: !Ref ArticlesTable
         - S3WritePolicy:
             BucketName: !Ref ContentBucket
+      Layers:
+        - Fn::Sub: "${ImageProcessingDependenciesLayer}"
       Environment:
         Variables:
           ARTICLES_TABLE: !Ref ArticlesTable

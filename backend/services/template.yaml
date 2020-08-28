@@ -46,6 +46,10 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>
     Description: Subnet for Lambda 2
 
+  ImageProcessingDependenciesLayer:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: Image processing dependencies Lambda Layer
+
 Globals:
   Function:
     Runtime: ruby2.7
@@ -98,6 +102,8 @@ Resources:
             TableName: !Ref ArticlesTable
         - S3CrudPolicy:
             BucketName: !Ref ContentBucket
+      Layers:
+        - Fn::Sub: "${ImageProcessingDependenciesLayer}"
       Events:
         image:
           Type: HttpApi

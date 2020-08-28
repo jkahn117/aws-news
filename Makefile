@@ -49,6 +49,7 @@ _deploy.push_custom_build_image: ##=>
 deploy.common: ##=> Deploy common resources
 	$(info [*] Deploying common resources...)
 	cd backend/common && \
+		sam build && \
 		sam package \
 						--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
 						--output-template-file packaged.yaml && \
@@ -61,12 +62,15 @@ deploy.common: ##=> Deploy common resources
 
 deploy.ingestion: ##=> Deploy ingestion services
 	$(info [*] Deploying ingestion services...)
+	$(eval IMAGE_LAYER := $(shell aws cloudformation describe-stacks --stack-name ${STACK_NAME}-common | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "ImageProcessingLayerArn").OutputValue'))
 	cd backend/ingestion && \
-			sam build && \
+			sam build \
+					--parameter-overrides \
+							ImageProcessingDependenciesLayer=${IMAGE_LAYER} && \
 			sam package \
 					--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
 					--output-template-file packaged.yaml && \
-			sam deploy \
+			aws cloudformation deploy \
 					--template-file packaged.yaml \
 					--stack-name ${STACK_NAME}-ingestion \
 					--capabilities CAPABILITY_IAM \
@@ -82,7 +86,8 @@ deploy.ingestion: ##=> Deploy ingestion services
 							ElasticachePort=/news/${AMPLIFY_ENV}/common/elasticache/port \
 							ElasticacheAccessSG=/news/${AMPLIFY_ENV}/common/elasticache/sg \
 							LambdaSubnet1=/news/${AMPLIFY_ENV}/common/network/privsubnet1 \
-							LambdaSubnet2=/news/${AMPLIFY_ENV}/common/network/privsubnet2
+							LambdaSubnet2=/news/${AMPLIFY_ENV}/common/network/privsubnet2 \
+							ImageProcessingDependenciesLayer=/news/${AMPLIFY_ENV}/common/layer/image/arn
 
 deploy.analytics: ##=> Deploy analytics
 	$(info [*] Deploying analytics...)
@@ -106,12 +111,15 @@ deploy.analytics: ##=> Deploy analytics
 
 deploy.services: ##=> Deploy services used by API
 	$(info [*] Deploying API services...)
+	$(eval IMAGE_LAYER := $(shell aws cloudformation describe-stacks --stack-name ${STACK_NAME}-common | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "ImageProcessingLayerArn").OutputValue'))
 	cd backend/services && \
-			sam build && \
+			sam build \
+					--parameter-overrides \
+							ImageProcessingDependenciesLayer=${IMAGE_LAYER} && \
 			sam package \
 					--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
 					--output-template-file packaged.yaml && \
-			sam deploy \
+			aws cloudformation deploy \
 					--template-file packaged.yaml \
 					--stack-name ${STACK_NAME}-services \
 					--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
@@ -124,7 +132,8 @@ deploy.services: ##=> Deploy services used by API
 							ElasticachePort=/news/${AMPLIFY_ENV}/common/elasticache/port \
 							ElasticacheAccessSG=/news/${AMPLIFY_ENV}/common/elasticache/sg \
 							LambdaSubnet1=/news/${AMPLIFY_ENV}/common/network/privsubnet1 \
-							LambdaSubnet2=/news/${AMPLIFY_ENV}/common/network/privsubnet2
+							LambdaSubnet2=/news/${AMPLIFY_ENV}/common/network/privsubnet2 \
+							ImageProcessingDependenciesLayer=/news/${AMPLIFY_ENV}/common/layer/image/arn
 
 deploy.cdn: ##=> Deploy the CloudFront distribution
 	$(info [*] Deploying API services...)
