@@ -62,12 +62,15 @@ deploy.common: ##=> Deploy common resources
 
 deploy.ingestion: ##=> Deploy ingestion services
 	$(info [*] Deploying ingestion services...)
+	$(eval IMAGE_LAYER := $(shell aws cloudformation describe-stacks --stack-name ${STACK_NAME}-common | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "ImageProcessingLayerArn").OutputValue'))
 	cd backend/ingestion && \
-			sam build && \
+			sam build \
+					--parameter-overrides \
+							ImageProcessingDependenciesLayer=${IMAGE_LAYER} && \
 			sam package \
 					--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
 					--output-template-file packaged.yaml && \
-			aws cloudformation deploy \
+			sam deploy \
 					--template-file packaged.yaml \
 					--stack-name ${STACK_NAME}-ingestion \
 					--capabilities CAPABILITY_IAM \
@@ -108,12 +111,15 @@ deploy.analytics: ##=> Deploy analytics
 
 deploy.services: ##=> Deploy services used by API
 	$(info [*] Deploying API services...)
+	$(eval IMAGE_LAYER := $(shell aws cloudformation describe-stacks --stack-name ${STACK_NAME}-common | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "ImageProcessingLayerArn").OutputValue'))
 	cd backend/services && \
-			sam build && \
+			sam build \
+					--parameter-overrides \
+							ImageProcessingDependenciesLayer=${IMAGE_LAYER} && \
 			sam package \
 					--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
 					--output-template-file packaged.yaml && \
-			aws cloudformation deploy \
+			sam deploy \
 					--template-file packaged.yaml \
 					--stack-name ${STACK_NAME}-services \
 					--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
