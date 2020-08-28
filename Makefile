@@ -70,7 +70,7 @@ deploy.ingestion: ##=> Deploy ingestion services
 			sam package \
 					--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
 					--output-template-file packaged.yaml && \
-			sam deploy \
+			aws cloudformation deploy \
 					--template-file packaged.yaml \
 					--stack-name ${STACK_NAME}-ingestion \
 					--capabilities CAPABILITY_IAM \
@@ -119,7 +119,7 @@ deploy.services: ##=> Deploy services used by API
 			sam package \
 					--s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
 					--output-template-file packaged.yaml && \
-			sam deploy \
+			aws cloudformation deploy \
 					--template-file packaged.yaml \
 					--stack-name ${STACK_NAME}-services \
 					--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
