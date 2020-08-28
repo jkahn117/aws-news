@@ -175,6 +175,17 @@ Resources:
     Metadata:
       BuildMethod: nodejs12.x
 
+  ImageProcessingDependenciesParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/news/${Stage}/common/layer/image/arn"
+      Type: String
+      Value: !Ref ImageProcessingDependenciesLayer
+      Description: Layer ARN for image processing layer
+      Tags:
+        Environment: !Ref Stage
+        ProjectName: !Ref ProjectName
+
   ### Network ###
   Network:
     Type: AWS::CloudFormation::Stack

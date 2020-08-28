@@ -58,10 +58,8 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>
     Description: Subnet for Lambda 2
 
-  # Value is passed as a string as using parameter store does not work currently
-  # https://github.com/aws/aws-sam-cli/issues/1698
   ImageProcessingDependenciesLayer:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
     Description: Image processing dependencies Lambda Layer
 
 Conditions:
@@ -187,7 +185,7 @@ Resources:
                 - events:PutEvents
               Resource: '*'
       Layers:
-        - !Sub "${IngestionDependenciesLayer}"
+        - !Ref IngestionDependenciesLayer
       Environment:
         Variables:
           ARTICLES_TABLE: !Ref ArticlesTable
@@ -207,7 +205,7 @@ Resources:
         - S3WritePolicy:
             BucketName: !Ref ContentBucket
       Layers:
-        - !Ref ImageProcessingDependenciesLayer
+        - Fn::Sub: "${ImageProcessingDependenciesLayer}"
       Environment:
         Variables:
           ARTICLES_TABLE: !Ref ArticlesTable

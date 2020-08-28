@@ -62,7 +62,6 @@ deploy.common: ##=> Deploy common resources
 
 deploy.ingestion: ##=> Deploy ingestion services
 	$(info [*] Deploying ingestion services...)
-	$(eval IMAGE_LAYER := $(shell aws cloudformation describe-stacks --stack-name ${STACK_NAME}-common | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "ImageProcessingLayerArn").OutputValue'))
 	cd backend/ingestion && \
 			sam build && \
 			sam package \
@@ -85,7 +84,7 @@ deploy.ingestion: ##=> Deploy ingestion services
 							ElasticacheAccessSG=/news/${AMPLIFY_ENV}/common/elasticache/sg \
 							LambdaSubnet1=/news/${AMPLIFY_ENV}/common/network/privsubnet1 \
 							LambdaSubnet2=/news/${AMPLIFY_ENV}/common/network/privsubnet2 \
-							ImageProcessingDependenciesLayer=${IMAGE_LAYER}
+							ImageProcessingDependenciesLayer=/news/${AMPLIFY_ENV}/common/layer/image/arn
 
 deploy.analytics: ##=> Deploy analytics
 	$(info [*] Deploying analytics...)
@@ -109,7 +108,6 @@ deploy.analytics: ##=> Deploy analytics
 
 deploy.services: ##=> Deploy services used by API
 	$(info [*] Deploying API services...)
-	$(eval IMAGE_LAYER := $(shell aws cloudformation describe-stacks --stack-name ${STACK_NAME}-common | jq -r '.Stacks[].Outputs[] | select(.OutputKey == "ImageProcessingLayerArn").OutputValue'))
 	cd backend/services && \
 			sam build && \
 			sam package \
@@ -129,7 +127,7 @@ deploy.services: ##=> Deploy services used by API
 							ElasticacheAccessSG=/news/${AMPLIFY_ENV}/common/elasticache/sg \
 							LambdaSubnet1=/news/${AMPLIFY_ENV}/common/network/privsubnet1 \
 							LambdaSubnet2=/news/${AMPLIFY_ENV}/common/network/privsubnet2 \
-							ImageProcessingDependenciesLayer=${IMAGE_LAYER}
+							ImageProcessingDependenciesLayer=/news/${AMPLIFY_ENV}/common/layer/image/arn
 
 deploy.cdn: ##=> Deploy the CloudFront distribution
 	$(info [*] Deploying API services...)
