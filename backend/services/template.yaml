@@ -70,7 +70,7 @@ Resources:
         Variables:
           ARTICLES_TABLE: !Ref ArticlesTable
           CONTENT_BUCKET: !Ref ContentBucket
-          CACHE_COTNROL_VALUE: 'max-age=2592000'
+          CACHE_CONTROL_VALUE: 'max-age=2592000'
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref ArticlesTable
@@ -95,7 +95,7 @@ Resources:
         Variables:
           ARTICLES_TABLE: !Ref ArticlesTable
           CONTENT_BUCKET: !Ref ContentBucket
-          CACHE_COTNROL_VALUE: 'max-age=2592000'
+          CACHE_CONTROL_VALUE: 'max-age=2592000'
           DEFAULT_IMAGE_WIDTH: 1024
       Policies:
         - DynamoDBReadPolicy:
