@@ -98,7 +98,9 @@ async function getArticleMetadata(articleId) {
 exports.handler = async(event) => {
   // console.log(JSON.stringify(event));
 
-  const { pathParameters: { id: articleId }, queryStringParameters: { size=DEFAULT_IMAGE_WIDTH } } = event;
+  const { pathParameters: { id: articleId }, queryStringParameters: qs } = event;
+  const size = qs && 'size' in qs ? qs['size'] : DEFAULT_IMAGE_WIDTH;
+
   console.log(`Loading image for article ${articleId}, @ ${size} px`);
 
   // query DDB for the base image key (no size included, this is the default image size)
