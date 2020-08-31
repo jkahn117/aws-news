@@ -36,7 +36,7 @@ backend:
         - echo Deploy backend components...
         - make deploy
         # this should only be done once....
-        # - if [ "${AMPLIFY_ENV}" = "prod" ]; then make deploy.cdn; fi
+        - if [ "${AMPLIFY_ENV}" = "prod" ]; then make deploy.cdn; fi
 frontend:
   phases:
     preBuild:

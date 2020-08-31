@@ -144,7 +144,8 @@ deploy.cdn: ##=> Deploy the CloudFront distribution
 					--capabilities CAPABILITY_IAM \
 					--parameter-overrides \
 							Stage=${AMPLIFY_ENV} \
-							ContentApiUrl=/news/${AMPLIFY_ENV}/services/content/api
+							ContentApiUrl=/news/${AMPLIFY_ENV}/services/content/api \
+					--no-fail-on-empty-changeset
 
 delete: ##=> Delete all
 	$(info [*] Deleting...)
