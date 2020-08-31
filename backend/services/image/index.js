@@ -141,7 +141,7 @@ exports.handler = async(event) => {
     statusCode: 200,
     headers: {
       'Content-Type': 'image/jpeg',
-      'Cache-Control': `max-age=${process.env.CACHE_CONTROL_VALUE}`
+      'Cache-Control': process.env.CACHE_CONTROL_VALUE
     },
     body: buffer.toString('base64')
   }

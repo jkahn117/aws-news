@@ -87,7 +87,7 @@ def respond_with_content(uri:)
       statusCode: 200,
       headers: {
         'Content-Type': 'text/html',
-        'Cache-Control': "max-age=#{ENV['CACHE_COTNROL_VALUE']}"
+        'Cache-Control': ENV['CACHE_COTNROL_VALUE']
       },
       body: Redcarpet::Markdown.new($renderer).render(resp.body.read)
     }
