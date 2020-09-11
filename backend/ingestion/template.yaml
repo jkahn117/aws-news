@@ -88,19 +88,14 @@ Resources:
         ProcessBlogStateMachine: !Ref ProcessBlogStateMachine
         # TODO: why is this not working? specify in ASL instead
         # SFNStartExecution: "arn:aws:states:::states:startExecution"
+      Tags:
+        Project: !Ref ProjectName
+        Env: !Ref Stage
       Policies:
-        - Version: "2012-10-17"
-          Statement:
-            - Effect: Allow
-              Action:
-                - lambda:InvokeFunction
-              Resource:
-                - !GetAtt LoadBlogsFunction.Arn
-            - Effect: Allow
-              Action:
-                - states:StartExecution
-              Resource:
-                - !Ref ProcessBlogStateMachine
+        - StepFunctionsExecutionPolicy:
+            StateMachineName: !Ref ProcessBlogStateMachine
+        - LambdaInvokePolicy:
+            FunctionName: !Ref LoadBlogsFunction        
   
   ProcessBlogStateMachine:
     Type: AWS::Serverless::StateMachine
@@ -114,24 +109,16 @@ Resources:
         ProcessBlogFunction: !GetAtt ProcessBlogFunction.Arn
         SQSSendMessage: "arn:aws:states:::sqs:sendMessage"
         ProcessFailureQueue: !Ref ProcessFailureQueue
+      Tags:
+        Project: !Ref ProjectName
+        Env: !Ref Stage
       Policies:
-        - Version: "2012-10-17"
-          Statement:
-            - Effect: Allow
-              Action:
-                - lambda:InvokeFunction
-              Resource:
-                - !GetAtt ProcessBlogFunction.Arn
-            - Effect: Allow
-              Action:
-                - sqs:SendMessage
-              Resource:
-                - !GetAtt ProcessFailureQueue.Arn
-            - Effect: Allow
-              Action:
-                - dynamodb:UpdateItem
-              Resource:
-                - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BlogsTable}"
+        - LambdaInvokePolicy:
+            FunctionName: !Ref ProcessBlogFunction
+        - SQSSendMessagePolicy:
+            QueueName: !Ref ProcessFailureQueue
+        - DynamoDBWritePolicy:
+            TableName: !Ref BlogsTable
 
   ### Lambda ###
   IngestionDependenciesLayer:
@@ -154,12 +141,8 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref BlogsTable
-        - Version: '2012-10-17' # Policy Document
-          Statement: # per docs, EventBridge only supports * today (@see https://github.com/awslabs/serverless-application-model/issues/1187)
-            - Effect: Allow
-              Action:
-                - events:PutEvents
-              Resource: '*'
+        - EventBridgePutEventsPolicy:
+            EventBusName: !Ref EventBus
       Layers:
         - !Ref IngestionDependenciesLayer
       Environment:
@@ -178,12 +161,8 @@ Resources:
             TableName: !Ref ArticlesTable
         - S3CrudPolicy:
             BucketName: !Ref ContentBucket
-        - Version: '2012-10-17' # Policy Document
-          Statement: # per docs, EventBridge only supports * today (@see https://github.com/awslabs/serverless-application-model/issues/1187)
-            - Effect: Allow
-              Action:
-                - events:PutEvents
-              Resource: '*'
+        - EventBridgePutEventsPolicy:
+            EventBusName: !Ref EventBus
       Layers:
         - !Ref IngestionDependenciesLayer
       Environment:
