@@ -1,7 +1,9 @@
 import Link from 'next/link';
-import moment from 'moment';
-import Moment from 'react-moment';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import UserCircleIcon from 'heroicons/solid/user-circle.svg';
+
+dayjs.extend(relativeTime);
 
 export function BlogSlug({ article }) {
   const { blog } = article;
@@ -16,19 +18,27 @@ export function BlogSlug({ article }) {
   );
 }
 
+function FromNow({ date }) {
+  return (
+    <time datetime={ date }>
+      { dayjs(date).fromNow() }
+    </time>
+  );
+}
+
 export function BlogSlugWithDate({ article }) {
-  function isNewThisWeek() {
+  function isNew() {
     if (!article.publishedAt) { return false; }
 
-    const startOfWeek = moment().subtract(7, 'days').startOf('day');
-    return moment(article.publishedAt).isAfter(startOfWeek);
+    const threeDaysAgo = dayjs().subtract(3, 'days').startOf('day');
+    return dayjs(article.publishedAt).isAfter(threeDaysAgo);
   }
 
 
   return (
     <>
       <div className="mb-1 text-xs leading-5 font-medium sm:text-indigo-800 sm:text-xs">
-        { isNewThisWeek() ? (
+        { isNew() ? (
           <span className="badge">NEW</span>
         ) : (
           <span/>
@@ -42,7 +52,7 @@ export function BlogSlugWithDate({ article }) {
         ) : (
           <span />
         )}
-        <span><Moment fromNow>{ article.publishedAt }</Moment></span>
+        <span><FromNow date={ article.publishedAt } /></span>
       </div>
 
       <style jsx>{`
@@ -61,7 +71,7 @@ export function ByLine({ article }) {
       <UserCircleIcon className="h-10 w-10 mr-2" />
       <div className="text-xs">
         <div>{ article.author }</div>
-        <div><Moment fromNow>{ article.publishedAt }</Moment></div>
+        <div><FromNow date={ article.publishedAt } /></div>
       </div>
     </div>
   );

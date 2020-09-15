@@ -6,7 +6,7 @@
   "author": "jkahn@",
   "license": "Apache2.0",
   "dependencies": {
-    "ioredis": "^4.16.0",
-    "moment": "^2.24.0"
+    "dayjs": "^1.8.35",
+    "ioredis": "^4.16.0"
   }
 }

@@ -11,7 +11,7 @@
  */
 
 const Redis = require("ioredis");
-const Moment = require("moment");
+const dayjs = require("dayjs");
 
 const LATEST_CONTENT_KEY = process.env.LATEST_CONTENT_KEY;
 const ARTICLE_COUNT_KEY = process.env.ARTICLE_COUNT_KEY;
@@ -50,7 +50,7 @@ exports.handler = async(event) => {
   // console.log(JSON.stringify(event));
 
   let { detail: { blogId, articleId } } = event;
-  const today = Moment().format("YYYYMMDD");
+  const today = dayjs().format("YYYYMMDD");
 
   try {
     // add blog to list of latest
