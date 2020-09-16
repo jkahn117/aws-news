@@ -1,7 +1,5 @@
 import Head from 'next/head';
-
 import '../css/app.css';
-
 import Navbar from '@/common/Navbar';
 import Footer from '@/common/Footer';
 
@@ -9,9 +7,11 @@ import Footer from '@/common/Footer';
 import awsconfig from '../aws-exports';
 import Amplify from '@aws-amplify/core';
 import Analytics from '@aws-amplify/analytics';
-import API from '@aws-amplify/api';
-import Auth from '@aws-amplify/auth';
-Amplify.configure(awsconfig);
+import API, { graphqlOperation } from '@aws-amplify/api';
+// import Auth from '@aws-amplify/auth';
+
+//Amplify.configure(awsconfig);
+Amplify.configure({ ...awsconfig, ssr: true });
 
 Analytics.autoTrack("session", {
   enable: true,
@@ -31,8 +31,22 @@ API.configure({
   ]
 });
 
+const listBlogs = /* GraphQL */ `
+    query ListBlogs (
+      $limit: Int,
+      $nextToken: String
+    ) {
+      listBlogs(limit: $limit, nextToken: $nextToken) {
+        items {
+          id
+          title
+        }
+        nextToken
+      }
+    }
+  `;
 
-export default function MyApp({ Component, pageProps }) {
+export default function MyApp({ Component, pageProps, blogs }) {
   return (
     <>
       <Head>
@@ -40,7 +54,7 @@ export default function MyApp({ Component, pageProps }) {
       </Head>
       
       <div className="h-screen antialiased text-gray-900">
-        <Navbar />
+        <Navbar blogs={ blogs }/>
 
         <div className="bg-white sm:max-w-5xl sm:mx-auto">
           <main>
@@ -52,4 +66,16 @@ export default function MyApp({ Component, pageProps }) {
       </div>
     </>
   );
+}
+
+MyApp.getInitialProps = async (context) => {
+  const blogs = await API.graphql(graphqlOperation(listBlogs))
+                            .then(r => {
+                              const { data: { listBlogs: { items } }} = r;
+                              return items;
+                            });
+
+  return {
+    blogs
+  }
 }

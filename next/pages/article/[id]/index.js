@@ -1,11 +1,7 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import useSWR from 'swr';
-import axios from 'axios';
-import Markdown from 'react-markdown';
 
 import API, { graphqlOperation } from '@aws-amplify/api';
-import Storage from '@aws-amplify/storage';
 import Analytics from '@aws-amplify/analytics';
 
 import ArticleImage from '@/article/ArticleImage';
@@ -30,28 +26,82 @@ const getArticle = /* GraphQL */ `
     }
   `;
 
-export default function Article() {
-  const { asPath, query: { id: articleId } } = useRouter();
+/**
+ * Use Next.js server-side generation to build article pages upfront. Articles
+ * do not generally change after creation, so building on the server saves runtime
+ * costs and reduces latency.
+ * 
+ * @param {} context 
+ */
+export async function getStaticProps(context) {
+  const { params: { id } } = context;
 
-  const fetcher = (query, id) => API.graphql(graphqlOperation(query, { id }))
-                                            .then(r => {
-                                              const { data: { getArticle } } = r;
-                                              return getArticle;
-                                            });
+  // load article data from the GraphQL endpoint
+  const article = await API.graphql(graphqlOperation(getArticle, { id }))
+                          .then(r => {
+                            const { data: { getArticle } } = r;
+                            return getArticle;
+                          });
 
-  const fetchContent = id => API.get('content-api', `/content/${id}`, { responseType: 'text' })
-                                .then(r => {
-                                  return { __html: r };
-                                });
+  // load the actual article content from the content API
+  const content = await API.get('content-api', `/content/${id}`, { responseType: 'text' })
+                          .then(r => {
+                            return { __html: r };
+                          });
 
-  const { data: article, error } = useSWR(articleId ? [ getArticle, articleId ] : null, fetcher);
-  
-  const { data: content } = useSWR(articleId ? articleId : null, fetchContent);
-
-  if (error) {
-    console.error(error);
-    return <div>Failed to load</div>;
+  return {
+    props: {
+      article,
+      content,
+    },
+    // Next.js will re-generate the page when request comes in or at most
+    // once per 3600 seconds
+    revalidate: 3600
   }
+}
+
+const latestArticles = /* GraphQL */ `
+    query LatestArticles(
+      $limit: Int,
+      $nextToken: String
+    ) {
+      latestArticles(limit: $limit, nextToken: $nextToken) {
+        items {
+          id
+        }
+      }
+    }
+  `;
+
+/**
+ * When using Next.js server-side generation, we need to provide a list of paths
+ * to be rendered at build time for dynamic paths. Next.js will statically render
+ * the returned paths specified by this method. Will use latest articles for this
+ * purpose, but only need the article IDs back.
+ * 
+ * If the article page was not pre-generated, fallback parameter instructs Next.js
+ * to build when requested.
+ */
+export async function getStaticPaths() {
+  const articles = await API.graphql(graphqlOperation(latestArticles))
+                            .then(r => {
+                              const { data: { latestArticles: { items } }} = r;
+                              return items;
+                            });
+
+  const articleParams = articles.reduce((acc, article) => {
+    acc.push({ params: { id: article.id } });
+    return acc;
+  }, []);
+                      
+  return {
+    paths: articleParams,
+    fallback: true
+  }
+}
+
+export default function Article({ article, content }) {
+  const { asPath } = useRouter();
 
   if (!article) return <div><Loader /></div>
 
@@ -86,7 +136,6 @@ export default function Article() {
 
           <div className="content my-10 overflow-hidden">
             { content ? (
-              // <Markdown source={ content } escapeHtml={ false } />
               <div dangerouslySetInnerHTML={ content } />
             ) : (
               <Loader />

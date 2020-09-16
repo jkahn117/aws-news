@@ -1,6 +1,5 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import useSWR from 'swr';
 import API, { graphqlOperation } from '@aws-amplify/api';
 import Analytics from '@aws-amplify/analytics';
 
@@ -27,21 +26,71 @@ const getBlog = /* GraphQL */ `
     }
   `;
 
-export default function Blog() {
-  const { asPath, query: { id: blogId } } = useRouter();
+/**
+ * Use Next.js server-side generation to build blog pages upfront. Building on the
+ * server saves runtime costs and reduces latency as they are generally slow moving.
+ * 
+ * @param {} context 
+ */
+export async function getStaticProps(context) {
+  const { params: { id } } = context;
 
-  const fetcher = (query, id) => API.graphql(graphqlOperation(query, { id }))
-                                            .then(r => {
-                                              const { data: { getBlog } } = r;
-                                              return getBlog;
-                                            });
+  // load the blog data from the GraphQL endpoint
+  const blog = await API.graphql(graphqlOperation(getBlog, { id }))
+                        .then(r => {
+                          const { data: { getBlog } } = r;
+                          return getBlog;
+                        });
 
-  const { data: blog, error } = useSWR(blogId ? [ getBlog, blogId ] : null, fetcher);
-
-  if (error) {
-    console.error(error);
-    return <div>Failed to load</div>;
+  return {
+    props: {
+      blog
+    },
+    revalidate: 3600
   }
+}
+
+const listBlogs = /* GraphQL */ `
+    query ListBlogs (
+      $limit: Int,
+      $nextToken: String
+    ) {
+      listBlogs(limit: $limit, nextToken: $nextToken) {
+        items {
+          id
+        }
+      }
+    }
+  `;
+
+/**
+ * When using Next.js server-side generation, we need to provide a list of paths
+ * to be rendered at build time for dynamic paths. Next.js will statically render
+ * the returned paths specified by this method. We will render all blogs.
+ * 
+ * If the article page was not pre-generated, fallback parameter instructs Next.js
+ * to build when requested.
+ */
+export async function getStaticPaths() {
+  const blogs = await API.graphql(graphqlOperation(listBlogs))
+                            .then(r => {
+                              const { data: { listBlogs: { items } }} = r;
+                              return items;
+                            });
+
+  const blogParams = blogs.reduce((acc, blog) => {
+    acc.push({ params: { id: blog.id } });
+    return acc;
+  }, []);
+                      
+  return {
+    paths: blogParams,
+    fallback: true
+  }
+}
+
+export default function Blog({ blog }) {
+  const { asPath } = useRouter();
 
   if (!blog) return <div><Loader /></div>
 

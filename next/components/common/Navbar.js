@@ -1,14 +1,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
-import useSWR from 'swr';
-import API, { graphqlOperation } from '@aws-amplify/api';
+import { Transition } from '@tailwindui/react';
 
 import ChevronDownIcon from 'heroicons/solid/chevron-down.svg';
 import MenuIcon from 'heroicons/solid/menu.svg';
-import UserIcon from 'heroicons/outline/user.svg';
+import CodeIcon from 'heroicons/outline/code.svg';
 import XIcon from 'heroicons/solid/x.svg';
-
-import Dropdown, { DropdownContext } from '@/ui/Dropdown';
 
 const listBlogs = /* GraphQL */ `
     query ListBlogs (
@@ -25,27 +22,10 @@ const listBlogs = /* GraphQL */ `
     }
   `;
 
-function BlogListDropdown({ toggle }) {
-  const fetcher = query => API.graphql(graphqlOperation(query))
-                              .then(r => {
-                                const { data: { listBlogs: items } } = r;
-                                return items;
-                              });
-
-  const { data, error } = useSWR(listBlogs, fetcher);
-
-  if (error) {
-    console.error(error);
-    return <div>Failed to load</div>;
-  }
-
-  if (!data) return <div></div>
-
-  const { items, nextToken } = data;
-
+function BlogListDropdown({ blogs, toggle }) {
   return (
     <>
-      { items.sort((a, b) => (a.title < b.title) ? -1 : 1).map((blog) =>
+      { blogs.sort((a, b) => (a.title < b.title) ? -1 : 1).map((blog) =>
         <Link href="/blog/[id]" as={ `/blog/${blog.id}` } key={ blog.id }>
           <a role="menuitem"
               onClick={ toggle }
@@ -58,7 +38,7 @@ function BlogListDropdown({ toggle }) {
   );
 }
 
-export default function NavBar() {
+export default function NavBar({ blogs }) {
   const [ menuOpen, setMenuOpen ] = useState(false);
 
   const toggleMobileMenu = () => setMenuOpen(oldIsOpen => !oldIsOpen);
@@ -92,24 +72,26 @@ export default function NavBar() {
             <div className="hidden sm:block sm:ml-10">
               <div className="flex">
                 <div className="relative">
-                  <Dropdown>
-                    <Dropdown.Button>
-                      <button
-                          className="px-3 py-2 rounded-md text-sm font-medium leading-5 text-white bg-gray-800 focus:outline-none focus:text-white focus:bg-gray-700 transition duration-150 ease-in-out">
-                        <span>Blogs</span>
-                        <ChevronDownIcon className="w-6 h-6 inline-flex" />
-                      </button>
-                    </Dropdown.Button>
-                    <Dropdown.Menu>
-                      <div className="origin-top-left absolute left-2 mt-2 w-64 rounded-md shadow-lg z-50">
-                        <div className="py-1 rounded-md bg-white shadow-xs" role="menu" aria-orientation="vertical" aria-labelledby="uer-menu">
-                          <DropdownContext.Consumer>
-                            {({ toggle }) => <BlogListDropdown toggle={ toggle } /> }
-                          </DropdownContext.Consumer>
-                        </div>
+                  <button onClick={ () => setMenuOpen(!menuOpen) }
+                      className="px-3 py-2 rounded-md text-sm font-medium leading-5 text-white bg-gray-800 focus:outline-none focus:text-white focus:bg-gray-700 transition duration-150 ease-in-out">
+                    <span>Blogs</span>
+                    <ChevronDownIcon className="w-6 h-6 inline-flex" />
+                  </button>
+                  <Transition
+                    show={ menuOpen }
+                    enter="transition ease-out duration-100"
+                    enterFrom="transform opacity-0 scale-95"
+                    enterTo="transform opacity-100 scale-100"
+                    leave="transition ease-in duration-75 transform"
+                    leaveFrom="transform opacity-100 scale-100"
+                    leaveTo="transform opacity-0 scale-95"
+                  >
+                    <div className="origin-top-left absolute left-2 mt-2 w-64 rounded-md shadow-lg z-50">
+                      <div className="py-1 rounded-md bg-white shadow-xs" role="menu" aria-orientation="vertical" aria-labelledby="uer-menu">
+                        <BlogListDropdown blogs={ blogs } toggle={ toggleMobileMenu } />
                       </div>
-                    </Dropdown.Menu>
-                  </Dropdown> 
+                    </div>
+                  </Transition>
                 </div>
               </div>
             </div>
@@ -117,10 +99,11 @@ export default function NavBar() {
 
           {/* Right */}
           <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-            <button className="p-1 border-2 border-transparent text-gray-400 rounded-full hover:text-white focus:outline-none focus:text-white focus:bg-gray-700 transition duration-150 ease-in-out"
-                    aria-label="">
-              <UserIcon className="h-6 w-6" />
-            </button>
+            <a className="p-1 border-2 border-transparent text-gray-400 rounded-full hover:text-white focus:outline-none focus:text-white focus:bg-gray-700 transition duration-150 ease-in-out"
+                href="https://github.com/jkahn117/aws-news"
+                aria-label="">
+              <CodeIcon className="h-6 w-6" />
+            </a>
           </div>
         </div>
       </div>
@@ -128,7 +111,7 @@ export default function NavBar() {
       {/* Mobile menu */}
       <div className={ `${ menuOpen ? 'block' : 'hidden' } sm:hidden` }>
         <div className="px-2 pt-2 pb-3">
-          <BlogListDropdown toggle={ toggleMobileMenu } />
+          <BlogListDropdown blogs={ blogs } toggle={ toggleMobileMenu } />
         </div>
       </div>
     </nav>

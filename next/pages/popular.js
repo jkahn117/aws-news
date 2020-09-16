@@ -7,12 +7,12 @@ import PageHeader from '@/common/PageHeader';
 import ArticleCard from '@/article/ArticleCard';
 import Loader from '@/ui/Loader';
 
-const latestArticles = /* GraphQL */ `
-    query LatestArticles(
+const popularArticles = /* GraphQL */ `
+    query PopularArticles(
       $limit: Int,
       $nextToken: String
     ) {
-      latestArticles(limit: $limit, nextToken: $nextToken) {
+      popularArticles(limit: $limit, nextToken: $nextToken) {
         items {
           id
           title
@@ -38,10 +38,10 @@ const latestArticles = /* GraphQL */ `
 export async function getStaticProps(context) {
 
   // load the blog data from the GraphQL endpoint
-  const data = await API.graphql(graphqlOperation(latestArticles, { limit: 25 }))
+  const data = await API.graphql(graphqlOperation(popularArticles, { limit: 25 }))
                         .then(r => {
-                          const { data: { latestArticles } } = r;
-                          return latestArticles;
+                          const { data: { popularArticles } } = r;
+                          return popularArticles;
                         });
 
   return {
@@ -59,8 +59,8 @@ export default function Home({ articles }) {
   Analytics.record({
     name: 'pageView',
     attributes: {
-      path: '/',
-      title: '[Home] Latest Articles'
+      path: '/popular',
+      title: '[Home] Popular Articles'
     }
   });
 
@@ -71,20 +71,20 @@ export default function Home({ articles }) {
       </Head>      
 
       <div className="hidden sm:block">
-        <PageHeader title="Latest Articles"/>
+        <PageHeader title="Popular Articles"/>
 
         <div className="flex flex-row h-10 border-b border-gray-300 justify-center content-center text-sm">
           <div className="px-4 py m-2 inline">
             <span className="font-semibold mr-1">View:</span>
             <span className="divide-x space-x-1">
-                <span className="selected pl-1">
-                  Latest
-                </span>
-                <Link href="/popular">
+                <Link href="/">
                   <a className="pl-1">
-                    Popular
+                    Latest
                   </a>
                 </Link>
+                <span className="selected pl-1">
+                  Popular
+                </span>
             </span>
           </div>
         </div>
