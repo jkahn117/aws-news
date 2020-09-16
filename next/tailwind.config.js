@@ -1,6 +1,10 @@
 const defaultTheme = require('tailwindcss/defaultTheme')
 
 module.exports = {
+  future: {
+    purgeLayersByDefault: true,
+    removeDeprecatedGapUtilities: true
+  },
   purge: [
     './components/**/*.js',
     './pages/**/*.js',
@@ -44,8 +48,6 @@ module.exports = {
   variants: {
   },
   plugins: [
-    require('@tailwindcss/ui')({
-      layout: 'sidebar',
-    })
+    require('@tailwindcss/ui')
   ],
 }

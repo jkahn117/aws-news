@@ -16,7 +16,7 @@
     "@tailwindcss/ui": "^0.3.0",
     "dayjs": "^1.8.35",
     "heroicons": "^0.3.6",
-    "next": "9.4.4",
+    "next": "^9.5",
     "next-svgr": "^0.0.2",
     "react": "16.13.1",
     "react-dom": "16.13.1",
@@ -29,6 +29,6 @@
   "devDependencies": {
     "postcss-preset-env": "^6.7.0",
     "styled-jsx-plugin-postcss": "^2.0.1",
-    "tailwindcss": "^1.4.6"
+    "tailwindcss": "^1.8"
   }
 }
