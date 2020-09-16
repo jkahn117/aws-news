@@ -20,7 +20,7 @@ export function BlogSlug({ article }) {
 
 function FromNow({ date }) {
   return (
-    <time datetime={ date }>
+    <time dateTime={ date }>
       { dayjs(date).fromNow() }
     </time>
   );
