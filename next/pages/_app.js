@@ -8,7 +8,8 @@ import awsconfig from '../aws-exports';
 import Amplify from '@aws-amplify/core';
 import Analytics from '@aws-amplify/analytics';
 import API, { graphqlOperation } from '@aws-amplify/api';
-// import Auth from '@aws-amplify/auth';
+import { withSSRContext } from 'aws-amplify';
+import Auth from '@aws-amplify/auth';
 
 //Amplify.configure(awsconfig);
 Amplify.configure({ ...awsconfig, ssr: true });
@@ -69,7 +70,8 @@ export default function MyApp({ Component, pageProps, blogs }) {
 }
 
 MyApp.getInitialProps = async (context) => {
-  const blogs = await API.graphql(graphqlOperation(listBlogs))
+  const SSR = withSSRContext();
+  const blogs = await SSR.API.graphql(graphqlOperation(listBlogs))
                             .then(r => {
                               const { data: { listBlogs: { items } }} = r;
                               return items;

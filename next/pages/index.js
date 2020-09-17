@@ -1,11 +1,15 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import API, { graphqlOperation } from '@aws-amplify/api';
-import Analytics from '@aws-amplify/analytics';
+import { Amplify, Analytics, withSSRContext, graphqlOperation } from 'aws-amplify';
 
 import PageHeader from '@/common/PageHeader';
 import ArticleCard from '@/article/ArticleCard';
 import Loader from '@/ui/Loader';
+
+// for SSG
+import awsconfig from '../aws-exports';
+Amplify.configure({ ...awsconfig, ssr: true });
+// for SSG
 
 const latestArticles = /* GraphQL */ `
     query LatestArticles(
@@ -35,14 +39,14 @@ const latestArticles = /* GraphQL */ `
  * 
  * @param {} context 
  */
-export async function getStaticProps(context) {
-
+export async function getStaticProps() {
+  const { API } = withSSRContext();
   // load the blog data from the GraphQL endpoint
   const data = await API.graphql(graphqlOperation(latestArticles, { limit: 25 }))
-                        .then(r => {
-                          const { data: { latestArticles } } = r;
-                          return latestArticles;
-                        });
+                                .then(r => {
+                                  const { data: { latestArticles } } = r;
+                                  return latestArticles;
+                                });
 
   return {
     props: {

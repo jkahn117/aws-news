@@ -1,12 +1,25 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-
-import API, { graphqlOperation } from '@aws-amplify/api';
-import Analytics from '@aws-amplify/analytics';
+import { Amplify, API, Analytics, withSSRContext, graphqlOperation } from 'aws-amplify';
 
 import ArticleImage from '@/article/ArticleImage';
 import { BlogSlug, ByLine } from '@/article/Util';
 import Loader from '@/ui/Loader';
+
+// for SSG
+import awsconfig from '@/../aws-exports';
+Amplify.configure({ ...awsconfig, ssr: true });
+
+// configure the content API separately ... for reasons unknown and to use a Next.js environment variable
+API.configure({
+  endpoints: [
+    {
+      name: 'content-api',
+      endpoint: process.env.NEXT_PUBLIC_CONTENT_API
+    }
+  ]
+});
+// for SSG
 
 const getArticle = /* GraphQL */ `
     query GetArticle ($id: ID!) {
@@ -34,14 +47,15 @@ const getArticle = /* GraphQL */ `
  * @param {} context 
  */
 export async function getStaticProps(context) {
+  const SSR = withSSRContext();
   const { params: { id } } = context;
 
   // load article data from the GraphQL endpoint
-  const article = await API.graphql(graphqlOperation(getArticle, { id }))
-                          .then(r => {
-                            const { data: { getArticle } } = r;
-                            return getArticle;
-                          });
+  const article = await SSR.API.graphql(graphqlOperation(getArticle, { id }))
+                                .then(r => {
+                                  const { data: { getArticle } } = r;
+                                  return getArticle;
+                                });
 
   // load the actual article content from the content API
   const content = await API.get('content-api', `/content/${id}`, { responseType: 'text' })
@@ -83,6 +97,7 @@ const latestArticles = /* GraphQL */ `
  * to build when requested.
  */
 export async function getStaticPaths() {
+  const { API } = withSSRContext();
   const articles = await API.graphql(graphqlOperation(latestArticles))
                             .then(r => {
                               const { data: { latestArticles: { items } }} = r;

@@ -1,11 +1,15 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import API, { graphqlOperation } from '@aws-amplify/api';
-import Analytics from '@aws-amplify/analytics';
+import { Amplify, Analytics, withSSRContext, graphqlOperation } from 'aws-amplify';
 
 import Loader from '@/ui/Loader';
 import PageHeader from '@/common/PageHeader';
 import ArticleCard from '@/article/ArticleCard';
+
+// for SSG
+import awsconfig from '@/../aws-exports';
+Amplify.configure({ ...awsconfig, ssr: true });
+// for SSG
 
 const getBlog = /* GraphQL */ `
     query GetBlog ($id: ID!) {
@@ -33,6 +37,7 @@ const getBlog = /* GraphQL */ `
  * @param {} context 
  */
 export async function getStaticProps(context) {
+  const { API } = withSSRContext();
   const { params: { id } } = context;
 
   // load the blog data from the GraphQL endpoint
@@ -72,11 +77,12 @@ const listBlogs = /* GraphQL */ `
  * to build when requested.
  */
 export async function getStaticPaths() {
+  const { API } = withSSRContext();
   const blogs = await API.graphql(graphqlOperation(listBlogs))
-                            .then(r => {
-                              const { data: { listBlogs: { items } }} = r;
-                              return items;
-                            });
+                          .then(r => {
+                            const { data: { listBlogs: { items } }} = r;
+                            return items;
+                          });
 
   const blogParams = blogs.reduce((acc, blog) => {
     acc.push({ params: { id: blog.id } });
