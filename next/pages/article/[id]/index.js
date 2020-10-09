@@ -5,6 +5,7 @@ import { Amplify, API, Analytics, withSSRContext, graphqlOperation } from 'aws-a
 import ArticleImage from '@/article/ArticleImage';
 import { BlogSlug, ByLine } from '@/article/Util';
 import Loader from '@/ui/Loader';
+import Share from '@/ui/Share';
 
 // for SSG
 import awsconfig from '@/../aws-exports';
@@ -31,6 +32,7 @@ const getArticle = /* GraphQL */ `
         contentUri
         publishedAt
         url
+        excerpt
         blog {
           id
           title
@@ -67,10 +69,7 @@ export async function getStaticProps(context) {
     props: {
       article,
       content,
-    },
-    // Next.js will re-generate the page when request comes in or at most
-    // once per 3600 seconds
-    revalidate: 3600
+    }
   }
 }
 
@@ -116,7 +115,7 @@ export async function getStaticPaths() {
 }
 
 export default function Article({ article, content }) {
-  const { asPath } = useRouter();
+  const { asPath, isFallback } = useRouter();
 
   if (!article) return <div><Loader /></div>
 
@@ -129,6 +128,8 @@ export default function Article({ article, content }) {
       blogId: article.blog ? article.blog.id : null
     }
   });
+
+  if (isFallback) return <div><Loader /></div>
 
   return (
     <>
@@ -144,12 +145,17 @@ export default function Article({ article, content }) {
 
         <div className="px-4">
           <BlogSlug article={ article } />
-          <h1 className="text-3xl font-extrabold mb-2 tracking-tight leading-tight">
+          <h1 className="text-3xl font-extrabold mb-2 tracking-tight leading-tight lg:text-5xl">
             { article.title }
           </h1>
-          <ByLine article={ article } />
 
-          <div className="content my-10 overflow-hidden">
+          <div className="flex flex-row flex-wrap justify-between">
+            <ByLine article={ article } />
+            
+            <Share url={ article.url } title={ article.title } text={ article.excerpt } />
+          </div>
+
+          <div className="prose lg:prose-xl mx-auto my-10 overflow-hidden">
             { content ? (
               <div dangerouslySetInnerHTML={ content } />
             ) : (

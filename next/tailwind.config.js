@@ -5,11 +5,14 @@ module.exports = {
     purgeLayersByDefault: true,
     removeDeprecatedGapUtilities: true
   },
-  purge: [
+  purge: {
+    mode: 'all',
+    content: [
     './components/**/*.js',
     './pages/**/*.js',
     './css/app.css'
-  ],
+    ]
+  },
   theme: {
     extend: {
       fontFamily: {
@@ -48,6 +51,7 @@ module.exports = {
   variants: {
   },
   plugins: [
-    require('@tailwindcss/ui')
+    require('@tailwindcss/ui'),
+    require('@tailwindcss/typography'),
   ],
 }
