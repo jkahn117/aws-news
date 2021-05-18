@@ -96,18 +96,18 @@ export async function getStaticPaths() {
 }
 
 export default function Blog({ blog }) {
-  const { asPath } = useRouter();
+  const { asPath, isFallback } = useRouter();
 
-  if (!blog) return <div><Loader /></div>
+  if (isFallback || !blog) return <div><Loader /></div>
 
-  Analytics.record({
-    name: 'pageView',
-    attributes: {
-      path: asPath,
-      title: `[Blog] ${blog.title}`,
-      blogId: blog.id
-    }
-  });
+  // Analytics.record({
+  //   name: 'pageView',
+  //   attributes: {
+  //     path: asPath,
+  //     title: `[Blog] ${blog.title}`,
+  //     blogId: blog.id
+  //   }
+  // });
 
   return (
     <>

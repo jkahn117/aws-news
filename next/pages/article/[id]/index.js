@@ -119,15 +119,15 @@ export default function Article({ article, content }) {
 
   if (!article) return <div><Loader /></div>
 
-  Analytics.record({
-    name: 'pageView',
-    attributes: {
-      path: asPath,
-      title: `[Article] ${article.title}`,
-      articleId: article.id,
-      blogId: article.blog ? article.blog.id : null
-    }
-  });
+  // Analytics.record({
+  //   name: 'pageView',
+  //   attributes: {
+  //     path: asPath,
+  //     title: `[Article] ${article.title}`,
+  //     articleId: article.id,
+  //     blogId: article.blog ? article.blog.id : null
+  //   }
+  // });
 
   if (isFallback) return <div><Loader /></div>
 

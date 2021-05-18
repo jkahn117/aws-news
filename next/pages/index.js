@@ -60,13 +60,13 @@ export async function getStaticProps() {
 export default function Home({ articles }) {
   if (!articles) return <div><Loader /></div>
 
-  Analytics.record({
-    name: 'pageView',
-    attributes: {
-      path: '/',
-      title: '[Home] Latest Articles'
-    }
-  });
+  // Analytics.record({
+  //   name: 'pageView',
+  //   attributes: {
+  //     path: '/',
+  //     title: '[Home] Latest Articles'
+  //   }
+  // });
 
   return (
     <>
