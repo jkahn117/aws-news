@@ -15,7 +15,7 @@
     "@aws-amplify/storage": "^3.2.6",
     "@tailwindcss/ui": "^0.3.0",
     "heroicons": "^0.3.6",
-    "moment": "^2.26.0",
+    "moment": "^2.29.2",
     "next": "9.4.4",
     "next-svgr": "^0.0.2",
     "react": "16.13.1",
